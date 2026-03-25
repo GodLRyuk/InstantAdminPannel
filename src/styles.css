@@ -1,3 +1,592 @@
 /* You can add global styles to this file, and also import other style files */
 
 @import 'tailwindcss';
+.login-page {
+  height: 100vh;
+  background: linear-gradient(135deg, #4facfe, #00f2fe);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.login-card {
+  background: #fff;
+  padding: 40px;
+  width: 350px;
+  border-radius: 10px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  text-align: center;
+}
+
+.login-card h2 {
+  margin-bottom: 5px;
+}
+
+.subtitle {
+  color: gray;
+  margin-bottom: 25px;
+}
+
+.form-group {
+  text-align: left;
+  margin-bottom: 18px;
+}
+
+.form-group label {
+  font-size: 14px;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  outline: none;
+  transition: 0.3s;
+}
+
+.form-group input:focus {
+  border-color: #4facfe;
+  box-shadow: 0 0 5px rgba(79,172,254,0.5);
+}
+
+.login-btn {
+  width: 100%;
+  padding: 12px;
+  background: #4facfe;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.login-btn:hover {
+  background: #2b8be6;
+}
+.admin-container{
+  display:flex;
+  height:100vh;
+  font-family:Arial, Helvetica, sans-serif;
+}
+
+.sidebar{
+  width:250px;
+  background:#6c92d2;
+  color:white;
+  padding:20px;
+}
+
+.logo{
+  margin-bottom:30px;
+}
+
+.menu{
+  list-style:none;
+  padding:0;
+}
+
+.menu li{
+  padding:12px;
+  cursor:pointer;
+  border-radius:6px;
+}
+
+.menu li:hover{
+  background:#334155;
+}
+
+.content{
+  flex:1;
+  padding:30px;
+  background:#f1f5f9;
+}
+.header{
+  height:60px;
+  background:white;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:0 20px;
+  border-bottom:1px solid #ddd;
+}
+
+.logo{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.logo img{
+  height:35px;
+}
+
+.right-menu{
+  display:flex;
+  gap:15px;
+  align-items:center;
+}
+.footer{
+  height:50px;
+  background:#f5f5f5;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:14px;
+}
+.admin-container{
+  display:flex;
+  height:100vh;
+}
+
+.main{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+}
+
+.content{
+  flex:1;
+  padding:20px;
+  background:#f1f5f9;
+}
+.dashboard-container{
+  padding:30px;
+  background:#f5f7fb;
+  min-height:84vh;
+}
+
+.dashboard-header{
+  margin-bottom:30px;
+}
+
+.dashboard-header h1{
+  font-size:32px;
+  color:#2c3e50;
+}
+
+.dashboard-header p{
+  color:#7f8c8d;
+}
+
+.stats-cards{
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px,1fr));
+  gap:20px;
+  margin-bottom:40px;
+}
+
+.card{
+  background:white;
+  padding:25px;
+  border-radius:10px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.08);
+  text-align:center;
+  transition:0.3s;
+}
+
+.card:hover{
+  transform:translateY(-5px);
+}
+
+.card h2{
+  font-size:28px;
+  color:#3498db;
+}
+
+.card p{
+  margin-top:8px;
+  color:#555;
+}
+
+.dashboard-welcome{
+  background:white;
+  padding:30px;
+  border-radius:10px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.08);
+}
+.page-container{
+padding:20px;
+}
+
+.page-header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:20px;
+}
+
+.page-header h2{
+margin:0;
+}
+
+.add-btn{
+background:#4CAF50;
+color:white;
+border:none;
+padding:10px 18px;
+border-radius:5px;
+cursor:pointer;
+font-weight:600;
+}
+
+.search-box{
+margin-bottom:15px;
+}
+
+.search-box input{
+width:250px;
+padding:8px;
+border:1px solid #ccc;
+border-radius:5px;
+}
+
+.table-card{
+background:white;
+border-radius:10px;
+padding:15px;
+box-shadow:0 2px 10px rgba(0,0,0,0.08);
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+}
+
+th{
+background:#f5f5f5;
+padding:12px;
+text-align:left;
+}
+
+td{
+padding:12px;
+border-bottom:1px solid #eee;
+}
+
+.active{
+background:#e8f5e9;
+color:#2e7d32;
+padding:5px 10px;
+border-radius:20px;
+font-size:12px;
+}
+
+.edit{
+background:#2196F3;
+border:none;
+color:white;
+padding:6px 12px;
+border-radius:5px;
+margin-right:5px;
+cursor:pointer;
+}
+
+.delete{
+background:#f44336;
+border:none;
+color:white;
+padding:6px 12px;
+border-radius:5px;
+cursor:pointer;
+}
+
+tr:hover{
+background:#fafafa;
+}
+/* Overlay background */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  z-index: 999;
+}
+
+/* Modal box */
+.modal-content {
+  background: white;
+  width: 400px;
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+
+  animation: modalFade 0.2s ease-in-out;
+}
+
+/* Header */
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.close-btn {
+  font-size: 22px;
+  cursor: pointer;
+}
+
+/* Body */
+.modal-body label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 600;
+}
+
+.modal-body input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+/* Buttons */
+.modal-actions {
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.save-btn {
+  background: #4CAF50;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.cancel-btn {
+  background: #ddd;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* Animation */
+@keyframes modalFade {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+.orders-container {
+  padding: 25px;
+  background: #f5f7fb;
+  min-height: 100vh;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+/* Title */
+.page-title {
+  font-size: 26px;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.tabs button {
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: none;
+  background: #e0e6ed;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.tabs button.active {
+  background: linear-gradient(135deg, #4facfe, #00f2fe);
+  color: white;
+}
+
+/* Header Row */
+.list-header {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  padding: 12px 15px;
+  font-weight: 600;
+  color: #666;
+  background: #eef2f7;
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+
+/* Order Row */
+.order-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  padding: 14px 15px;
+  background: #fff;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  align-items: center;
+  transition: 0.2s ease;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+}
+
+.order-row:hover {
+  transform: translateX(5px);
+  box-shadow: 0 6px 15px rgba(0,0,0,0.06);
+}
+
+/* Order ID */
+.order-id {
+  font-weight: 500;
+  color: #333;
+}
+
+/* Amount */
+.amount {
+  font-weight: 500;
+  color: #444;
+}
+
+/* Status Badge */
+.status {
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  text-transform: capitalize;
+  width: fit-content;
+}
+
+/* Status Colors */
+.status.confirmed {
+  background: #e6f9f0;
+  color: #28a745;
+}
+
+.status.pending {
+  background: #fff4e5;
+  color: #ff9800;
+}
+
+.status.all {
+  background: #e3f2fd;
+  color: #2196f3;
+}
+
+/* Button */
+.view-btn {
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: none;
+  background: #4facfe;
+  color: #fff;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.view-btn:hover {
+  background: #007bff;
+}
+.custom-select {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  font-size: 14px;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+/* Hover */
+.custom-select:hover {
+  border-color: #4CAF50;
+}
+
+/* Focus */
+.custom-select:focus {
+  border-color: #4CAF50;
+  box-shadow: 0 0 5px rgba(76, 175, 80, 0.3);
+}
+
+/* Add dropdown arrow styling */
+.custom-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg fill='%23666' height='20' viewBox='0 0 24 24' width='20' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+}
+.toggle-group {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+}
+
+/* Switch container */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 26px;
+}
+
+/* Hide default checkbox */
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* Slider */
+.slider {
+  position: absolute;
+  cursor: pointer;
+  background-color: #ccc;
+  border-radius: 34px;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  transition: 0.3s;
+}
+
+/* Circle */
+.slider::before {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  border-radius: 50%;
+  transition: 0.3s;
+}
+
+/* Checked state */
+.switch input:checked + .slider {
+  background-color: #4CAF50;
+}
+
+.switch input:checked + .slider::before {
+  transform: translateX(24px);
+}

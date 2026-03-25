@@ -1,0 +1,67 @@
+<div class="page-container">
+
+  <div class="page-header">
+    <h2>Unit Management</h2>
+    <button class="add-btn" (click)="openAddModal()">+ Add Unit</button>
+  </div>
+
+  <div class="search-box">
+    <input type="text" placeholder="Search unit..." />
+  </div>
+
+  <div class="table-card">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Unit Name</th>
+          <th>Short Name</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let unit of units; let i=index">
+          <td>{{ unit.id }}</td>
+          <td>{{ unit.name }}</td>
+          <td>{{ unit.short_name }}</td>
+          <td>
+            <button class="edit" (click)="openEditModal(unit)">Edit</button>
+            <button class="delete" (click)="deleteUnit(unit.id)">Delete</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+ <!-- Modal -->
+<div class="modal-overlay" *ngIf="showModal">
+  <div class="modal-content">
+
+    <div class="modal-header">
+      <h3>{{ modalType === 'add' ? 'Add Unit' : 'Edit Unit' }}</h3>
+      <span class="close-btn" (click)="showModal=false">×</span>
+    </div>
+
+    <div class="modal-body">
+      <label>Unit Name</label>
+      <input type="text" [(ngModel)]="unitName" placeholder="Enter Unit Name" />
+    </div>
+    <div class="modal-body">
+      <label>Unit Short Name</label>
+      <input type="text" [(ngModel)]="unitsShortName" placeholder="Enter Unit Short Name" />
+    </div>
+
+    <div class="modal-actions">
+      <button class="save-btn" (click)="save()">
+        {{ modalType === 'add' ? 'Add Unit' : 'Update Unit' }}
+      </button>
+
+      <button class="cancel-btn" (click)="showModal=false">
+        Cancel
+      </button>
+    </div>
+
+  </div>
+</div>
+
+</div>

@@ -1,0 +1,101 @@
+<div class="page-container">
+
+  <div class="page-header">
+    <h2>Product Management</h2>
+    <button class="add-btn" (click)="openAddModal()">+ Add Product</button>
+  </div>
+
+  <div class="search-box">
+    <input type="text" placeholder="Search brand..." />
+  </div>
+
+  <div class="table-card">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Product Name</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let prod of products; let i=index">
+          <td>{{ prod.id }}</td>
+          <td>{{ prod.name }}</td>
+          <td>
+            <!-- <button class="edit" (click)="openEditModal(prod)">Edit</button> -->
+            <button class="delete" (click)="deleteProduct(prod.id)">Delete</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+ <!-- Modal -->
+<div class="modal-overlay" *ngIf="showModal">
+  <div class="modal-content">
+
+    <div class="modal-header">
+      <h3>Add Product</h3>
+      <span class="close-btn" (click)="showModal=false">×</span>
+    </div>
+
+    <div class="modal-body">
+
+      <label>Product Name</label>
+      <input type="text" [(ngModel)]="product.name" />
+
+      <label>Price</label>
+      <input type="number" [(ngModel)]="product.price" />
+
+      <label>Discount (%)</label>
+      <input type="number" [(ngModel)]="product.discount_percent" />
+
+      <label>Description</label>
+      <textarea [(ngModel)]="product.description"></textarea>
+
+      <label>Category</label>
+      <select class="custom-select" [(ngModel)]="product.category">
+        <option *ngFor="let cat of categories" [value]="cat.id">
+          {{ cat.name }}
+        </option>
+      </select>
+
+      <label>Subcategory</label>
+      <select class="custom-select" [(ngModel)]="product.subcategory">
+        <option *ngFor="let sub of subcategories" [value]="sub.id">
+          {{ sub.name }}
+        </option>
+      </select>
+
+      <label>Unit</label>
+      <select class="custom-select" [(ngModel)]="product.unit">
+        <option *ngFor="let u of units" [value]="u.id">
+          {{ u.name }}
+        </option>
+      </select>
+
+      <label>Brand</label>
+      <select class="custom-select" [(ngModel)]="product.brand">
+        <option *ngFor="let u of brands" [value]="u.id">
+          {{ u.name }}
+        </option>
+      </select>
+
+      <div class="toggle-group">
+        <label>Active</label>
+
+        <label class="switch">
+            <input type="checkbox" [(ngModel)]="product.is_active" />
+            <span class="slider"></span>
+        </label>
+        </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="save-btn" (click)="save()">Save</button>
+      <button class="cancel-btn" (click)="showModal=false">Cancel</button>
+    </div>
+
+  </div>
+</div>

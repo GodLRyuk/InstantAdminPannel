@@ -1,0 +1,91 @@
+<div class="page-container">
+
+  <!-- HEADER -->
+  <div class="page-header">
+    <h2>Stock Management</h2>
+    <button class="add-btn" (click)="openAddModal()">+ Add Stock</button>
+  </div>
+
+  <!-- SEARCH -->
+  <div class="search-box">
+    <input type="text" placeholder="Search batch..." />
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-card">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Product ID</th>
+          <th>Batch No</th>
+          <th>Quantity</th>
+          <th>Purchase Price</th>
+          <th>Selling Price</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let stock of stocks">
+          <td>{{ stock.batch_no }}</td>
+          <td>{{ stock.product_id }}</td>
+          <td>{{ stock.batch_no }}</td>
+          <td>{{ stock.quantity }}</td>
+          <td>{{ stock.purchase_price }}</td>
+          <td>{{ stock.selling_price }}</td>
+
+          <td>
+            <button class="edit" (click)="openEditModal(stock)">Edit</button>
+            <button class="delete" (click)="deleteStock(stock.id)">Delete</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- MODAL -->
+  <div class="modal-overlay" *ngIf="showModal">
+    <div class="modal-content">
+
+      <!-- HEADER -->
+      <div class="modal-header">
+        <h3>{{ modalType === 'add' ? 'Add Stock' : 'Edit Stock' }}</h3>
+        <span class="close-btn" (click)="showModal=false">×</span>
+      </div>
+
+      <!-- BODY -->
+      <div class="modal-body">
+
+        <label>Product ID</label>
+        <input type="number" [(ngModel)]="stockData.product_id" />
+
+        <label>Batch No</label>
+        <input type="text" [(ngModel)]="stockData.batch_no" />
+
+        <label>Quantity</label>
+        <input type="number" [(ngModel)]="stockData.quantity" />
+
+        <label>Purchase Price</label>
+        <input type="number" [(ngModel)]="stockData.purchase_price" />
+
+        <label>Selling Price</label>
+        <input type="number" [(ngModel)]="stockData.selling_price" />
+
+      </div>
+
+      <!-- ACTIONS -->
+      <div class="modal-actions">
+        <button class="save-btn" (click)="save()">
+          {{ modalType === 'add' ? 'Add Stock' : 'Update Stock' }}
+        </button>
+
+        <button class="cancel-btn" (click)="showModal=false">
+          Cancel
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+</div>

@@ -1,0 +1,94 @@
+<div class="page-container">
+
+  <!-- Header -->
+  <div class="page-header">
+    <h2>Sub Category Management</h2>
+    <button class="add-btn" (click)="openAddModal()">+ Add Sub Category</button>
+  </div>
+
+  <!-- Search -->
+  <div class="search-box">
+    <input 
+      type="text" 
+      placeholder="Search Sub Category..." 
+    />
+  </div>
+
+  <!-- Table -->
+  <div class="table-card">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Category</th>
+          <th>Sub Category</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <!-- ✅ Safe binding with fallback -->
+        <tr *ngFor="let cat of cats; let i = index">
+          <td>{{ i }}</td>
+          <td>{{ cat.categoryName}}</td>
+          <td>{{ cat.name }}</td>
+          <td>
+            <button class="edit" (click)="openEditModal(cat)">Edit</button>
+            <button class="delete" (click)="deleteCat(cat.id!)">Delete</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal-overlay" *ngIf="showModal">
+    <div class="modal-content">
+
+      <!-- Header -->
+      <div class="modal-header">
+        <h3>
+          {{ modalType === 'add' ? 'Add Sub Category' : 'Edit Sub Category' }}
+        </h3>
+        <span class="close-btn" (click)="showModal=false">×</span>
+      </div>
+
+      <!-- Body -->
+      <div class="modal-body">
+
+        <!-- Company Dropdown -->
+        <label>Company</label>
+        <select [(ngModel)]="subCategory.categoryId">
+          <option [ngValue]="null">Select Category</option>
+          <option 
+            *ngFor="let cat of category" 
+            [ngValue]="cat.id">
+            {{ cat.name }}
+          </option>
+        </select>
+
+        <!-- Sub Category Name -->
+        <label>Sub Category Name</label>
+        <input 
+          type="text" 
+          [(ngModel)]="subCategory.name" 
+          placeholder="Enter Sub Category" 
+        />
+
+      </div>
+
+      <!-- Actions -->
+      <div class="modal-actions">
+        <button class="save-btn" (click)="save()">
+          {{ modalType === 'add' ? 'Add' : 'Update' }}
+        </button>
+
+        <button class="cancel-btn" (click)="showModal=false">
+          Cancel
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+</div>

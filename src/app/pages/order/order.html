@@ -1,0 +1,39 @@
+<div class="orders-container">
+
+  <h1 class="page-title">Orders</h1>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button (click)="filterOrders('all')" [class.active]="selectedTab === 'all'">All</button>
+    <button (click)="filterOrders('confirmed')" [class.active]="selectedTab === 'confirmed'">Confirmed</button>
+    <button (click)="filterOrders('pending')" [class.active]="selectedTab === 'pending'">Pending</button>
+  </div>
+
+  <!-- List Header -->
+  <div class="list-header">
+    <span>Order ID</span>
+    <span>Status</span>
+    <span>Amount</span>
+    <span>Action</span>
+  </div>
+
+  <!-- Orders List -->
+  <div class="orders-list">
+    <div class="order-row" *ngFor="let order of filteredOrders">
+
+      <span class="order-id">#{{order.id}}</span>
+
+      <span class="status" [ngClass]="order.status">
+        {{order.status}}
+      </span>
+
+      <span class="amount">₹{{order.amount}}</span>
+
+      <span>
+        <button class="view-btn">View</button>
+      </span>
+
+    </div>
+  </div>
+
+</div>
