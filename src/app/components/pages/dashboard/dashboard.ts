@@ -16,4 +16,12 @@ goToAppProduct()
 {
   this.router.navigate(['/products']);
 }
+goToAppStock()
+{
+  this.router.navigate(['/stock']);
+}
+goToAppInventory()
+{
+  this.router.navigate(['/inventory']);
+}
 }

@@ -17,19 +17,24 @@ export class AuthInterceptor implements HttpInterceptor {
   private isRefreshing = false;
   private refreshTokenSubject = new BehaviorSubject<string | null>(null);
 
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService) { }
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
 
     const token = localStorage.getItem('token');
 
+    // ✅ Define public APIs (NO TOKEN)
+    const publicUrls = [
+      '/api/token/',          // login
+      '/api/token/refresh/',  // refresh
+    ];
+
+    const isPublic = publicUrls.some(url => req.url.includes(url));
+
     let authReq = req;
 
-    if (
-      token &&
-      !req.url.includes('login') &&
-      !req.url.includes('refresh')
-    ) {
+    // ✅ Attach token only for protected APIs
+    if (token && !isPublic) {
       authReq = req.clone({
         setHeaders: {
           Authorization: `Bearer ${token}`
@@ -40,7 +45,8 @@ export class AuthInterceptor implements HttpInterceptor {
     return next.handle(authReq).pipe(
       catchError((error: HttpErrorResponse) => {
 
-        if (error.status === 401 && !req.url.includes('refresh')) {
+        // ❌ Do NOT refresh for login/refresh APIs
+        if (error.status === 401 && !isPublic) {
           return this.handle401Error(authReq, next);
         }
 
@@ -64,32 +70,36 @@ export class AuthInterceptor implements HttpInterceptor {
 
       return this.authService.refreshToken(refreshToken).pipe(
         switchMap((res: any) => {
-
           this.isRefreshing = false;
 
-          const newToken = res.access;
+          const newAccessToken = res.access;
 
-          localStorage.setItem('token', newToken);
+          // ✅ Save new token
+          localStorage.setItem('access', newAccessToken);
 
-          this.refreshTokenSubject.next(newToken);
+          this.refreshTokenSubject.next(newAccessToken);
 
+          // ✅ Retry original request
           return next.handle(
             request.clone({
               setHeaders: {
-                Authorization: `Bearer ${newToken}`
+                Authorization: `Bearer ${newAccessToken}`
               }
             })
           );
         }),
         catchError(err => {
           this.isRefreshing = false;
-          this.authService.logout(); // 🔴 IMPORTANT
+
+          // ❌ Refresh failed → logout
+          this.authService.logout();
+
           return throwError(() => err);
         })
       );
     }
 
-    // ⏳ Wait for ongoing refresh
+    // ⏳ Wait until refresh completes
     return this.refreshTokenSubject.pipe(
       filter(token => token != null),
       take(1),

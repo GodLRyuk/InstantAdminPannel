@@ -17,7 +17,7 @@
       <thead>
         <tr>
           <th>ID</th>
-          <th>Product ID</th>
+          <th>Product Name</th>
           <th>Batch No</th>
           <th>Quantity</th>
           <th>Purchase Price</th>
@@ -27,9 +27,9 @@
       </thead>
 
       <tbody>
-        <tr *ngFor="let stock of stocks">
-          <td>{{ stock.batch_no }}</td>
-          <td>{{ stock.product_id }}</td>
+        <tr *ngFor="let stock of stocks; let i = index">
+          <td>{{ i+1}}</td>
+          <td>{{ stock.product__name }}</td>
           <td>{{ stock.batch_no }}</td>
           <td>{{ stock.quantity }}</td>
           <td>{{ stock.purchase_price }}</td>
@@ -57,8 +57,20 @@
       <!-- BODY -->
       <div class="modal-body">
 
-        <label>Product ID</label>
-        <input type="number" [(ngModel)]="stockData.product_id" />
+       <label>Product</label>
+        <div class="form-group">
+        <label for="productSelect">Product</label>
+        <select
+            id="productSelect"
+            class="form-control"
+            [(ngModel)]="stockData.product_id"
+        >
+            <option [ngValue]="0" disabled>Select a product</option>
+            <option *ngFor="let product of products" [ngValue]="product.id">
+            {{ product.name }}
+            </option>
+        </select>
+        </div>
 
         <label>Batch No</label>
         <input type="text" [(ngModel)]="stockData.batch_no" />

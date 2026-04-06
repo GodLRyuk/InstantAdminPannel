@@ -8,6 +8,9 @@ import { CategoryModel } from '../models/category.model';
 import { SubCategoryModel } from '../models/sub-category.model';
 import { ProductModel } from '../models/products.model';
 import { StockModel } from '../models/stock.model';
+import { OrderModel } from '../models/order.model';
+import { BannerModel } from '../models/banner.model';
+import { advBannerModel } from '../models/advbanner.model';
 
 @Injectable({
   providedIn: 'root'
@@ -16,24 +19,24 @@ export class AuthService {
 
   private apiUrl = `${environment.apiUrl}/accounts/admin-login/`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   login(data: any): Observable<any> {
     return this.http.post(this.apiUrl, data);
   }
-  
+
   refreshToken(refresh: string) {
 
-          console.log("auth Print in auth rervice");
-  return this.http.post<any>(`${environment.apiUrl}/accounts/token/refresh/`, {
-    refresh: refresh
-  });
-}
-logout() {
-  localStorage.removeItem('token');
-  localStorage.removeItem('refresh');
-  localStorage.clear();
-}
+    console.log("auth Print in auth rervice");
+    return this.http.post<any>(`${environment.apiUrl}/accounts/token/refresh/`, {
+      refresh: refresh
+    });
+  }
+  logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('refresh');
+    localStorage.clear();
+  }
 }
 
 @Injectable({
@@ -62,7 +65,7 @@ export class MasterService {
     return this.http.delete(`${this.apiUrl}/masters/brands/${id}/`);
   }
 
-  getAllunits(): Observable<UnitModel[]>{
+  getAllunits(): Observable<UnitModel[]> {
     return this.http.get<UnitModel[]>(`${this.apiUrl}/masters/units/`);
   }
   addUnit(data: Partial<UnitModel>): Observable<any> {
@@ -78,12 +81,11 @@ export class MasterService {
   }
 
   getAllCat(): Observable<CategoryModel[]> {
-  const token = localStorage.getItem('token');
 
-  return this.http.get<CategoryModel[]>(
-    `${this.apiUrl}/masters/categories/`,
-  );
-}
+    return this.http.get<CategoryModel[]>(
+      `${this.apiUrl}/masters/categories/`,
+    );
+  }
   addCat(data: Partial<CategoryModel>): Observable<any> {
     return this.http.post(`${this.apiUrl}/masters/categories/`, data);
   }
@@ -95,30 +97,25 @@ export class MasterService {
   deleteCat(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/masters/categories/${id}/`);
   }
-  getAllCatforSub(): Observable<any>{
-   const token = localStorage.getItem('token');
+  getAllCatforSub(): Observable<any> {
 
-  return this.http.get<SubCategoryModel[]>(
-    `${this.apiUrl}/masters/subcategories/`,
-  );
+    return this.http.get<SubCategoryModel[]>(
+      `${this.apiUrl}/masters/subcategories/`,
+    );
   }
-  getAllSubCat(): Observable<any>{
-   const token = localStorage.getItem('token');
+  getAllSubCat(): Observable<any> {
 
-  return this.http.get<SubCategoryModel[]>(
-    `${this.apiUrl}/masters/subcategories/`,
-  );
+    return this.http.get<SubCategoryModel[]>(
+      `${this.apiUrl}/masters/subcategories/`,
+    );
   }
-  addSubCat(data: Partial<SubCategoryModel>): Observable<any>{
-    const token = localStorage.getItem('token');
+  addSubCat(data: Partial<SubCategoryModel>): Observable<any> {
 
-  return this.http.post<SubCategoryModel[]>(
-    `${this.apiUrl}/masters/subcategories/`, data
-  );
+    return this.http.post<SubCategoryModel[]>(
+      `${this.apiUrl}/masters/subcategories/`, data
+    );
   }
-  updateSubCat(id:number, data: Partial<SubCategoryModel>): Observable<any>
-  {
-    const token = localStorage.getItem('token');
+  updateSubCat(id: number, data: Partial<SubCategoryModel>): Observable<any> {
     return this.http.put(`${this.apiUrl}/masters/subcategories/${id}/`, data);
   }
   deleteSubCat(id: number): Observable<any> {
@@ -127,40 +124,114 @@ export class MasterService {
 
 
 
-  getAllProducts(): Observable<any>{
-   const token = localStorage.getItem('token');
+  getAllProducts(): Observable<any> {
 
-  return this.http.get<SubCategoryModel[]>(
-    `${this.apiUrl}/products/`,
-  );
+    return this.http.get<ProductModel[]>(
+      `${this.apiUrl}/products/`,
+    );
   }
-  addProduct(data: Partial<SubCategoryModel>): Observable<any>{
-    const token = localStorage.getItem('token');
+  addProduct(data: FormData): Observable<any> {
 
-  return this.http.post<SubCategoryModel[]>(
-    `${this.apiUrl}/products/`, data
-  );
+    return this.http.post<ProductModel[]>(
+      `${this.apiUrl}/products/`, data
+    );
   }
   deleteproduct(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/products/${id}/`);
   }
 
 
-  getAllstock(): Observable<any>{
-   const token = localStorage.getItem('token');
+  getAllstock(): Observable<any> {
 
-  return this.http.get<StockModel[]>(
-    `${this.apiUrl}/stocks/`,
-  );
+    return this.http.get<StockModel[]>(
+      `${this.apiUrl}/stock/`,
+    );
   }
-  addStock(data: Partial<StockModel>): Observable<any>{
-    const token = localStorage.getItem('token');
 
-  return this.http.post<StockModel[]>(
-    `${this.apiUrl}/stocks/`, data
-  );
+  addStock(data: Partial<StockModel>): Observable<any> {
+
+    return this.http.post<StockModel[]>(
+      `${this.apiUrl}/stock/add/`, data
+    );
+  }
+  updateStock(id: number, data: Partial<StockModel>): Observable<any> {
+    return this.http.put(`${this.apiUrl}/stock/update/${id}/`, data);
   }
   deleteStock(id: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/stocks/${id}/`);
+    return this.http.delete(`${this.apiUrl}/stock/delete/${id}/`);
+  }
+
+  getInventoryItem(): Observable<any> {
+    return this.http.get<StockModel[]>(
+      `${this.apiUrl}/stock/inventory/`,
+    );
+  }
+  // GET ORDERS
+getOrders():  Observable<any> {
+    return this.http.get<OrderModel[]>(
+      `${this.apiUrl}/orders/`,
+    );
+  }
+
+updateOrderStatus(id: number, data: { status: string }): Observable<any> {
+  return this.http.post(`${this.apiUrl}/orders/${id}/status/`, data);
+}
+
+addBanner(data: Partial<BannerModel>, imageFile?: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('is_active', data.is_active ? 'true' : 'false');
+
+    if (imageFile) formData.append('image', imageFile);
+
+    return this.http.post(`${this.apiUrl}/masters/banners/`, formData);
+  }
+
+  // Update existing banner (with optional image)
+  updateBanner(id: number, data: Partial<BannerModel>, imageFile?: File): Observable<any> {
+    const formData = new FormData();
+    if (data.is_active !== undefined) formData.append('is_active', data.is_active ? 'true' : 'false');
+
+    if (imageFile) formData.append('image', imageFile);
+
+    return this.http.put(`${this.apiUrl}/masters/banners/${id}/`, formData);
+  }
+
+  // Delete banner
+  deleteBanner(id: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/masters/banners/${id}/`);
+  }
+
+  // Get all banners
+  getBanners(): Observable<BannerModel[]> {
+    return this.http.get<BannerModel[]>(`${this.apiUrl}/masters/banners/`);
+  }
+
+  addAdvBanner(data: Partial<advBannerModel>, imageFile?: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('is_active', data.is_active ? 'true' : 'false');
+
+    if (imageFile) formData.append('image', imageFile);
+
+    return this.http.post(`${this.apiUrl}/masters/advbanners/`, formData);
+  }
+
+  // Update existing banner (with optional image)
+  updateAdvBanner(id: number, data: Partial<advBannerModel>, imageFile?: File): Observable<any> {
+    const formData = new FormData();
+    if (data.is_active !== undefined) formData.append('is_active', data.is_active ? 'true' : 'false');
+
+    if (imageFile) formData.append('image', imageFile);
+
+    return this.http.put(`${this.apiUrl}/masters/advbanners/${id}/`, formData);
+  }
+
+  // Delete banner
+  deleteAdvBanner(id: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/masters/advbanners/${id}/`);
+  }
+
+  // Get all banners
+  getAdvBanners(): Observable<advBannerModel[]> {
+    return this.http.get<advBannerModel[]>(`${this.apiUrl}/masters/advbanners/`);
   }
 }

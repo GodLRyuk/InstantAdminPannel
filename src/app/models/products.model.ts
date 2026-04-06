@@ -11,4 +11,5 @@ export interface ProductModel {
   subcategory: number;
   brand: number | null;
   unit: number;
+  unit_size: null,
 }

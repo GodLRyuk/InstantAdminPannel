@@ -1,6 +1,11 @@
 import { NgModule, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import {
+  HTTP_INTERCEPTORS,
+  HttpClientModule,
+  provideHttpClient,
+  withInterceptorsFromDi,
+} from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 
 import { AppRoutingModule } from './app-routing-module';
@@ -17,6 +22,11 @@ import { Subcategory } from './pages/subcategory/subcategory';
 import { OrdersComponent } from './pages/order/order';
 import { Products } from './pages/products/products';
 import { Stock } from './pages/stock/stock';
+import { Inventory } from './pages/inventory/inventory';
+import { OrderModel } from './models/order.model';
+import { CommonModule } from '@angular/common';
+import { BannerComponent } from './pages/banner/banner';
+import { Advbanner } from './pages/advbanner/advbanner';
 
 @NgModule({
   declarations: [
@@ -29,14 +39,16 @@ import { Stock } from './pages/stock/stock';
     Unit,
     Category,
     Subcategory,
-    OrdersComponent,
     Products,
     Stock,
+    Inventory,
+    OrdersComponent,
+    BannerComponent,
+    Advbanner,
   ],
-  imports: [BrowserModule, AppRoutingModule, FormsModule],
+  imports: [BrowserModule, AppRoutingModule, FormsModule, HttpClientModule, CommonModule],
   providers: [
     provideBrowserGlobalErrorListeners(),
-    provideHttpClient(withInterceptorsFromDi()),
     {
       provide: HTTP_INTERCEPTORS,
       useClass: AuthInterceptor,

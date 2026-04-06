@@ -1,0 +1,72 @@
+<div class="page-container">
+
+  <div class="page-header">
+    <h2>Adv Banner Management</h2>
+    <button class="add-btn" (click)="openAddModal()">+ Add Slider</button>
+  </div>
+
+  <div class="search-box">
+    <input type="text" placeholder="Search Slider..." />
+  </div>
+
+  <div class="table-card">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Brand Name</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let banner of advbrands; let i=index">
+          <td>{{ i+1 }}</td>
+          <td><img [src]="banner.image" alt="Banner Preview" style="height: 50%;width: 50%;"/></td>
+          <td>
+            <button class="edit" (click)="openEditModal(banner)">Edit</button>
+            <button class="delete" (click)="deleteAdvBanner(banner.id!)">Delete</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+ <!-- Modal -->
+<div class="modal-overlay" *ngIf="showModal">
+  <div class="modal-content">
+
+    <!-- Modal Header -->
+    <div class="modal-header">
+      <h3>{{ modalType === 'add' ? 'Add Banner' : 'Edit Banner' }}</h3>
+      <span class="close-btn" (click)="showModal=false">×</span>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="modal-body">
+
+     
+      <!-- Image Upload -->
+      <label>Banner Image</label>
+      <input type="file" (change)="onFileSelected($event)" accept="image/*" />
+
+      <!-- Preview Selected Image -->
+      <div *ngIf="imageFile" class="image-preview">
+        <p>Selected Image:</p>
+        <img [src]="imagePreview" alt="Banner Preview" />
+      </div>
+
+    </div>
+
+    <!-- Modal Actions -->
+    <div class="modal-actions">
+      <button class="save-btn" (click)="save()">
+        {{ modalType === 'add' ? 'Add Banner' : 'Update Banner' }}
+      </button>
+
+      <button class="cancel-btn" (click)="showModal=false">
+        Cancel
+      </button>
+    </div>
+
+  </div>
+</div>

@@ -20,7 +20,7 @@
       </thead>
       <tbody>
         <tr *ngFor="let prod of products; let i=index">
-          <td>{{ prod.id }}</td>
+          <td>{{ i+1 }}</td>
           <td>{{ prod.name }}</td>
           <td>
             <!-- <button class="edit" (click)="openEditModal(prod)">Edit</button> -->
@@ -31,71 +31,117 @@
     </table>
   </div>
 
- <!-- Modal -->
-<div class="modal-overlay" *ngIf="showModal">
-  <div class="modal-content">
+  <!-- Modal -->
+  <div class="modal-overlay" *ngIf="showModal">
+    <div class="modal-content">
 
-    <div class="modal-header">
-      <h3>Add Product</h3>
-      <span class="close-btn" (click)="showModal=false">×</span>
-    </div>
+      <div class="modal-header">
+        <h3>Add Product</h3>
+        <span class="close-btn" (click)="showModal=false">×</span>
+      </div>
 
-    <div class="modal-body">
+      <div class="modal-body">
 
-      <label>Product Name</label>
-      <input type="text" [(ngModel)]="product.name" />
+        <!-- Row 1 -->
+        <div class="row">
+          <div class="form-group">
+            <label>Product Name</label>
+            <input type="text" [(ngModel)]="product.name" />
+          </div>
 
-      <label>Price</label>
-      <input type="number" [(ngModel)]="product.price" />
+          <div class="form-group">
+            <label>Price</label>
+            <input type="number" [(ngModel)]="product.price" />
+          </div>
+        </div>
 
-      <label>Discount (%)</label>
-      <input type="number" [(ngModel)]="product.discount_percent" />
+        <!-- Row 2 -->
+        <div class="row">
+          <div class="form-group">
+            <label>Discount (%)</label>
+            <input type="number" [(ngModel)]="product.discount_percent" />
+          </div>
+          <div class="form-group">
+            <label>Brand</label>
+            <select [(ngModel)]="product.brand">
+              <option *ngFor="let u of brands" [value]="u.id">
+                {{ u.name }}
+              </option>
+            </select>
+          </div>
+        </div>
 
-      <label>Description</label>
-      <textarea [(ngModel)]="product.description"></textarea>
+        <!-- Row 3 -->
+        <div class="row">
+          <div class="form-group">
+            <label>Category</label>
+            <select [(ngModel)]="product.category">
+              <option *ngFor="let cat of categories" [value]="cat.id">
+                {{ cat.name }}
+              </option>
+            </select>
+          </div>
 
-      <label>Category</label>
-      <select class="custom-select" [(ngModel)]="product.category">
-        <option *ngFor="let cat of categories" [value]="cat.id">
-          {{ cat.name }}
-        </option>
-      </select>
+          <div class="form-group">
+            <label>Subcategory</label>
+            <select [(ngModel)]="product.subcategory">
+              <option *ngFor="let sub of subcategories" [value]="sub.id">
+                {{ sub.name }}
+              </option>
+            </select>
+          </div>
+        </div>
 
-      <label>Subcategory</label>
-      <select class="custom-select" [(ngModel)]="product.subcategory">
-        <option *ngFor="let sub of subcategories" [value]="sub.id">
-          {{ sub.name }}
-        </option>
-      </select>
+        <!-- Row 4 -->
+        <div class="row">
+          <div class="form-group">
+            <label>Unit</label>
+            <select [(ngModel)]="product.unit">
+              <option *ngFor="let u of units" [value]="u.id">
+                {{ u.name }}
+              </option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Unit Size</label>
+            <input type="number" [(ngModel)]="product.unit_size" placeholder="e.g. 500" />
+          </div>
+        </div>
+        <div class="row">
+          <!-- Image -->
+          <div class="form-group">
+            <label>Image</label>
+            <div class="image-upload-box" (click)="fileInput.click()">
+              <input #fileInput type="file" hidden (change)="onFileSelected($event)" />
 
-      <label>Unit</label>
-      <select class="custom-select" [(ngModel)]="product.unit">
-        <option *ngFor="let u of units" [value]="u.id">
-          {{ u.name }}
-        </option>
-      </select>
+              <div *ngIf="!imagePreview">📷 Upload</div>
+              <img *ngIf="imagePreview" [src]="imagePreview" />
+            </div>
+          </div>
 
-      <label>Brand</label>
-      <select class="custom-select" [(ngModel)]="product.brand">
-        <option *ngFor="let u of brands" [value]="u.id">
-          {{ u.name }}
-        </option>
-      </select>
+        </div>
 
-      <div class="toggle-group">
-        <label>Active</label>
+        <!-- Full Width -->
+        <div class="form-group full">
+          <label>Description</label>
+          <textarea [(ngModel)]="product.description"></textarea>
+        </div>
 
-        <label class="switch">
+        <!-- Toggle -->
+        <div class="form-group">
+          <label>Active</label>
+          <label class="switch">
             <input type="checkbox" [(ngModel)]="product.is_active" />
             <span class="slider"></span>
-        </label>
+          </label>
         </div>
-    </div>
 
-    <div class="modal-actions">
-      <button class="save-btn" (click)="save()">Save</button>
-      <button class="cancel-btn" (click)="showModal=false">Cancel</button>
-    </div>
+      </div>
 
+      <div class="modal-actions">
+        <button class="save-btn" (click)="save()">Save</button>
+        <button class="cancel-btn" (click)="showModal=false">Cancel</button>
+      </div>
+
+    </div>
   </div>
-</div>

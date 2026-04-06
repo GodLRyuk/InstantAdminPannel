@@ -1,0 +1,74 @@
+<div class="page-container">
+
+  <div class="page-header">
+    <h2>Slider Banner Management</h2>
+    <button class="add-btn" (click)="openAddModal()">+ Add Banner</button>
+  </div>
+
+  <div class="search-box">
+    <input type="text" placeholder="Search brand..." />
+  </div>
+
+  <div class="table-card">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Slider</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let banner of banners; let i=index">
+          <td>{{ i+1 }}</td>
+          <td><img [src]="banner.image" alt="Banner Preview" style="height: 20%;width: 20%;"/></td>
+          <td>
+            <button class="edit" (click)="openEditModal(banner)">Edit</button>
+            <button class="delete" (click)="deleteBanner(banner.id!)">Delete</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+ <!-- Modal -->
+<div class="modal-overlay" *ngIf="showModal">
+  <div class="modal-content">
+
+    <!-- Modal Header -->
+    <div class="modal-header">
+      <h3>{{ modalType === 'add' ? 'Add Banner' : 'Edit Banner' }}</h3>
+      <span class="close-btn" (click)="showModal=false">×</span>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="modal-body">
+
+      <!-- Banner Title -->
+      <label>Title</label>
+      <input type="text" [(ngModel)]="title" placeholder="Enter banner title" />
+      <!-- Image Upload -->
+      <label>Banner Image</label>
+      <input type="file" (change)="onFileSelected($event)" accept="image/*" />
+
+      <!-- Preview Selected Image -->
+      <div *ngIf="imageFile" class="image-preview">
+        <p>Selected Image:</p>
+        <img [src]="imagePreview" alt="Banner Preview" />
+      </div>
+
+    </div>
+
+    <!-- Modal Actions -->
+    <div class="modal-actions">
+      <button class="save-btn" (click)="save()">
+        {{ modalType === 'add' ? 'Add Banner' : 'Update Banner' }}
+      </button>
+
+      <button class="cancel-btn" (click)="showModal=false">
+        Cancel
+      </button>
+    </div>
+
+  </div>
+</div>

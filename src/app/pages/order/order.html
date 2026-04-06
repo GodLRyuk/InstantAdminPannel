@@ -1,5 +1,4 @@
 <div class="orders-container">
-
   <h1 class="page-title">Orders</h1>
 
   <!-- Tabs -->
@@ -18,22 +17,30 @@
   </div>
 
   <!-- Orders List -->
-  <div class="orders-list">
-    <div class="order-row" *ngFor="let order of filteredOrders">
+  <div class="order-row" *ngFor="let order of filteredOrders; let i = index">
+    <span class="order-id">#{{i+1}}</span>
+    <span class="status" [ngClass]="order.order_status.toLowerCase()">
+      {{order.order_status | lowercase}}
+    </span>
+    <span class="amount">₹{{order.total_amount}}</span>
+    <span>
+      <!-- Dynamic button -->
+      <!-- Dynamic button -->
+      <button class="view-btn" *ngIf="order.order_status === 'PENDING'" (click)="updateStatus(order, 'CONFIRMED')">
+        Confirm
+      </button>
 
-      <span class="order-id">#{{order.id}}</span>
+      <button class="view-btn" *ngIf="order.order_status === 'CONFIRMED'" (click)="updateStatus(order, 'SHIPPED')">
+        Ship
+      </button>
 
-      <span class="status" [ngClass]="order.status">
-        {{order.status}}
-      </span>
-
-      <span class="amount">₹{{order.amount}}</span>
-
-      <span>
-        <button class="view-btn">View</button>
-      </span>
-
-    </div>
+      <button class="view-btn" *ngIf="order.order_status === 'SHIPPED'" disabled>
+        Shipped
+      </button>
+    </span>
   </div>
-
+</div>
+<!-- Page Loader -->
+<div class="loader" *ngIf="loading">
+  Updating status...
 </div>

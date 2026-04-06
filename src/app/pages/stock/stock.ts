@@ -4,15 +4,17 @@ import { MasterService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-stock',
+  standalone: false,
   templateUrl: './stock.html',
-  styleUrls: ['./stock.css'],
+  styleUrls: ['./stock.css']
 })
 export class Stock implements OnInit {
 
   stocks: StockModel[] = [];
+  products: { id: number; name: string }[] = []; 
   showModal = false;
   modalType: 'add' | 'edit' = 'add';
-
+  selectedStock: StockModel | null = null;
   stockData: StockModel = this.getEmptyStock();
 
   constructor(
@@ -22,12 +24,23 @@ export class Stock implements OnInit {
 
   ngOnInit(): void {
     this.loadstock();
+    this.loadProducts(); 
   }
-
+  loadProducts() {
+    this.masterService.getAllProducts().subscribe({
+      next: (data: any) => {
+        this.products = data; // expects [{id:1,name:'Amul Butter'},...]
+        this.cdf.detectChanges();
+      },
+      error: err => console.error('Error loading products', err)
+    });
+  }
   // ✅ Empty model initializer
   getEmptyStock(): StockModel {
     return {
+      id: 0,
       product_id: 0,
+      product__name:'',
       batch_no: '',
       quantity: 0,
       purchase_price: 0,
@@ -49,6 +62,7 @@ export class Stock implements OnInit {
   // ✅ Open Add
   openAddModal() {
     this.modalType = 'add';
+    this.selectedStock = null;
     this.stockData = this.getEmptyStock();
     this.showModal = true;
   }
@@ -56,6 +70,7 @@ export class Stock implements OnInit {
   // ✅ Open Edit
   openEditModal(stock: StockModel) {
     this.modalType = 'edit';
+    this.selectedStock = stock;
     this.stockData = { ...stock }; // clone
     this.showModal = true;
   }
@@ -70,7 +85,12 @@ export class Stock implements OnInit {
           this.showModal = false;
         });
 
-    } 
+    } else if (this.modalType === 'edit' && this.selectedStock) {
+      this.masterService.updateStock(this.selectedStock.id, this.stockData)
+        .subscribe(() => this.loadstock());
+    }
+    this.showModal = false;
+
   }
 
   // ✅ Delete

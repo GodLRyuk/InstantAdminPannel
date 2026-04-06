@@ -1,0 +1,67 @@
+<div class="page-container">
+
+  <div class="page-header">
+    <h2>Inventory Management</h2>
+  </div>
+
+  <div class="search-box">
+    <input type="text" placeholder="Search product..." />
+  </div>
+
+  <div class="table-card">
+    <table>
+      <thead>
+        <tr>
+          <th>Sl.No</th>
+          <th>Product Name</th>
+          <th>Total Stock</th>
+          <th>Price</th>
+          <th>Unit</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let item of inventoryItems; let i = index"
+            [ngClass]="{
+              'out-stock-row': item.total_stock === 0,
+              'low-stock-row': item.total_stock > 0 && item.total_stock <= 5,
+            }">
+
+          <td>{{ i + 1 }}</td>
+
+          <td>{{ item.product_name }}</td>
+
+          <!-- Stock Column -->
+          <td>
+              {{ item.total_stock }}
+          </td>
+
+          <!-- Price -->
+          <td>₹ {{ item.price }}</td>
+
+          <!-- Unit -->
+          <td>{{ item.unit }}</td>
+
+          <!-- Status -->
+          <td>
+            <span *ngIf="item.total_stock > 5" class="in-stock">
+              In Stock
+            </span>
+
+            <span *ngIf="item.total_stock > 0 && item.total_stock <= 5" class="low-stock">
+              Low Stock
+            </span>
+
+            <span *ngIf="item.total_stock === 0" class="out-stock">
+              Out of Stock
+            </span>
+          </td>
+
+        </tr>
+      </tbody>
+
+    </table>
+  </div>
+
+</div>
