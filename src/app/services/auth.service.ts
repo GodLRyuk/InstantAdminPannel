@@ -167,33 +167,43 @@ export class MasterService {
     );
   }
   // GET ORDERS
-getOrders():  Observable<any> {
+  getOrders(): Observable<any> {
     return this.http.get<OrderModel[]>(
       `${this.apiUrl}/orders/`,
     );
   }
 
-updateOrderStatus(id: number, data: { status: string }): Observable<any> {
-  return this.http.post(`${this.apiUrl}/orders/${id}/status/`, data);
-}
+  updateOrderStatus(id: number, data: { status: string }): Observable<any> {
+    return this.http.post(`${this.apiUrl}/orders/${id}/status/`, data);
+  }
 
-addBanner(data: Partial<BannerModel>, imageFile?: File): Observable<any> {
+  addBanner(data: Partial<BannerModel>, imageFile: File) {
     const formData = new FormData();
-    formData.append('is_active', data.is_active ? 'true' : 'false');
 
-    if (imageFile) formData.append('image', imageFile);
+    formData.append('title', data.title || '');
+    formData.append('link', data.link || '');
+    formData.append('is_active', String(data.is_active));
 
-    return this.http.post(`${this.apiUrl}/masters/banners/`, formData);
+    if (imageFile) {
+      formData.append('image', imageFile);
+    }
+
+    return this.http.post<any>(`${this.apiUrl}/masters/banners/`, formData);
   }
 
   // Update existing banner (with optional image)
-  updateBanner(id: number, data: Partial<BannerModel>, imageFile?: File): Observable<any> {
+  updateBanner(id: number, data: Partial<BannerModel>, imageFile?: File) {
     const formData = new FormData();
-    if (data.is_active !== undefined) formData.append('is_active', data.is_active ? 'true' : 'false');
 
-    if (imageFile) formData.append('image', imageFile);
+    formData.append('title', data.title || '');
+    formData.append('link', data.link || '');
+    formData.append('is_active', String(data.is_active));
 
-    return this.http.put(`${this.apiUrl}/masters/banners/${id}/`, formData);
+    if (imageFile) {
+      formData.append('image', imageFile);
+    }
+
+    return this.http.put<any>(`${this.apiUrl}/masters/banners/${id}/`, formData);
   }
 
   // Delete banner
