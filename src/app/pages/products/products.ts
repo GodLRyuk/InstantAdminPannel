@@ -53,7 +53,7 @@ export class Products implements OnInit {
     });
   }
   loadSubcategories() {
-    this.masterService.getAllCatforSub().subscribe({
+    this.masterService.getAllSubCat().subscribe({
       next: (res: any) => {
         this.subcategories = res;
         this.filteredSubcategories = res; // initial

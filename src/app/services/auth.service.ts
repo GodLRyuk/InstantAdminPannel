@@ -86,11 +86,11 @@ export class MasterService {
       `${this.apiUrl}/masters/categories/`,
     );
   }
-  addCat(data: Partial<CategoryModel>): Observable<any> {
+  addCat(data: FormData) {
     return this.http.post(`${this.apiUrl}/masters/categories/`, data);
   }
 
-  updateCat(id: number, data: Partial<CategoryModel>): Observable<any> {
+  updateCat(id: number, data: FormData): Observable<any> {
     return this.http.put(`${this.apiUrl}/masters/categories/${id}/`, data);
   }
 
@@ -100,11 +100,10 @@ export class MasterService {
   getAllCatforSub(): Observable<any> {
 
     return this.http.get<SubCategoryModel[]>(
-      `${this.apiUrl}/masters/subcategories/`,
+      `${this.apiUrl}/masters/categories/`,
     );
   }
   getAllSubCat(): Observable<any> {
-
     return this.http.get<SubCategoryModel[]>(
       `${this.apiUrl}/masters/subcategories/`,
     );
@@ -144,7 +143,7 @@ export class MasterService {
   getAllstock(): Observable<any> {
 
     return this.http.get<StockModel[]>(
-      `${this.apiUrl}/stock/`,
+      `${this.apiUrl}/stock/inventory/`,
     );
   }
 

@@ -29,7 +29,7 @@
       <tbody>
         <!-- ✅ Safe binding with fallback -->
         <tr *ngFor="let cat of cats; let i = index">
-          <td>{{ i }}</td>
+          <td>{{ i+1 }}</td>
           <td>{{ cat.categoryName}}</td>
           <td>{{ cat.name }}</td>
           <td>
@@ -57,7 +57,7 @@
       <div class="modal-body">
 
         <!-- Company Dropdown -->
-        <label>Company</label>
+        <label>Category</label>
         <select [(ngModel)]="subCategory.categoryId">
           <option [ngValue]="null">Select Category</option>
           <option 

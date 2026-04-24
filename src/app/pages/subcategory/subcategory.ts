@@ -39,7 +39,6 @@ export class Subcategory implements OnInit {
     error: err => console.error('Error loading categories', err)
   });
 }
-
   // ✅ Load Sub Categories
   loadSubCategories() {
   this.masterService.getAllSubCat().subscribe({

@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { MasterService } from '../../services/auth.service';
-import { OrderModel, CreateOrderModel } from '../../models/order.model';
+import { OrderModel } from '../../models/order.model';
 
 @Component({
   selector: 'app-order',
@@ -12,15 +12,21 @@ export class OrdersComponent implements OnInit {
 
   selectedTab: string = 'all';
 
-  orders: OrderModel[] = [];          // ✅ typed
-  filteredOrders: OrderModel[] = [];  // ✅ typed
-  loading: boolean = false;  // ✅ loader flag
+  orders: OrderModel[] = [];
+  filteredOrders: OrderModel[] = [];
+  paginatedOrders: OrderModel[] = [];
+
+  loading: boolean = false;
   showModal = false;
 
-  // ✅ Create order payload
+  currentPage = 1;
+  itemsPerPage = 10;
+  totalPages = 0;
+
   items: { product: number; quantity: number }[] = [
     { product: 0, quantity: 1 }
   ];
+
   coupon_code: string = '';
 
   constructor(
@@ -34,29 +40,91 @@ export class OrdersComponent implements OnInit {
 
   // ✅ LOAD ORDERS
   loadOrders() {
-  this.masterService.getOrders().subscribe({
-    next: (data: OrderModel[]) => {
-      this.orders = data;
-      this.filterOrders(this.selectedTab);  // ✅ use current tab
-      this.cdf.detectChanges();             // ✅ ensure view updates
-    },
-    error: err => console.error(err)
-  });
-}
+    this.masterService.getOrders().subscribe({
+      next: (data: OrderModel[]) => {
+        this.orders = data;
+
+        this.applyFilter();
+        this.updatePagination();   // 🔥 FIXED FLOW
+
+        this.cdf.detectChanges();
+      },
+      error: err => console.error(err)
+    });
+  }
+
   // ✅ FILTER
   filterOrders(tab: string) {
     this.selectedTab = tab;
+    this.currentPage = 1;
 
-    if (tab === 'all') {
+    this.applyFilter();
+    this.updatePagination();   // 🔥 IMPORTANT FIX
+  }
+
+  // ✅ FILTER LOGIC
+  applyFilter() {
+    if (this.selectedTab === 'all') {
       this.filteredOrders = this.orders;
     } else {
       this.filteredOrders = this.orders.filter(
-        o => o.order_status.toLowerCase() === tab
+        o => o.order_status.toLowerCase() === this.selectedTab
       );
     }
   }
 
-  // ✅ MODAL
+  // =========================
+  // 🔥 PAGINATION (FIXED FLOW)
+  // =========================
+
+  updatePagination() {
+    this.totalPages = Math.ceil(this.filteredOrders.length / this.itemsPerPage);
+
+    // prevent invalid page crash
+    if (this.currentPage > this.totalPages) {
+      this.currentPage = 1;
+    }
+
+    this.updatePaginatedOrders();
+  }
+
+  updatePaginatedOrders() {
+    const start = (this.currentPage - 1) * this.itemsPerPage;
+    const end = start + this.itemsPerPage;
+
+    this.paginatedOrders = this.filteredOrders.slice(start, end);
+  }
+
+  goToPage(page: number) {
+    if (page < 1 || page > this.totalPages) return;
+
+    this.currentPage = page;
+    this.updatePaginatedOrders();
+  }
+
+  // =========================
+  // 🔥 ORDER STATUS UPDATE
+  // =========================
+
+  updateStatus(order: OrderModel, newStatus: string) {
+    this.loading = true;
+
+    this.masterService.updateOrderStatus(order.id, { status: newStatus }).subscribe({
+      next: () => {
+        this.loading = false;
+        this.loadOrders(); // refresh cleanly
+      },
+      error: err => {
+        console.error(err);
+        this.loading = false;
+      }
+    });
+  }
+
+  // =========================
+  // 🔥 MODAL
+  // =========================
+
   openCreateModal() {
     this.items = [{ product: 0, quantity: 1 }];
     this.coupon_code = '';
@@ -71,20 +139,4 @@ export class OrdersComponent implements OnInit {
     this.items.splice(index, 1);
     this.loadOrders();
   }
-  // ✅ UPDATE STATUS
-  updateStatus(order: OrderModel, newStatus: string) {
-  this.loading = true; // optional loader
-
-  this.masterService.updateOrderStatus(order.id, { status: newStatus }).subscribe({
-    next: () => {
-      this.loading = false; // hide loader if using
-      // reload the entire page
-      window.location.reload();
-    },
-    error: err => {
-      console.error('Status update error', err);
-      this.loading = false; // hide loader on error
-    }
-  });
-}
 }

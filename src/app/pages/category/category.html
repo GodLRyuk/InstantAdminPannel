@@ -20,7 +20,7 @@
       </thead>
       <tbody>
         <tr *ngFor="let cat of cats; let i=index">
-          <td>{{ cat.id }}</td>
+          <td>{{ i+1 }} </td>
           <td>{{ cat.name }}</td>
           <td>
             <button class="edit" (click)="openEditModal(cat)">Edit</button>
@@ -31,30 +31,32 @@
     </table>
   </div>
 
- <!-- Modal -->
-<div class="modal-overlay" *ngIf="showModal">
-  <div class="modal-content">
+  <!-- Modal -->
+  <div class="modal-overlay" *ngIf="showModal">
+    <div class="modal-content">
 
-    <div class="modal-header">
-      <h3>{{ modalType === 'add' ? 'Add Category' : 'Edit Category' }}</h3>
-      <span class="close-btn" (click)="showModal=false">×</span>
+      <div class="modal-header">
+        <h3>{{ modalType === 'add' ? 'Add Category' : 'Edit Category' }}</h3>
+        <span class="close-btn" (click)="showModal=false">×</span>
+      </div>
+
+      <div class="modal-body">
+        <label>Category Name</label>
+        <input type="text" [(ngModel)]="catName" placeholder="Enter Category Name" />
+        <label>Category Image</label>
+        <input type="file" (change)="onFileSelected($event)" />
+      </div>
+      <div class="modal-actions">
+        <button class="save-btn" (click)="save()">
+          {{ modalType === 'add' ? 'Add Category' : 'Update Category' }}
+        </button>
+
+        <button class="cancel-btn" (click)="showModal=false">
+          Cancel
+        </button>
+      </div>
+
     </div>
-
-    <div class="modal-body">
-      <label>Category Name</label>
-      <input type="text" [(ngModel)]="catName" placeholder="Enter Category Name" />
-    </div>
-    <div class="modal-actions">
-      <button class="save-btn" (click)="save()">
-        {{ modalType === 'add' ? 'Add Category' : 'Update Category' }}
-      </button>
-
-      <button class="cancel-btn" (click)="showModal=false">
-        Cancel
-      </button>
-    </div>
-
   </div>
-</div>
 
 </div>

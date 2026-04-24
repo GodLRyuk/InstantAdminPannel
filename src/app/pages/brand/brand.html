@@ -20,7 +20,7 @@
       </thead>
       <tbody>
         <tr *ngFor="let brand of brands; let i=index">
-          <td>{{ brand.id }}</td>
+          <td>{{ i+1}}</td>
           <td>{{ brand.name }}</td>
           <td>
             <button class="edit" (click)="openEditModal(brand)">Edit</button>
