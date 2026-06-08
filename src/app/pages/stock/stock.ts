@@ -40,11 +40,12 @@ export class Stock implements OnInit {
     return {
       id: 0,
       product_id: 0,
-      product__name:'',
+      product_name:'',
       batch_no: '',
-      quantity: 0,
+      total_stock: 0,
       purchase_price: 0,
-      selling_price: 0
+      selling_price: 0,
+      available_stock: 0
     };
   }
 
