@@ -1,7 +1,7 @@
 export interface InventoryModel {
   product_id: number;
   product_name: string;
-  quantity: number;
+  total_stock: number;
   available_stock: number;
   unit: string | null;
 }
