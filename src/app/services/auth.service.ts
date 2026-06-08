@@ -143,7 +143,7 @@ export class MasterService {
   getAllstock(): Observable<any> {
 
     return this.http.get<StockModel[]>(
-      `${this.apiUrl}/stock/inventory/`,
+      `${this.apiUrl}/stock/`,
     );
   }
 

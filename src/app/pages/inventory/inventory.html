@@ -15,8 +15,7 @@
           <th>Sl.No</th>
           <th>Product Name</th>
           <th>Total Stock</th>
-          <th>Price</th>
-          <th>Unit</th>
+          <th>Available Stock</th>
           <th>Status</th>
         </tr>
       </thead>
@@ -38,11 +37,7 @@
           </td>
 
           <!-- Price -->
-          <td>₹ {{ item.price }}</td>
-
-          <!-- Unit -->
-          <td>{{ item.unit }}</td>
-
+          <td>{{ item.available_stock}}</td>
           <!-- Status -->
           <td>
             <span *ngIf="item.total_stock > 5" class="in-stock">

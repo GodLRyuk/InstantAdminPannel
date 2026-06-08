@@ -18,7 +18,6 @@
         <tr>
           <th>ID</th>
           <th>Product Name</th>
-          <th>Batch No</th>
           <th>Quantity</th>
           <th>Purchase Price</th>
           <th>Selling Price</th>
@@ -30,7 +29,6 @@
         <tr *ngFor="let stock of stocks; let i = index">
           <td>{{ i+1}}</td>
           <td>{{ stock.product__name }}</td>
-          <td>{{ stock.batch_no }}</td>
           <td>{{ stock.quantity }}</td>
           <td>{{ stock.purchase_price }}</td>
           <td>{{ stock.selling_price }}</td>
@@ -71,8 +69,7 @@
             </option>
         </select>
         </div>
-
-        <label>Batch No</label>
+         <label>Batch No</label>
         <input type="text" [(ngModel)]="stockData.batch_no" />
 
         <label>Quantity</label>
