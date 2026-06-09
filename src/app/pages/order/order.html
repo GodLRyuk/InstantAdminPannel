@@ -1,82 +1,86 @@
-<div class="orders-container">
+<div class="wrap">
   <h1 class="page-title">Orders</h1>
 
-  <!-- Tabs -->
   <div class="tabs">
-    <button (click)="filterOrders('all')" [class.active]="selectedTab === 'all'">All</button>
-    <button (click)="filterOrders('confirmed')" [class.active]="selectedTab === 'confirmed'">Confirmed</button>
-    <button (click)="filterOrders('pending')" [class.active]="selectedTab === 'pending'">Pending</button>
+    <button class="tab" [class.active]="selectedTab === 'all'" (click)="filterOrders('all')">All</button>
+    <button class="tab" [class.active]="selectedTab === 'confirmed'" (click)="filterOrders('confirmed')">Confirmed</button>
+    <button class="tab" [class.active]="selectedTab === 'pending'" (click)="filterOrders('pending')">Pending</button>
   </div>
 
-  <!-- List Header -->
-  <div class="list-header">
-    <span>Order ID</span>
-    <span>Items & Batch</span>
-    <span>Status</span>
-    <span>Amount</span>
-    <span>Action</span>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th class="col-id">Order ID</th>
+          <th class="col-items">Items & Batch</th>
+          <th class="col-status">Status</th>
+          <th class="col-amount">Amount</th>
+          <th class="col-action">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let order of paginatedOrders">
+
+          <td>
+            <span class="order-id">#{{ order.id }}</span>
+          </td>
+
+          <td>
+            <div class="item-row" *ngFor="let item of order.items">
+              <span class="item-name">{{ item.product_name }}</span>
+              <span class="batch-pill" *ngIf="item.batch_no">{{ item.batch_no }}</span>
+              <span class="batch-pill no-batch" *ngIf="!item.batch_no">No batch</span>
+            </div>
+          </td>
+
+          <td>
+            <span class="badge" [ngClass]="order.order_status.toLowerCase()">
+              {{ order.order_status | titlecase }}
+            </span>
+          </td>
+
+          <td>
+            <span class="amount">₹{{ order.total_amount }}</span>
+          </td>
+
+          <td>
+            <button class="btn btn-confirm"
+              *ngIf="order.order_status === 'PENDING'"
+              (click)="updateStatus(order, 'CONFIRMED')">
+              Confirm
+            </button>
+
+            <button class="btn btn-ship"
+              *ngIf="order.order_status === 'CONFIRMED'"
+              (click)="updateStatus(order, 'SHIPPED')">
+              Ship
+            </button>
+
+            <button class="btn" disabled
+              *ngIf="order.order_status === 'SHIPPED' || order.order_status === 'DELIVERED'">
+              {{ order.order_status | titlecase }}
+            </button>
+          </td>
+
+        </tr>
+
+        <tr *ngIf="paginatedOrders.length === 0">
+          <td colspan="5" class="empty">No orders found</td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 
-  <!-- Orders List -->
-  <div class="order-row" *ngFor="let order of paginatedOrders; let i = index">
-    
-    <span class="order-id">
-      #{{ order.id }}
-    </span>
+  <div class="loader" *ngIf="loading">Updating status...</div>
 
-    <!-- ✅ Show each item with its batch -->
-    <span class="batch-info">
-      <div *ngFor="let item of order.items" class="item-batch">
-        <span class="product-name">{{ item.product_name }}</span>
-        <span class="batch-tag" *ngIf="item.batch_no">Batch: {{ item.batch_no }}</span>
-        <span class="batch-tag no-batch" *ngIf="!item.batch_no">No batch</span>
-      </div>
-    </span>
-
-    <span class="status" [ngClass]="order.order_status.toLowerCase()">
-      {{ order.order_status | lowercase }}
-    </span>
-
-    <span class="amount">₹{{ order.total_amount }}</span>
-
-    <span>
-      <button class="view-btn"
-        *ngIf="order.order_status === 'PENDING'"
-        (click)="updateStatus(order, 'CONFIRMED')">
-        Confirm
-      </button>
-
-      <button class="view-btn"
-        *ngIf="order.order_status === 'CONFIRMED'"
-        (click)="updateStatus(order, 'SHIPPED')">
-        Ship
-      </button>
-
-      <button class="view-btn"
-        *ngIf="order.order_status === 'SHIPPED'"
-        disabled>
-        Shipped
-      </button>
-    </span>
-  </div>
-
-  <!-- Loader -->
-  <div class="loader" *ngIf="loading">
-    Updating status...
-  </div>
-
-  <!-- Pagination -->
   <div class="pagination" *ngIf="totalPages > 1">
-    <button (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1">Prev</button>
-
-    <button
+    <button class="pg-btn" (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1">&#8249;</button>
+    <button class="pg-btn"
       *ngFor="let page of [].constructor(totalPages); let i = index"
-      (click)="goToPage(i + 1)"
-      [class.active]="currentPage === i + 1">
+      [class.active]="currentPage === i + 1"
+      (click)="goToPage(i + 1)">
       {{ i + 1 }}
     </button>
-
-    <button (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages">Next</button>
+    <button class="pg-btn" (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages">&#8250;</button>
   </div>
-
 </div>
