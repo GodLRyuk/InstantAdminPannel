@@ -21,7 +21,7 @@
   <div class="order-row" *ngFor="let order of paginatedOrders; let i = index">
     <span class="order-id">{{ (currentPage - 1) * itemsPerPage + i + 1 }}</span>
 
-    <span class="batch-no">
+    <span class="status">
       {{ order.batch_no }}
     </span>
 
