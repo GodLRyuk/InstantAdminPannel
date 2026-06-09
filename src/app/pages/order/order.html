@@ -11,7 +11,7 @@
   <!-- List Header -->
   <div class="list-header">
     <span>Order ID</span>
-    <span>Batch</span>
+    <span>Items & Batch</span>
     <span>Status</span>
     <span>Amount</span>
     <span>Action</span>
@@ -19,9 +19,19 @@
 
   <!-- Orders List -->
   <div class="order-row" *ngFor="let order of paginatedOrders; let i = index">
-    <span class="order-id">{{ (currentPage - 1) * itemsPerPage + i + 1 }}</span>
-    <span class="order-id">{{ (currentPage - 1) * itemsPerPage + i + 1 }}</span>
+    
+    <span class="order-id">
+      #{{ order.id }}
+    </span>
 
+    <!-- ✅ Show each item with its batch -->
+    <span class="batch-info">
+      <div *ngFor="let item of order.items" class="item-batch">
+        <span class="product-name">{{ item.product_name }}</span>
+        <span class="batch-tag" *ngIf="item.batch_no">Batch: {{ item.batch_no }}</span>
+        <span class="batch-tag no-batch" *ngIf="!item.batch_no">No batch</span>
+      </div>
+    </span>
 
     <span class="status" [ngClass]="order.order_status.toLowerCase()">
       {{ order.order_status | lowercase }}
@@ -57,9 +67,7 @@
 
   <!-- Pagination -->
   <div class="pagination" *ngIf="totalPages > 1">
-    <button (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1">
-      Prev
-    </button>
+    <button (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1">Prev</button>
 
     <button
       *ngFor="let page of [].constructor(totalPages); let i = index"
@@ -68,9 +76,7 @@
       {{ i + 1 }}
     </button>
 
-    <button (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages">
-      Next
-    </button>
+    <button (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages">Next</button>
   </div>
 
 </div>
