@@ -63,7 +63,7 @@
         <select
             id="productSelect"
             class="form-control"
-            [(ngModel)]="stockData.product_id"
+            [(ngModel)]="stockData.id"
         >
             <option [ngValue]="0" disabled>Select a product</option>
             <option *ngFor="let product of products" [ngValue]="product.id">
@@ -75,7 +75,7 @@
         <input type="text" [(ngModel)]="stockData.batch_no" />
 
         <label>Quantity</label>
-        <input type="number" [(ngModel)]="stockData.total_stock" />
+        <input type="number" [(ngModel)]="stockData.quantity" />
 
         <label>Purchase Price</label>
         <input type="number" [(ngModel)]="stockData.purchase_price" />
