@@ -11,6 +11,7 @@
   <!-- List Header -->
   <div class="list-header">
     <span>Order ID</span>
+    <span>Batch No</span>
     <span>Status</span>
     <span>Amount</span>
     <span>Action</span>
@@ -19,6 +20,10 @@
   <!-- Orders List -->
   <div class="order-row" *ngFor="let order of paginatedOrders; let i = index">
     <span class="order-id">{{ (currentPage - 1) * itemsPerPage + i + 1 }}</span>
+
+    <span class="batch-no">
+      {{ order.batch_no }}
+    </span>
 
     <span class="status" [ngClass]="order.order_status.toLowerCase()">
       {{ order.order_status | lowercase }}

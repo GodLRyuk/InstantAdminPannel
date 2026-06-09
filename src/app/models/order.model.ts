@@ -14,6 +14,7 @@ export interface OrderModel {
   coupon_code?: string;
   payment_status: string;
   order_status: string;
+  batch_no: string;
   created_at: string;
   items: OrderItem[];
 }
