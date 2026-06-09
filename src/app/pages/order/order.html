@@ -11,7 +11,6 @@
     <table>
       <thead>
         <tr>
-          <th class="col-id">Order ID</th>
           <th class="col-items">Items & Batch</th>
           <th class="col-status">Status</th>
           <th class="col-amount">Amount</th>
@@ -20,10 +19,6 @@
       </thead>
       <tbody>
         <tr *ngFor="let order of paginatedOrders">
-
-          <td>
-            <span class="order-id">#{{ order.id }}</span>
-          </td>
 
           <td>
             <div class="item-row" *ngFor="let item of order.items">
