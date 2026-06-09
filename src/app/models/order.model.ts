@@ -5,6 +5,7 @@ export interface OrderItem {
   quantity: number;
   price: number;
   total_price: number;
+  batch_no: string;
 }
 
 export interface OrderModel {
@@ -14,7 +15,6 @@ export interface OrderModel {
   coupon_code?: string;
   payment_status: string;
   order_status: string;
-  batch_no: string;
   created_at: string;
   items: OrderItem[];
 }
