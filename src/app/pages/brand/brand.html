@@ -6,7 +6,11 @@
   </div>
 
   <div class="search-box">
-    <input type="text" placeholder="Search brand..." />
+    <input
+      type="text"
+      placeholder="Search brand..."
+      [(ngModel)]="searchTerm"
+      (ngModelChange)="onSearch()" />
   </div>
 
   <div class="table-card">
@@ -19,43 +23,60 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let brand of brands; let i=index">
-          <td>{{ i+1}}</td>
+        <tr *ngFor="let brand of pagedBrands; let i=index">
+          <td>{{ (currentPage - 1) * pageSize + i + 1 }}</td>
           <td>{{ brand.name }}</td>
           <td>
             <button class="edit" (click)="openEditModal(brand)">Edit</button>
             <button class="delete" (click)="deleteBrand(brand.id)">Delete</button>
           </td>
         </tr>
+        <tr *ngIf="pagedBrands.length === 0">
+          <td colspan="3" style="text-align:center; padding: 20px;">No brands found</td>
+        </tr>
       </tbody>
     </table>
-  </div>
 
- <!-- Modal -->
-<div class="modal-overlay" *ngIf="showModal">
-  <div class="modal-content">
+    <!-- Pagination -->
+    <div class="pagination" *ngIf="totalPages > 1">
+      <button (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1">Prev</button>
 
-    <div class="modal-header">
-      <h3>{{ modalType === 'add' ? 'Add Brand' : 'Edit Brand' }}</h3>
-      <span class="close-btn" (click)="showModal=false">×</span>
-    </div>
-
-    <div class="modal-body">
-      <label>Brand Name</label>
-      <input type="text" [(ngModel)]="brandName" placeholder="Enter Brand Name" />
-    </div>
-
-    <div class="modal-actions">
-      <button class="save-btn" (click)="save()">
-        {{ modalType === 'add' ? 'Add Brand' : 'Update Brand' }}
+      <button
+        *ngFor="let p of pages"
+        (click)="goToPage(p)"
+        [class.active]="p === currentPage">
+        {{ p }}
       </button>
 
-      <button class="cancel-btn" (click)="showModal=false">
-        Cancel
-      </button>
+      <button (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages">Next</button>
     </div>
-
   </div>
-</div>
+
+  <!-- Modal -->
+  <div class="modal-overlay" *ngIf="showModal">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h3>{{ modalType === 'add' ? 'Add Brand' : 'Edit Brand' }}</h3>
+        <span class="close-btn" (click)="showModal=false">×</span>
+      </div>
+
+      <div class="modal-body">
+        <label>Brand Name</label>
+        <input type="text" [(ngModel)]="brandName" placeholder="Enter Brand Name" />
+      </div>
+
+      <div class="modal-actions">
+        <button class="save-btn" (click)="save()">
+          {{ modalType === 'add' ? 'Add Brand' : 'Update Brand' }}
+        </button>
+
+        <button class="cancel-btn" (click)="showModal=false">
+          Cancel
+        </button>
+      </div>
+
+    </div>
+  </div>
 
 </div>

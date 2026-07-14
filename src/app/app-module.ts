@@ -27,6 +27,7 @@ import { OrderModel } from './models/order.model';
 import { CommonModule } from '@angular/common';
 import { BannerComponent } from './pages/banner/banner';
 import { Advbanner } from './pages/advbanner/advbanner';
+import { SalesReport } from './reports/sales-report/sales-report';
 
 @NgModule({
   declarations: [
@@ -45,6 +46,7 @@ import { Advbanner } from './pages/advbanner/advbanner';
     OrdersComponent,
     BannerComponent,
     Advbanner,
+    SalesReport,
   ],
   imports: [BrowserModule, AppRoutingModule, FormsModule, HttpClientModule, CommonModule],
   providers: [

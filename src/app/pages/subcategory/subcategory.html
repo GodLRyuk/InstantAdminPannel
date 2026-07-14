@@ -8,10 +8,11 @@
 
   <!-- Search -->
   <div class="search-box">
-    <input 
-      type="text" 
-      placeholder="Search Sub Category..." 
-    />
+    <input
+      type="text"
+      placeholder="Search Sub Category..."
+      [(ngModel)]="searchTerm"
+      (ngModelChange)="onSearch()" />
   </div>
 
   <!-- Table -->
@@ -27,18 +28,34 @@
       </thead>
 
       <tbody>
-        <!-- ✅ Safe binding with fallback -->
-        <tr *ngFor="let cat of cats; let i = index">
-          <td>{{ i+1 }}</td>
-          <td>{{ cat.categoryName}}</td>
+        <tr *ngFor="let cat of pagedCats; let i = index">
+          <td>{{ (currentPage - 1) * pageSize + i + 1 }}</td>
+          <td>{{ cat.categoryName }}</td>
           <td>{{ cat.name }}</td>
           <td>
             <button class="edit" (click)="openEditModal(cat)">Edit</button>
             <button class="delete" (click)="deleteCat(cat.id!)">Delete</button>
           </td>
         </tr>
+        <tr *ngIf="pagedCats.length === 0">
+          <td colspan="4" style="text-align:center; padding: 20px;">No sub categories found</td>
+        </tr>
       </tbody>
     </table>
+
+    <!-- Pagination -->
+    <div class="pagination" *ngIf="totalPages > 1">
+      <button (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1">Prev</button>
+
+      <button
+        *ngFor="let p of pages"
+        (click)="goToPage(p)"
+        [class.active]="p === currentPage">
+        {{ p }}
+      </button>
+
+      <button (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages">Next</button>
+    </div>
   </div>
 
   <!-- Modal -->
@@ -56,24 +73,21 @@
       <!-- Body -->
       <div class="modal-body">
 
-        <!-- Company Dropdown -->
         <label>Category</label>
         <select [(ngModel)]="subCategory.categoryId">
           <option [ngValue]="null">Select Category</option>
-          <option 
-            *ngFor="let cat of category" 
+          <option
+            *ngFor="let cat of category"
             [ngValue]="cat.id">
             {{ cat.name }}
           </option>
         </select>
 
-        <!-- Sub Category Name -->
         <label>Sub Category Name</label>
-        <input 
-          type="text" 
-          [(ngModel)]="subCategory.name" 
-          placeholder="Enter Sub Category" 
-        />
+        <input
+          type="text"
+          [(ngModel)]="subCategory.name"
+          placeholder="Enter Sub Category" />
 
       </div>
 

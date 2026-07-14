@@ -11,11 +11,19 @@ import { MasterService } from '../../services/auth.service';
 export class Category implements OnInit {
 
   cats: CategoryModel[] = [];
+  pagedCats: CategoryModel[] = [];
+
   showModal = false;
   modalType: 'add' | 'edit' = 'add';
   selectedCategory: CategoryModel | null = null;
   selectedFile: File | null = null;
   catName = '';
+  searchTerm = '';
+  filteredCats: CategoryModel[] = [];
+  // Pagination
+  currentPage = 1;
+  pageSize = 10;
+  totalPages = 1;
 
   constructor(
     private masterService: MasterService,
@@ -25,16 +33,51 @@ export class Category implements OnInit {
   ngOnInit(): void {
     this.loadCat();
   }
-  loadCat() {
-    this.masterService.getAllCat().subscribe({
 
-      next: data => {
-        this.cats = [...data];
-        this.cdf.detectChanges();
-      },
-      error: err => console.error('Error loading Category', err)
-    });
+  loadCat() {
+  this.masterService.getAllCat().subscribe({
+    next: data => {
+      this.cats = [...data];
+      this.applyFilter();
+      this.cdf.detectChanges();
+    },
+    error: err => console.error('Error loading Category', err)
+  });
+}
+
+onSearch() {
+  this.currentPage = 1; // reset to page 1 on every new search
+  this.applyFilter();
+}
+
+applyFilter() {
+  const term = this.searchTerm.trim().toLowerCase();
+  this.filteredCats = term
+    ? this.cats.filter(c => c.name.toLowerCase().includes(term))
+    : this.cats;
+
+  this.totalPages = Math.max(1, Math.ceil(this.filteredCats.length / this.pageSize));
+  if (this.currentPage > this.totalPages) {
+    this.currentPage = this.totalPages;
   }
+  this.updatePagedCats();
+}
+
+updatePagedCats() {
+  const start = (this.currentPage - 1) * this.pageSize;
+  this.pagedCats = this.filteredCats.slice(start, start + this.pageSize);
+}
+
+  goToPage(page: number) {
+    if (page < 1 || page > this.totalPages || page === this.currentPage) return;
+    this.currentPage = page;
+    this.updatePagedCats();
+  }
+
+  get pages(): number[] {
+    return Array.from({ length: this.totalPages }, (_, i) => i + 1);
+  }
+
   onFileSelected(event: any) {
     this.selectedFile = event.target.files[0];
   }
@@ -54,31 +97,30 @@ export class Category implements OnInit {
   }
 
   save() {
-  const formData = new FormData();
-  formData.append('name', this.catName);
-  formData.append('is_active', "True");
+    const formData = new FormData();
+    formData.append('name', this.catName);
+    formData.append('is_active', "True");
 
-  if (this.selectedFile) {
-    formData.append('image', this.selectedFile);
+    if (this.selectedFile) {
+      formData.append('image', this.selectedFile);
+    }
+
+    if (this.modalType === 'add') {
+      this.masterService.addCat(formData)
+        .subscribe(() => this.loadCat());
+
+    } else if (this.modalType === 'edit' && this.selectedCategory) {
+      this.masterService.updateCat(this.selectedCategory.id, formData)
+        .subscribe(() => this.loadCat());
+    }
+
+    this.showModal = false;
+    this.selectedFile = null;
   }
-
-  if (this.modalType === 'add') {
-    this.masterService.addCat(formData)
-      .subscribe(() => this.loadCat());
-
-  } else if (this.modalType === 'edit' && this.selectedCategory) {
-    this.masterService.updateCat(this.selectedCategory.id, formData)
-      .subscribe(() => this.loadCat());
-  }
-
-  this.showModal = false;
-  this.selectedFile = null;
-}
 
   deleteCat(id: number) {
     if (confirm('Are you sure you want to delete this units?')) {
       this.masterService.deleteCat(id).subscribe(() => this.loadCat());
-      this.cdf.detectChanges();
     }
   }
 }

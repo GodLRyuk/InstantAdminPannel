@@ -21,7 +21,7 @@ export class OrdersComponent implements OnInit {
 
   currentPage = 1;
   itemsPerPage = 10;
-  totalPages = 0;
+  totalPages = 1;
 
   items: { product: number; quantity: number }[] = [
     { product: 0, quantity: 1 }
@@ -45,7 +45,7 @@ export class OrdersComponent implements OnInit {
         this.orders = data;
 
         this.applyFilter();
-        this.updatePagination();   // 🔥 FIXED FLOW
+        this.updatePagination();
 
         this.cdf.detectChanges();
       },
@@ -59,7 +59,7 @@ export class OrdersComponent implements OnInit {
     this.currentPage = 1;
 
     this.applyFilter();
-    this.updatePagination();   // 🔥 IMPORTANT FIX
+    this.updatePagination();
   }
 
   // ✅ FILTER LOGIC
@@ -74,15 +74,15 @@ export class OrdersComponent implements OnInit {
   }
 
   // =========================
-  // 🔥 PAGINATION (FIXED FLOW)
+  // PAGINATION
   // =========================
 
   updatePagination() {
-    this.totalPages = Math.ceil(this.filteredOrders.length / this.itemsPerPage);
+    this.totalPages = Math.max(1, Math.ceil(this.filteredOrders.length / this.itemsPerPage));
 
-    // prevent invalid page crash
+    // clamp to last valid page instead of resetting to page 1
     if (this.currentPage > this.totalPages) {
-      this.currentPage = 1;
+      this.currentPage = this.totalPages;
     }
 
     this.updatePaginatedOrders();
@@ -102,8 +102,12 @@ export class OrdersComponent implements OnInit {
     this.updatePaginatedOrders();
   }
 
+  get pages(): number[] {
+    return Array.from({ length: this.totalPages }, (_, i) => i + 1);
+  }
+
   // =========================
-  // 🔥 ORDER STATUS UPDATE
+  // ORDER STATUS UPDATE
   // =========================
 
   updateStatus(order: OrderModel, newStatus: string) {
@@ -112,7 +116,7 @@ export class OrdersComponent implements OnInit {
     this.masterService.updateOrderStatus(order.id, { status: newStatus }).subscribe({
       next: () => {
         this.loading = false;
-        this.loadOrders(); // refresh cleanly
+        this.loadOrders();
       },
       error: err => {
         console.error(err);
@@ -122,7 +126,7 @@ export class OrdersComponent implements OnInit {
   }
 
   // =========================
-  // 🔥 MODAL
+  // MODAL
   // =========================
 
   openCreateModal() {
@@ -137,6 +141,6 @@ export class OrdersComponent implements OnInit {
 
   removeItem(index: number) {
     this.items.splice(index, 1);
-    this.loadOrders();
+    // ✅ removed loadOrders() — unrelated to the create-order form array
   }
 }

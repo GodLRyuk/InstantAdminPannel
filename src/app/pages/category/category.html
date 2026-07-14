@@ -1,12 +1,16 @@
 <div class="page-container">
 
   <div class="page-header">
-    <h2>Category Management</h2>
+    <h2>Category</h2>
     <button class="add-btn" (click)="openAddModal()">+ Add Category</button>
   </div>
 
   <div class="search-box">
-    <input type="text" placeholder="Search cat..." />
+    <input
+      type="text"
+      placeholder="Search cat..."
+      [(ngModel)]="searchTerm"
+      (ngModelChange)="onSearch()" />
   </div>
 
   <div class="table-card">
@@ -19,16 +23,33 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let cat of cats; let i=index">
-          <td>{{ i+1 }} </td>
+        <tr *ngFor="let cat of pagedCats; let i=index">
+          <td>{{ (currentPage - 1) * pageSize + i + 1 }}</td>
           <td>{{ cat.name }}</td>
           <td>
             <button class="edit" (click)="openEditModal(cat)">Edit</button>
             <button class="delete" (click)="deleteCat(cat.id)">Delete</button>
           </td>
         </tr>
+        <tr *ngIf="pagedCats.length === 0">
+          <td colspan="3" style="text-align:center; padding: 20px;">No categories found</td>
+        </tr>
       </tbody>
     </table>
+
+    <!-- Pagination -->
+    <div class="pagination" *ngIf="totalPages > 1">
+      <button (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1">Prev</button>
+
+      <button
+        *ngFor="let p of pages"
+        (click)="goToPage(p)"
+        [class.active]="p === currentPage">
+        {{ p }}
+      </button>
+
+      <button (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages">Next</button>
+    </div>
   </div>
 
   <!-- Modal -->

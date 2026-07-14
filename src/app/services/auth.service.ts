@@ -243,4 +243,16 @@ export class MasterService {
   getAdvBanners(): Observable<advBannerModel[]> {
     return this.http.get<advBannerModel[]>(`${this.apiUrl}/masters/advbanners/`);
   }
+
+  getSalesTrend(startDate: string, endDate: string) {
+  return this.http.get(
+    `${this.apiUrl}/reports/sales-trend/?start_date=${startDate}&end_date=${endDate}`
+  );
+}
+downloadSalesReport(startDate: string, endDate: string) {
+  return this.http.get(
+    `${this.apiUrl}/reports/sales-export/?start_date=${startDate}&end_date=${endDate}`,
+    { responseType: 'blob' }   // ← critical: tells Angular to expect binary data, not JSON
+  );
+}
 }

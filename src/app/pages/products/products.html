@@ -1,12 +1,16 @@
 <div class="page-container">
 
   <div class="page-header">
-    <h2>Product Management</h2>
+    <h2>Product</h2>
     <button class="add-btn" (click)="openAddModal()">+ Add Product</button>
   </div>
 
   <div class="search-box">
-    <input type="text" placeholder="Search brand..." />
+    <input
+      type="text"
+      placeholder="Search product..."
+      [(ngModel)]="searchTerm"
+      (ngModelChange)="onSearch()" />
   </div>
 
   <div class="table-card">
@@ -15,20 +19,39 @@
         <tr>
           <th>ID</th>
           <th>Product Name</th>
+          <th>Price</th>
           <th>Action</th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let prod of products; let i=index">
-          <td>{{ i+1 }}</td>
+        <tr *ngFor="let prod of pagedProducts; let i=index">
+          <td>{{ (currentPage - 1) * pageSize + i + 1 }}</td>
           <td>{{ prod.name }}</td>
+          <td>{{ prod.price }}</td>
           <td>
             <!-- <button class="edit" (click)="openEditModal(prod)">Edit</button> -->
             <button class="delete" (click)="deleteProduct(prod.id)">Delete</button>
           </td>
         </tr>
+        <tr *ngIf="pagedProducts.length === 0">
+          <td colspan="4" style="text-align:center; padding: 20px;">No products found</td>
+        </tr>
       </tbody>
     </table>
+
+    <!-- Pagination -->
+    <div class="pagination" *ngIf="totalPages > 1">
+      <button (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1">Prev</button>
+
+      <button
+        *ngFor="let p of pages"
+        (click)="goToPage(p)"
+        [class.active]="p === currentPage">
+        {{ p }}
+      </button>
+
+      <button (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages">Next</button>
+    </div>
   </div>
 
   <!-- Modal -->
@@ -75,7 +98,7 @@
         <div class="row">
           <div class="form-group">
             <label>Category</label>
-            <select [(ngModel)]="product.category">
+            <select [(ngModel)]="product.category" (change)="onCategoryChange()">
               <option *ngFor="let cat of categories" [value]="cat.id">
                 {{ cat.name }}
               </option>
@@ -85,7 +108,7 @@
           <div class="form-group">
             <label>Subcategory</label>
             <select [(ngModel)]="product.subcategory">
-              <option *ngFor="let sub of subcategories" [value]="sub.id">
+              <option *ngFor="let sub of filteredSubcategories" [value]="sub.id">
                 {{ sub.name }}
               </option>
             </select>
@@ -145,3 +168,4 @@
 
     </div>
   </div>
+</div>

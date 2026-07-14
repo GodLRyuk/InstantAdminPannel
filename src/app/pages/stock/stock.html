@@ -2,13 +2,17 @@
 
   <!-- HEADER -->
   <div class="page-header">
-    <h2>Stock Management</h2>
+    <h2>Stock</h2>
     <button class="add-btn" (click)="openAddModal()">+ Add Stock</button>
   </div>
 
   <!-- SEARCH -->
   <div class="search-box">
-    <input type="text" placeholder="Search batch..." />
+    <input
+      type="text"
+      placeholder="Search batch..."
+      [(ngModel)]="searchTerm"
+      (ngModelChange)="onSearch()" />
   </div>
 
   <!-- TABLE -->
@@ -27,8 +31,8 @@
       </thead>
 
       <tbody>
-        <tr *ngFor="let stock of stocks; let i = index">
-          <td>{{ i+1}}</td>
+        <tr *ngFor="let stock of pagedStocks; let i = index">
+          <td>{{ (currentPage - 1) * pageSize + i + 1 }}</td>
           <td>{{ stock.product_name }}</td>
           <td>{{ stock.batch_no }}</td>
           <td>{{ stock.quantity }}</td>
@@ -40,8 +44,25 @@
             <button class="delete" (click)="deleteStock(stock.id)">Delete</button>
           </td>
         </tr>
+        <tr *ngIf="pagedStocks.length === 0">
+          <td colspan="7" style="text-align:center; padding: 20px;">No stock entries found</td>
+        </tr>
       </tbody>
     </table>
+
+    <!-- PAGINATION -->
+    <div class="pagination" *ngIf="totalPages > 1">
+      <button (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1">Prev</button>
+
+      <button
+        *ngFor="let p of pages"
+        (click)="goToPage(p)"
+        [class.active]="p === currentPage">
+        {{ p }}
+      </button>
+
+      <button (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages">Next</button>
+    </div>
   </div>
 
   <!-- MODAL -->
@@ -59,29 +80,28 @@
 
        <label>Product</label>
         <div class="form-group">
-        <label for="productSelect">Product</label>
-        <select
+          <select
             id="productSelect"
             class="form-control"
-            [(ngModel)]="stockData.id"
-        >
+            [(ngModel)]="stockData.product"
+            name="product">
             <option [ngValue]="0" disabled>Select a product</option>
             <option *ngFor="let product of products" [ngValue]="product.id">
-            {{ product.name }}
+              {{ product.name }}
             </option>
         </select>
         </div>
          <label>Batch No</label>
-        <input type="text" [(ngModel)]="stockData.batch_no" />
+        <input type="text" [(ngModel)]="stockData.batch_no" name="batch_no" />
 
         <label>Quantity</label>
-        <input type="number" [(ngModel)]="stockData.quantity" />
+        <input type="number" [(ngModel)]="stockData.quantity" name="quantity" />
 
         <label>Purchase Price</label>
-        <input type="number" [(ngModel)]="stockData.purchase_price" />
+        <input type="number" [(ngModel)]="stockData.purchase_price" name="purchase_price" />
 
         <label>Selling Price</label>
-        <input type="number" [(ngModel)]="stockData.selling_price" />
+        <input type="number" [(ngModel)]="stockData.selling_price" name="selling_price" />
 
       </div>
 

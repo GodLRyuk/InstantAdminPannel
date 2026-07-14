@@ -13,6 +13,7 @@ import { Stock } from './pages/stock/stock';
 import { Inventory } from './pages/inventory/inventory';
 import { BannerComponent } from './pages/banner/banner';
 import { Advbanner } from './pages/advbanner/advbanner';
+import { SalesReport } from './reports/sales-report/sales-report';
 
 const routes: Routes = [
   {path: '', component: LoginComponent},
@@ -30,7 +31,8 @@ const routes: Routes = [
       { path: 'stock', component: Stock },
       { path: 'inventory', component: Inventory },
       { path: 'banner', component: BannerComponent },
-      { path: 'advbanner', component: Advbanner }
+      { path: 'advbanner', component: Advbanner },
+      { path: 'reports/sales', component: SalesReport }
     ]
   },
 ];

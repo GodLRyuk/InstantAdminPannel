@@ -1,0 +1,17 @@
+<div class="page-container">
+  <h2>Sales Report</h2>
+
+  <div class="filters">
+    <label>From: <input type="date" class="form-control" [(ngModel)]="startDate" /></label>
+    <label>To:  <input type="date" class="form-control" [(ngModel)]="endDate" /></label>
+    &nbsp;
+    <button  class="btn btn-confirm"(click)="loadSalesTrend()">Apply</button>
+    &nbsp;
+  <button  class="btn btn-confirm" (click)="exportToExcel()">Export Excel</button>
+
+  </div>
+
+  <div class="chart-card">
+    <canvas #salesCanvas></canvas>
+  </div>
+</div>

@@ -10,15 +10,22 @@ import { SubCategoryModel } from '../../models/sub-category.model';
 })
 export class Subcategory implements OnInit {
 
-  // ✅ FIXED: Use model, not component
   cats: SubCategoryModel[] = [];
+  filteredCats: SubCategoryModel[] = [];
+  pagedCats: SubCategoryModel[] = [];
   category: any[] = [];
 
   showModal = false;
   modalType: 'add' | 'edit' = 'add';
-
-  // ✅ FIXED
   subCategory: SubCategoryModel = new SubCategoryModel();
+
+  // Search
+  searchTerm = '';
+
+  // Pagination
+  currentPage = 1;
+  pageSize = 10;
+  totalPages = 1;
 
   constructor(
     private masterService: MasterService,
@@ -29,81 +36,109 @@ export class Subcategory implements OnInit {
     this.loadSubCategories();
     this.getAllCatforSub();
   }
+
   getAllCatforSub() {
-  this.masterService.getAllCatforSub().subscribe({
-    next: (res: any) => {
-      this.category = res; // 👈 IMPORTANT
+    this.masterService.getAllCatforSub().subscribe({
+      next: (res: any) => {
+        this.category = res;
+        this.cdf.detectChanges();
+      },
+      error: err => console.error('Error loading categories', err)
+    });
+  }
 
-      this.cdf.detectChanges();
-    },
-    error: err => console.error('Error loading categories', err)
-  });
-}
-  // ✅ Load Sub Categories
   loadSubCategories() {
-  this.masterService.getAllSubCat().subscribe({
-    next: data => {
-      this.cats = data.map((item: any) => ({
-        id: item.id,
-        name: item.name,
-        categoryId: item.category,     // ✅ mapping fixed
-        categoryName: item.category_name       // ✅ mapping fixed
-      }));
+    this.masterService.getAllSubCat().subscribe({
+      next: data => {
+        this.cats = data.map((item: any) => ({
+          id: item.id,
+          name: item.name,
+          categoryId: item.category,
+          categoryName: item.category_name
+        }));
+        this.applyFilter();
+        this.cdf.detectChanges();
+      },
+      error: err => console.error('Error loading SubCategory', err)
+    });
+  }
 
-      this.cdf.detectChanges();
-    },
-    error: err => console.error('Error loading SubCategory', err)
-  });
-}
-  
+  // Search
+  onSearch() {
+    this.currentPage = 1;
+    this.applyFilter();
+  }
 
+  applyFilter() {
+    const term = this.searchTerm.trim().toLowerCase();
+    this.filteredCats = term
+      ? this.cats.filter(c =>
+          c.name.toLowerCase().includes(term) ||
+          (c.categoryName || '').toLowerCase().includes(term)
+        )
+      : this.cats;
 
-  // ✅ Open Add Modal
+    this.totalPages = Math.max(1, Math.ceil(this.filteredCats.length / this.pageSize));
+    if (this.currentPage > this.totalPages) {
+      this.currentPage = this.totalPages;
+    }
+    this.updatePagedCats();
+  }
+
+  // Pagination
+  updatePagedCats() {
+    const start = (this.currentPage - 1) * this.pageSize;
+    this.pagedCats = this.filteredCats.slice(start, start + this.pageSize);
+  }
+
+  goToPage(page: number) {
+    if (page < 1 || page > this.totalPages || page === this.currentPage) return;
+    this.currentPage = page;
+    this.updatePagedCats();
+  }
+
+  get pages(): number[] {
+    return Array.from({ length: this.totalPages }, (_, i) => i + 1);
+  }
+
   openAddModal() {
     this.modalType = 'add';
-    this.subCategory = new SubCategoryModel(); // ✅ FIXED
+    this.subCategory = new SubCategoryModel();
     this.showModal = true;
   }
 
-  // ✅ Open Edit Modal
   openEditModal(cat: any) {
-  this.modalType = 'edit';
+    this.modalType = 'edit';
+    this.subCategory = {
+      id: cat.id,
+      name: cat.name,
+      categoryId: Number(cat.categoryId)
+    };
+    this.showModal = true;
+  }
 
-  this.subCategory = {
-    id: cat.id,
-    name: cat.name,
-    categoryId: Number(cat.categoryId) // ✅ FORCE NUMBER
-  };
-
-  this.showModal = true;
-}
-
-  // ✅ Save
   save() {
-
     if (!this.subCategory.name || !this.subCategory.categoryId) {
       alert('Please fill all fields');
       return;
     }
     const payload = {
-        name: this.subCategory.name,
-        category: this.subCategory.categoryId   // ✅ FIX
-      };
+      name: this.subCategory.name,
+      category: this.subCategory.categoryId
+    };
     if (this.modalType === 'add') {
       this.masterService.addSubCat(payload)
         .subscribe(() => this.loadSubCategories());
-
     } else {
       this.masterService.updateSubCat(
-      this.subCategory.id!,
-      payload   // ✅ send fixed payload
-    ).subscribe(() => this.loadSubCategories());
+        this.subCategory.id!,
+        payload
+      ).subscribe(() => this.loadSubCategories());
     }
 
     this.showModal = false;
   }
 
-  // ✅ Delete
   deleteCat(id: number) {
     if (confirm('Are you sure you want to delete this sub category?')) {
       this.masterService.deleteSubCat(id)
