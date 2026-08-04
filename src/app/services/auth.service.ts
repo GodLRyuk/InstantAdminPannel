@@ -11,6 +11,7 @@ import { StockModel } from '../models/stock.model';
 import { OrderModel } from '../models/order.model';
 import { BannerModel } from '../models/banner.model';
 import { advBannerModel } from '../models/advbanner.model';
+import { RecordRemittancePayload } from '../models/settlements.model';
 
 @Injectable({
   providedIn: 'root'
@@ -28,7 +29,7 @@ export class AuthService {
   refreshToken(refresh: string) {
 
     console.log("auth Print in auth rervice");
-    return this.http.post<any>(`${environment.apiUrl}/accounts/token/refresh/`, {
+    return this.http.post<any>(`${environment.apiUrl}/token/refresh/`, {
       refresh: refresh
     });
   }
@@ -135,6 +136,11 @@ export class MasterService {
       `${this.apiUrl}/products/`, data
     );
   }
+  updateProduct(id: number, data: FormData): Observable<any> {
+  return this.http.put<ProductModel[]>(
+    `${this.apiUrl}/products/${id}/`, data
+  );
+}
   deleteproduct(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/products/${id}/`);
   }
@@ -255,4 +261,18 @@ downloadSalesReport(startDate: string, endDate: string) {
     { responseType: 'blob' }   // ← critical: tells Angular to expect binary data, not JSON
   );
 }
+
+// ── COD SETTLEMENTS ──────────────────────────────
+getPendingSettlements(): Observable<any> {
+  return this.http.get(`${this.apiUrl}/orders/admin/settlements/pending/`);
+}
+
+getDriverPendingOrders(driverId: number): Observable<any> {
+  return this.http.get(`${this.apiUrl}/orders/admin/settlements/driver/${driverId}/`);
+}
+
+recordRemittance(data: RecordRemittancePayload): Observable<any> {
+  return this.http.post(`${this.apiUrl}/orders/admin/settlements/record/`, data);
+}
+
 }

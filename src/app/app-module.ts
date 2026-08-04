@@ -28,6 +28,7 @@ import { CommonModule } from '@angular/common';
 import { BannerComponent } from './pages/banner/banner';
 import { Advbanner } from './pages/advbanner/advbanner';
 import { SalesReport } from './reports/sales-report/sales-report';
+import { Settlements } from './pages/settlements/settlements';
 
 @NgModule({
   declarations: [
@@ -47,6 +48,7 @@ import { SalesReport } from './reports/sales-report/sales-report';
     BannerComponent,
     Advbanner,
     SalesReport,
+    Settlements,
   ],
   imports: [BrowserModule, AppRoutingModule, FormsModule, HttpClientModule, CommonModule],
   providers: [

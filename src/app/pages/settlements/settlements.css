@@ -1,0 +1,66 @@
+.settlements-page {
+  padding: 24px;
+
+  h2 {
+    margin-bottom: 16px;
+  }
+
+  .error {
+    color: #c62828;
+    background: #fdecea;
+    padding: 8px 12px;
+    border-radius: 6px;
+    margin-bottom: 12px;
+  }
+
+  .success {
+    color: #2e7d32;
+    background: #e8f5e9;
+    padding: 8px 12px;
+    border-radius: 6px;
+    margin-bottom: 12px;
+  }
+
+  .driver-table, .order-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+
+    th, td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #e0e0e0;
+      text-align: left;
+    }
+  }
+
+  .drilldown-panel {
+    background: #fafafa;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 20px;
+
+    label {
+      display: block;
+      margin-bottom: 12px;
+
+      input {
+        display: block;
+        margin-top: 4px;
+        padding: 6px 10px;
+        width: 100%;
+        max-width: 300px;
+      }
+    }
+
+    .actions {
+      margin-top: 16px;
+      display: flex;
+      gap: 10px;
+    }
+  }
+
+  button {
+    padding: 8px 16px;
+    cursor: pointer;
+  }
+}

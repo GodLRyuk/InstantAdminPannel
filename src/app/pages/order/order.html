@@ -1,11 +1,12 @@
 <div class="wrap">
   <h1 class="page-title">Orders</h1>
 
-  <div class="tabs">
-    <button class="tab" [class.active]="selectedTab === 'all'" (click)="filterOrders('all')">All</button>
-    <button class="tab" [class.active]="selectedTab === 'confirmed'" (click)="filterOrders('confirmed')">Confirmed</button>
-    <button class="tab" [class.active]="selectedTab === 'pending'" (click)="filterOrders('pending')">Pending</button>
-  </div>
+<div class="tabs">
+  <button class="tab" [class.active]="selectedTab === 'all'" (click)="filterOrders('all')">All</button>
+  <button class="tab" [class.active]="selectedTab === 'confirmed'" (click)="filterOrders('confirmed')">Confirmed</button>
+  <button class="tab" [class.active]="selectedTab === 'packed'" (click)="filterOrders('packed')">Packed</button>
+  <button class="tab" [class.active]="selectedTab === 'pending'" (click)="filterOrders('pending')">Pending</button>
+</div>
 
   <div class="table-wrap">
     <table>
@@ -14,6 +15,7 @@
           <th class="col-items">Items & Batch</th>
           <th class="col-status">Status</th>
           <th class="col-amount">Amount</th>
+          <th class="col-action">Status</th>
           <th class="col-action">Action</th>
         </tr>
       </thead>
@@ -37,25 +39,34 @@
           <td>
             <span class="amount">₹{{ order.total_amount }}</span>
           </td>
+          <td>
+            <span class="status">{{ order.order_status}}</span>
+          </td>
 
           <td>
-            <button class="btn btn-confirm"
-              *ngIf="order.order_status === 'PENDING'"
-              (click)="updateStatus(order, 'CONFIRMED')">
-              Confirm
-            </button>
+  <button class="btn btn-confirm"
+    *ngIf="order.order_status === 'PENDING'"
+    (click)="updateStatus(order, 'CONFIRMED')">
+    Confirm
+  </button>
 
-            <button class="btn btn-ship"
-              *ngIf="order.order_status === 'CONFIRMED'"
-              (click)="updateStatus(order, 'SHIPPED')">
-              Ship
-            </button>
+  <button class="btn btn-pack" disabled
+    *ngIf="order.order_status === 'CONFIRMED'"
+    (click)="updateStatus(order, 'PACKED')">
+    Pack
+  </button>
 
-            <button class="btn" disabled
-              *ngIf="order.order_status === 'SHIPPED' || order.order_status === 'DELIVERED'">
-              {{ order.order_status | titlecase }}
-            </button>
-          </td>
+  <button class="btn btn-ship"
+    *ngIf="order.order_status === 'PACKED'"
+    (click)="updateStatus(order, 'SHIPPED')">
+    Ship
+  </button>
+
+  <button class="btn" disabled
+    *ngIf="order.order_status === 'SHIPPED' || order.order_status === 'DELIVERED'">
+    {{ order.order_status | titlecase }}
+  </button>
+</td>
 
         </tr>
 

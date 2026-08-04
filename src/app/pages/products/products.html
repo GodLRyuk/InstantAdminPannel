@@ -29,7 +29,7 @@
           <td>{{ prod.name }}</td>
           <td>{{ prod.price }}</td>
           <td>
-            <!-- <button class="edit" (click)="openEditModal(prod)">Edit</button> -->
+            <button class="edit" (click)="openEditModal(prod)">Edit</button>
             <button class="delete" (click)="deleteProduct(prod.id)">Delete</button>
           </td>
         </tr>
@@ -59,7 +59,7 @@
     <div class="modal-content">
 
       <div class="modal-header">
-        <h3>Add Product</h3>
+        <h3>{{ modalType === 'add' ? 'Add Product' : 'Edit Product' }}</h3>
         <span class="close-btn" (click)="showModal=false">×</span>
       </div>
 
@@ -99,7 +99,7 @@
           <div class="form-group">
             <label>Category</label>
             <select [(ngModel)]="product.category" (change)="onCategoryChange()">
-              <option *ngFor="let cat of categories" [value]="cat.id">
+              <option *ngFor="let cat of categories" [ngValue]="cat.id">
                 {{ cat.name }}
               </option>
             </select>
@@ -108,7 +108,7 @@
           <div class="form-group">
             <label>Subcategory</label>
             <select [(ngModel)]="product.subcategory">
-              <option *ngFor="let sub of filteredSubcategories" [value]="sub.id">
+              <option *ngFor="let sub of filteredSubcategories" [ngValue]="sub.id">
                 {{ sub.name }}
               </option>
             </select>

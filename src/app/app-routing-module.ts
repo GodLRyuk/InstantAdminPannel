@@ -14,6 +14,7 @@ import { Inventory } from './pages/inventory/inventory';
 import { BannerComponent } from './pages/banner/banner';
 import { Advbanner } from './pages/advbanner/advbanner';
 import { SalesReport } from './reports/sales-report/sales-report';
+import { Settlements } from './pages/settlements/settlements';
 
 const routes: Routes = [
   {path: '', component: LoginComponent},
@@ -32,7 +33,8 @@ const routes: Routes = [
       { path: 'inventory', component: Inventory },
       { path: 'banner', component: BannerComponent },
       { path: 'advbanner', component: Advbanner },
-      { path: 'reports/sales', component: SalesReport }
+      { path: 'reports/sales', component: SalesReport },
+      { path: 'settlements', component: Settlements }
     ]
   },
 ];
