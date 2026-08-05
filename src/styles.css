@@ -1,6 +1,12 @@
 /* You can add global styles to this file, and also import other style files */
 
 @import 'tailwindcss';
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
 .login-page {
   height: 100vh;
   background: linear-gradient(135deg, #4facfe, #00f2fe);
@@ -68,19 +74,21 @@
 .login-btn:hover {
   background: #2b8be6;
 }
-.admin-container{
-  display:flex;
-  font-family:Arial, Helvetica, sans-serif;
+.admin-container {
+  display: flex;
+  font-family: Arial, Helvetica, sans-serif;
   align-items: stretch;
+  min-height: 100vh;
 }
 
-.sidebar{
-  width:250px;
-  background:#6c92d2;
-  color:white;
-  padding:20px;
+.sidebar {
+  width: 250px;
+  background: #6c92d2;
+  color: white;
+  padding: 20px;
   display: flex;
   flex-direction: column;
+  min-height: 100vh;
 }
 
 .logo{
