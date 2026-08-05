@@ -28,6 +28,7 @@ import { CommonModule } from '@angular/common';
 import { BannerComponent } from './pages/banner/banner';
 import { Advbanner } from './pages/advbanner/advbanner';
 import { SalesReport } from './reports/sales-report/sales-report';
+import { BrandProductsReport } from './reports/brand-products-report/brand-products-report';
 import { Settlements } from './pages/settlements/settlements';
 
 @NgModule({
@@ -48,6 +49,7 @@ import { Settlements } from './pages/settlements/settlements';
     BannerComponent,
     Advbanner,
     SalesReport,
+    BrandProductsReport,
     Settlements,
   ],
   imports: [BrowserModule, AppRoutingModule, FormsModule, HttpClientModule, CommonModule],

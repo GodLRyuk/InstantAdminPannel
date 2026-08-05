@@ -1,0 +1,16 @@
+.page-container {
+  padding: 1.5rem;
+}
+
+.report-actions {
+  margin-top: 1rem;
+}
+
+.btn {
+  cursor: pointer;
+}
+
+.status-message {
+  margin-top: 1rem;
+  color: #d32f2f;
+}

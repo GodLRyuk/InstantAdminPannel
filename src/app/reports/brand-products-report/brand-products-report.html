@@ -1,0 +1,12 @@
+<div class="page-container">
+  <h2>Brand Products Report</h2>
+  <p>Export all active products grouped by brand into an Excel file.</p>
+
+  <div class="report-actions">
+    <button class="btn btn-confirm" (click)="exportBrandProducts()" [disabled]="isLoading">
+      {{ isLoading ? 'Preparing...' : 'Download Excel' }}
+    </button>
+  </div>
+
+  <div class="status-message" *ngIf="downloadError">{{ downloadError }}</div>
+</div>

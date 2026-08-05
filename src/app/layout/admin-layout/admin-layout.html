@@ -7,14 +7,23 @@
   </div>
 
 <ul class="menu">
-  <li routerLink="/dashboard">Dashboard</li>
-  <li routerLink="/banner">Banner</li>
-  <li routerLink="/advbanner">Adv Banner</li>
-  <li routerLink="/brand">Brand</li>
-  <li routerLink="/unit">Unit</li>
-  <li routerLink="/category">Category</li>
-  <li routerLink="/subcategory">Sub Category</li>
-  <li routerLink="/settlements">Settlements</li>
+  <li routerLink="/dashboard"><span class="menu-icon">🏠</span>Dashboard</li>
+  <li routerLink="/banner"><span class="menu-icon">🖼️</span>Banner</li>
+  <li routerLink="/advbanner"><span class="menu-icon">⭐</span>Adv Banner</li>
+  <li routerLink="/brand"><span class="menu-icon">🏷️</span>Brand</li>
+  <li routerLink="/unit"><span class="menu-icon">📏</span>Unit</li>
+  <li routerLink="/category"><span class="menu-icon">📂</span>Category</li>
+  <li routerLink="/subcategory"><span class="menu-icon">🗂️</span>Sub Category</li>
+  <li class="submenu-label" (click)="toggleReports()" [class.open]="reportsOpen">
+    <span class="menu-icon">📊</span>
+    <span class="submenu-title">Reports</span>
+    <span class="submenu-arrow">{{ reportsOpen ? '▾' : '▸' }}</span>
+  </li>
+  <ul class="submenu" *ngIf="reportsOpen">
+    <li routerLink="/reports/sales"><span class="menu-icon">💹</span>Sales Report</li>
+    <li routerLink="/reports/brand-products"><span class="menu-icon">📦</span>Brand Products Report</li>
+  </ul>
+  <li routerLink="/settlements"><span class="menu-icon">💰</span>Settlements</li>
 </ul>
 
   </div>

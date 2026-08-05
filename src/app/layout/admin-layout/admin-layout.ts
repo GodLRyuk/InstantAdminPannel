@@ -6,4 +6,10 @@ import { Component } from '@angular/core';
   templateUrl: './admin-layout.html',
   styleUrls: ['./admin-layout.css']
 })
-export class AdminLayoutComponent {}
+export class AdminLayoutComponent {
+  reportsOpen = false;
+
+  toggleReports() {
+    this.reportsOpen = !this.reportsOpen;
+  }
+}

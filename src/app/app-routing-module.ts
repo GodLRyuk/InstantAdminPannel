@@ -14,6 +14,7 @@ import { Inventory } from './pages/inventory/inventory';
 import { BannerComponent } from './pages/banner/banner';
 import { Advbanner } from './pages/advbanner/advbanner';
 import { SalesReport } from './reports/sales-report/sales-report';
+import { BrandProductsReport } from './reports/brand-products-report/brand-products-report';
 import { Settlements } from './pages/settlements/settlements';
 
 const routes: Routes = [
@@ -34,6 +35,7 @@ const routes: Routes = [
       { path: 'banner', component: BannerComponent },
       { path: 'advbanner', component: Advbanner },
       { path: 'reports/sales', component: SalesReport },
+      { path: 'reports/brand-products', component: BrandProductsReport },
       { path: 'settlements', component: Settlements }
     ]
   },

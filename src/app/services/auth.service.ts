@@ -251,16 +251,24 @@ export class MasterService {
   }
 
   getSalesTrend(startDate: string, endDate: string) {
-  return this.http.get(
-    `${this.apiUrl}/reports/sales-trend/?start_date=${startDate}&end_date=${endDate}`
-  );
-}
-downloadSalesReport(startDate: string, endDate: string) {
-  return this.http.get(
-    `${this.apiUrl}/reports/sales-export/?start_date=${startDate}&end_date=${endDate}`,
-    { responseType: 'blob' }   // ← critical: tells Angular to expect binary data, not JSON
-  );
-}
+    return this.http.get(
+      `${this.apiUrl}/reports/sales-trend/?start_date=${startDate}&end_date=${endDate}`
+    );
+  }
+
+  downloadSalesReport(startDate: string, endDate: string) {
+    return this.http.get(
+      `${this.apiUrl}/reports/sales-export/?start_date=${startDate}&end_date=${endDate}`,
+      { responseType: 'blob' }
+    );
+  }
+
+  downloadBrandProductsReport() {
+    return this.http.get(
+      `${this.apiUrl}/reports/brand-products-export/`,
+      { responseType: 'blob' }
+    );
+  }
 
 // ── COD SETTLEMENTS ──────────────────────────────
 getPendingSettlements(): Observable<any> {
