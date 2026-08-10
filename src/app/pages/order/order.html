@@ -1,6 +1,10 @@
 <div class="wrap">
   <h1 class="page-title">Orders</h1>
 
+  <div class="order-notification" *ngIf="notificationVisible">
+    {{ notificationMessage }}
+  </div>
+
 <div class="tabs">
   <button class="tab" [class.active]="selectedTab === 'all'" (click)="filterOrders('all')">All</button>
   <button class="tab" [class.active]="selectedTab === 'confirmed'" (click)="filterOrders('confirmed')">Confirmed</button>
@@ -20,7 +24,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let order of paginatedOrders">
+        <tr *ngFor="let order of paginatedOrders" [class.highlighted-order]="highlightedOrderIds.has(order.id)">
 
           <td>
             <div class="item-row" *ngFor="let item of order.items">

@@ -7,3 +7,54 @@
   background: #f0ad4e;
   color: #fff;
 }
+.order-notification {
+  position: fixed;
+  top: 90px;
+  right: 24px;
+  z-index: 1200;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 12px 18px;
+  border-radius: 999px;
+  background: rgba(28, 36, 58, 0.96);
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.24);
+  animation: notificationFade 0.22s ease-out;
+}
+
+.order-notification::before {
+  content: '🔔';
+  font-size: 1.1rem;
+}
+
+.highlighted-order {
+  animation: highlightPulse 1.2s ease-in-out;
+  background: rgba(255, 229, 100, 0.18);
+  border-left: 4px solid #ffcc00;
+}
+
+@keyframes highlightPulse {
+  0% {
+    background: rgba(255, 229, 100, 0.22);
+  }
+  50% {
+    background: rgba(255, 229, 100, 0.08);
+  }
+  100% {
+    background: rgba(255, 229, 100, 0.22);
+  }
+}
+
+@keyframes notificationFade {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

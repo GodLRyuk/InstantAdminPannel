@@ -1,4 +1,5 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import { interval, Subject, startWith, switchMap, takeUntil } from 'rxjs';
 import { MasterService } from '../../services/auth.service';
 import { OrderModel } from '../../models/order.model';
 
@@ -8,7 +9,7 @@ import { OrderModel } from '../../models/order.model';
   templateUrl: './order.html',
   styleUrls: ['./order.css']
 })
-export class OrdersComponent implements OnInit {
+export class OrdersComponent implements OnInit, OnDestroy {
 
   selectedTab: string = 'all';
 
@@ -18,6 +19,12 @@ export class OrdersComponent implements OnInit {
 
   loading: boolean = false;
   showModal = false;
+
+  notificationMessage = '';
+  notificationVisible = false;
+  lastOrderCount = 0;
+  highlightedOrderIds = new Set<number>();
+  private destroy$ = new Subject<void>();
 
   currentPage = 1;
   itemsPerPage = 10;
@@ -35,7 +42,38 @@ export class OrdersComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.loadOrders();
+    this.masterService.newOrderIds$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((ids: number[]) => {
+        this.highlightedOrderIds = new Set(ids);
+        this.cdf.detectChanges();
+      });
+
+    this.startOrderPolling();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  startOrderPolling() {
+    interval(5000)
+      .pipe(
+        startWith(0),
+        switchMap(() => this.masterService.getOrders()),
+        takeUntil(this.destroy$)
+      )
+      .subscribe({
+        next: (data: OrderModel[]) => {
+          this.orders = data || [];
+
+          this.applyFilter();
+          this.updatePagination();
+          this.cdf.detectChanges();
+        },
+        error: err => console.error(err)
+      });
   }
 
   // ✅ LOAD ORDERS
@@ -111,6 +149,9 @@ export class OrdersComponent implements OnInit {
   // =========================
 
   updateStatus(order: OrderModel, newStatus: string) {
+    this.masterService.stopOrderNotification();
+    this.highlightedOrderIds.delete(order.id);
+    this.cdf.detectChanges();
     this.loading = true;
 
     this.masterService.updateOrderStatus(order.id, { status: newStatus }).subscribe({

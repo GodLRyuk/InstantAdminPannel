@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { BrandModel } from '../models/brand.model';
 import { UnitModel } from '../models/unit.model';
@@ -46,6 +46,10 @@ export class AuthService {
 export class MasterService {
 
   private apiUrl = `${environment.apiUrl}`;
+  private stopOrderNotificationSubject = new Subject<void>();
+  orderNotificationStop$ = this.stopOrderNotificationSubject.asObservable();
+  private newOrderIdsSubject = new Subject<number[]>();
+  newOrderIds$ = this.newOrderIdsSubject.asObservable();
 
   constructor(private http: HttpClient) { }
 
@@ -180,6 +184,14 @@ export class MasterService {
 
   updateOrderStatus(id: number, data: { status: string }): Observable<any> {
     return this.http.post(`${this.apiUrl}/orders/${id}/status/`, data);
+  }
+
+  emitNewOrderIds(orderIds: number[]): void {
+    this.newOrderIdsSubject.next(orderIds);
+  }
+
+  stopOrderNotification(): void {
+    this.stopOrderNotificationSubject.next();
   }
 
   addBanner(data: Partial<BannerModel>, imageFile: File) {
