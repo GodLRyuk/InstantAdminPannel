@@ -5,7 +5,7 @@
   <div *ngIf="errorMsg" class="error">{{ errorMsg }}</div>
   <div *ngIf="successMsg" class="success">{{ successMsg }}</div>
 
-  <table *ngIf="!loading && drivers.length > 0" class="driver-table">
+  <table *ngIf="!loading && drivers.length > 0" class="table-card">
     <thead>
       <tr>
         <th>Driver</th>
@@ -19,7 +19,7 @@
         <td>{{ driver.deliveryassignment__driver__username }}</td>
         <td>{{ driver.order_count }}</td>
         <td>₹{{ driver.total_due }}</td>
-        <td><button (click)="openDriver(driver)">Settle</button></td>
+        <td><button (click)="openDriver(driver)" style="background: green;border-radius: 10px;color:white">Settle</button></td>
       </tr>
     </tbody>
   </table>
@@ -66,10 +66,10 @@
     </label>
 
     <div class="actions">
-      <button (click)="submitSettlement()" [disabled]="submitting">
+      <button (click)="submitSettlement()" [disabled]="submitting" style="background: green;color: white;border-radius: 5px;">
         {{ submitting ? 'Recording...' : 'Record settlement' }}
       </button>
-      <button (click)="closeDriverPanel()">Cancel</button>
+      <button (click)="closeDriverPanel()" style="background: red;color: white;border-radius: 5px;">Cancel</button>
     </div>
   </div>
 </div>

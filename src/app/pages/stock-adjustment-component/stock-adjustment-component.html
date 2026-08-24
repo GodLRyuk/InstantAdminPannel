@@ -1,0 +1,107 @@
+<div class="page-container">
+
+  <!-- HEADER -->
+  <div class="page-header">
+    <h2>Stock Adjustments</h2>
+    <button class="add-btn" (click)="openModal()">+ New Adjustment</button>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-card">
+    <table>
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>Batch</th>
+          <th>Type</th>
+          <th>Reason</th>
+          <th>Qty</th>
+          <th>Notes</th>
+          <th>By</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let a of adjustments">
+          <td>{{ a.product_name }}</td>
+          <td>{{ a.batch_no }}</td>
+          <td>
+            <span class="badge" [ngClass]="a.adjust_type === 'IN' ? 'in' : 'out'">
+              {{ a.adjust_type }}
+            </span>
+          </td>
+          <td>{{ a.reason }}</td>
+          <td>{{ a.quantity }}</td>
+          <td>{{ a.notes || '-' }}</td>
+          <td>{{ a.adjusted_by_name }}</td>
+          <td>{{ a.created_at | date:'short' }}</td>
+        </tr>
+        <tr *ngIf="adjustments.length === 0">
+          <td colspan="8" style="text-align:center; padding: 20px;">No adjustments yet</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- MODAL -->
+  <div class="modal-overlay" *ngIf="showModal">
+    <div class="modal-content">
+
+      <!-- HEADER -->
+      <div class="modal-header">
+        <h3>New Stock Adjustment</h3>
+        <span class="close-btn" (click)="closeModal()">×</span>
+      </div>
+
+      <!-- BODY -->
+      <div class="modal-body">
+
+        <label>Batch</label>
+        <div class="form-group">
+          <select class="form-control" [(ngModel)]="form.batch" name="batch">
+            <option [ngValue]="undefined" disabled>Select batch</option>
+            <option *ngFor="let b of batches" [ngValue]="b.id">
+              {{ b.product_name }} — {{ b.batch_no }} (qty: {{ b.quantity }})
+            </option>
+          </select>
+        </div>
+
+        <label>Type</label>
+        <div class="form-group">
+          <select class="form-control" [(ngModel)]="form.adjust_type" name="adjust_type">
+            <option value="OUT">Stock Out</option>
+            <option value="IN">Stock In</option>
+          </select>
+        </div>
+
+        <label>Reason</label>
+        <div class="form-group">
+          <select class="form-control" [(ngModel)]="form.reason" name="reason">
+            <option *ngFor="let r of reasons" [value]="r.value">{{ r.label }}</option>
+          </select>
+        </div>
+
+        <label>Quantity</label>
+        <input type="number" min="1" [(ngModel)]="form.quantity" name="quantity" />
+
+        <label>Notes</label>
+        <input type="text" [(ngModel)]="form.notes" name="notes" placeholder="Optional" />
+
+      </div>
+
+      <!-- ACTIONS -->
+      <div class="modal-actions">
+        <button class="save-btn" [disabled]="loading" (click)="submit()">
+          {{ loading ? 'Saving...' : 'Save' }}
+        </button>
+
+        <button class="cancel-btn" (click)="closeModal()">
+          Cancel
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+</div>

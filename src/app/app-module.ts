@@ -30,6 +30,9 @@ import { Advbanner } from './pages/advbanner/advbanner';
 import { SalesReport } from './reports/sales-report/sales-report';
 import { BrandProductsReport } from './reports/brand-products-report/brand-products-report';
 import { Settlements } from './pages/settlements/settlements';
+import { Expense } from './pages/expense/expense';
+import { StoreTiming } from './pages/store-timing/store-timing';
+import { StockAdjustmentComponent } from './pages/stock-adjustment-component/stock-adjustment-component';
 
 @NgModule({
   declarations: [
@@ -51,6 +54,9 @@ import { Settlements } from './pages/settlements/settlements';
     SalesReport,
     BrandProductsReport,
     Settlements,
+    Expense,
+    StoreTiming,
+    StockAdjustmentComponent,
   ],
   imports: [BrowserModule, AppRoutingModule, FormsModule, HttpClientModule, CommonModule],
   providers: [

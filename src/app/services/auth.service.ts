@@ -12,6 +12,9 @@ import { OrderModel } from '../models/order.model';
 import { BannerModel } from '../models/banner.model';
 import { advBannerModel } from '../models/advbanner.model';
 import { RecordRemittancePayload } from '../models/settlements.model';
+import { ExpenseCategoryModel, ExpenseModel, ExpenseSummaryModel } from '../models/expense.model';
+import { StoreScheduleModel, StoreStatusModel } from '../models/store-schedule.model';
+import { StockAdjustmentModel } from '../models/stock-adjustment.model';
 
 @Injectable({
   providedIn: 'root'
@@ -294,5 +297,80 @@ getDriverPendingOrders(driverId: number): Observable<any> {
 recordRemittance(data: RecordRemittancePayload): Observable<any> {
   return this.http.post(`${this.apiUrl}/orders/admin/settlements/record/`, data);
 }
+
+
+// ── EXPENSES ──────────────────────────────────────
+getExpenseCategories(): Observable<ExpenseCategoryModel[]> {
+  return this.http.get<ExpenseCategoryModel[]>(`${this.apiUrl}/expenses/categories/`);
+}
+ 
+addExpenseCategory(data: Partial<ExpenseCategoryModel>): Observable<any> {
+  return this.http.post(`${this.apiUrl}/expenses/categories/`, data);
+}
+ 
+updateExpenseCategory(id: number, data: Partial<ExpenseCategoryModel>): Observable<any> {
+  return this.http.put(`${this.apiUrl}/expenses/categories/${id}/`, data);
+}
+ 
+deleteExpenseCategory(id: number): Observable<any> {
+  return this.http.delete(`${this.apiUrl}/expenses/categories/${id}/`);
+}
+ 
+getExpenses(params?: { category_id?: number; payment_method?: string; start_date?: string; end_date?: string }): Observable<ExpenseModel[]> {
+  let query = '';
+  if (params) {
+    const parts = Object.entries(params)
+      .filter(([_, v]) => v !== undefined && v !== null && v !== '')
+      .map(([k, v]) => `${k}=${encodeURIComponent(String(v))}`);
+    if (parts.length) query = '?' + parts.join('&');
+  }
+  return this.http.get<ExpenseModel[]>(`${this.apiUrl}/expenses/records/${query}`);
+}
+ 
+addExpense(data: Partial<ExpenseModel>): Observable<any> {
+  return this.http.post(`${this.apiUrl}/expenses/records/`, data);
+}
+ 
+updateExpense(id: number, data: Partial<ExpenseModel>): Observable<any> {
+  return this.http.put(`${this.apiUrl}/expenses/records/${id}/`, data);
+}
+ 
+deleteExpense(id: number): Observable<any> {
+  return this.http.delete(`${this.apiUrl}/expenses/records/${id}/`);
+}
+ 
+getExpenseSummary(params?: { start_date?: string; end_date?: string }): Observable<ExpenseSummaryModel> {
+  let query = '';
+  if (params) {
+    const parts = Object.entries(params)
+      .filter(([_, v]) => v !== undefined && v !== null && v !== '')
+      .map(([k, v]) => `${k}=${encodeURIComponent(String(v))}`);
+    if (parts.length) query = '?' + parts.join('&');
+  }
+  return this.http.get<ExpenseSummaryModel>(`${this.apiUrl}/expenses/records/summary/${query}`);
+}
+ 
+// ── STORE TIMING ──────────────────────────────────
+getStoreStatus(): Observable<StoreStatusModel> {
+  return this.http.get<StoreStatusModel>(`${this.apiUrl}/store/status/`);
+}
+ 
+getStoreSchedule(): Observable<StoreScheduleModel> {
+  return this.http.get<StoreScheduleModel>(`${this.apiUrl}/store/schedule/`);
+}
+ 
+updateStoreSchedule(data: Partial<StoreScheduleModel>): Observable<any> {
+  return this.http.patch(`${this.apiUrl}/store/schedule/`, data);
+}
+
+getStockAdjustments(batchId?: number): Observable<StockAdjustmentModel[]> {
+  const query = batchId ? `?batch=${batchId}` : '';
+  return this.http.get<StockAdjustmentModel[]>(`${this.apiUrl}/stock/adjustments/${query}`);
+}
+
+addStockAdjustment(data: Partial<StockAdjustmentModel>): Observable<any> {
+  return this.http.post(`${this.apiUrl}/stock/adjustments/`, data);
+}
+ 
 
 }

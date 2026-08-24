@@ -1,0 +1,183 @@
+<div class="page-container">
+
+  <div class="page-header">
+    <h2>Expense Management</h2>
+    <div>
+      <button class="add-btn" (click)="openAddCategoryModal()" style="margin-right: 8px;">+ Add Category</button>
+      <button class="add-btn" (click)="openAddModal()">+ Add Expense</button>
+    </div>
+  </div>
+
+  <!-- Summary -->
+  <div class="table-card" *ngIf="summary" style="margin-bottom: 16px; padding: 16px;">
+    <strong>Total Expenses: ₹{{ summary.total_expenses }}</strong> ({{ summary.count }} records)
+    <div *ngIf="summary.by_category.length" style="margin-top: 8px;">
+      <span *ngFor="let row of summary.by_category" style="margin-right: 16px;">
+        {{ row.category_name }}: ₹{{ row.total }}
+      </span>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="search-box" style="display:flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+    <input
+      type="text"
+      placeholder="Search title / reference..."
+      [(ngModel)]="searchTerm"
+      (ngModelChange)="onSearch()" />
+
+    <select class="custom-select" [(ngModel)]="filterCategoryId" (ngModelChange)="onFilterChange()" style="width: 15%;">
+      <option [ngValue]="null">All Categories</option>
+      <option *ngFor="let cat of categories" [ngValue]="cat.id">{{ cat.name }}</option>
+    </select>
+
+    <input type="date" [(ngModel)]="filterStartDate" (ngModelChange)="onFilterChange()" />
+    <input type="date" [(ngModel)]="filterEndDate" (ngModelChange)="onFilterChange()" />
+
+    <button class="cancel-btn" (click)="clearFilters()">Clear</button>
+  </div>
+
+  <div class="table-card">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Date</th>
+          <th>Category</th>
+          <th>Title</th>
+          <th>Amount</th>
+          <th>Payment Method</th>
+          <th>Reference No.</th>
+          <th>Added By</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let exp of pagedExpenses; let i=index">
+          <td>{{ (currentPage - 1) * pageSize + i + 1 }}</td>
+          <td>{{ exp.expense_date }}</td>
+          <td>{{ exp.category_name }}</td>
+          <td>{{ exp.title }}</td>
+          <td>₹{{ exp.amount }}</td>
+          <td>{{ exp.payment_method }}</td>
+          <td>{{ exp.reference_no || '-' }}</td>
+          <td>{{ exp.added_by_name || '-' }}</td>
+          <td>
+            <button class="edit" (click)="openEditModal(exp)">Edit</button>
+            <button class="delete" (click)="deleteExpense(exp.id)">Delete</button>
+          </td>
+        </tr>
+        <tr *ngIf="pagedExpenses.length === 0">
+          <td colspan="9" style="text-align:center; padding: 20px;">No expenses found</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Pagination -->
+    <div class="pagination" *ngIf="totalPages > 1">
+      <button (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1">Prev</button>
+
+      <button
+        *ngFor="let p of pages"
+        (click)="goToPage(p)"
+        [class.active]="p === currentPage">
+        {{ p }}
+      </button>
+
+      <button (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages">Next</button>
+    </div>
+  </div>
+
+  <!-- Expense Modal -->
+  <div class="modal-overlay" *ngIf="showModal">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h3>{{ modalType === 'add' ? 'Add Expense' : 'Edit Expense' }}</h3>
+        <span class="close-btn" (click)="showModal=false">×</span>
+      </div>
+
+      <div class="modal-body">
+        <label>Category</label>
+        <select class="custom-select" [(ngModel)]="form.category">
+          <option [ngValue]="undefined" disabled>Select category</option>
+          <option *ngFor="let cat of categories" [ngValue]="cat.id">{{ cat.name }}</option>
+        </select>
+
+        <label>Title</label>
+        <input type="text" [(ngModel)]="form.title" placeholder="e.g. August Salary - Rahul" />
+
+        <label>Amount</label>
+        <input type="number" [(ngModel)]="form.amount" placeholder="Enter amount" />
+
+        <label>Payment Method</label>
+        <select class="custom-select" [(ngModel)]="form.payment_method">
+          <option *ngFor="let pm of paymentMethods" [value]="pm">{{ pm }}</option>
+        </select>
+
+        <label>Reference No. (optional)</label>
+        <input type="text" [(ngModel)]="form.reference_no" placeholder="Transaction / UTR ref" />
+
+        <label>Date</label>
+        <input type="date" [(ngModel)]="form.expense_date" />
+
+        <label>Remarks (optional)</label>
+        <textarea [(ngModel)]="form.remarks" placeholder="Any notes"></textarea>
+      </div>
+
+      <div class="modal-actions">
+        <button class="save-btn" (click)="save()">
+          {{ modalType === 'add' ? 'Add Expense' : 'Update Expense' }}
+        </button>
+
+        <button class="cancel-btn" (click)="showModal=false">
+          Cancel
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Category Modal -->
+  <div class="modal-overlay" *ngIf="showCategoryModal">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h3>{{ categoryModalType === 'add' ? 'Add Category' : 'Edit Category' }}</h3>
+        <span class="close-btn" (click)="showCategoryModal=false">×</span>
+      </div>
+
+      <div class="modal-body">
+        <label>Category Name</label>
+        <input type="text" [(ngModel)]="categoryName" placeholder="e.g. Salary" />
+      </div>
+
+      <div class="modal-actions">
+        <button class="save-btn" (click)="saveCategory()">
+          {{ categoryModalType === 'add' ? 'Add Category' : 'Update Category' }}
+        </button>
+
+        <button class="cancel-btn" (click)="showCategoryModal=false">
+          Cancel
+        </button>
+      </div>
+
+      <div style="margin-top: 16px;" *ngIf="categories.length">
+        <strong>Existing Categories</strong>
+        <table style="margin-top: 8px;">
+          <tbody>
+            <tr *ngFor="let cat of categories">
+              <td>{{ cat.name }}</td>
+              <td>
+                <button class="edit" (click)="openEditCategoryModal(cat)">Edit</button>
+                <button class="delete" (click)="deleteCategory(cat.id)">Delete</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+</div>

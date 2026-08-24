@@ -16,6 +16,9 @@ import { Advbanner } from './pages/advbanner/advbanner';
 import { SalesReport } from './reports/sales-report/sales-report';
 import { BrandProductsReport } from './reports/brand-products-report/brand-products-report';
 import { Settlements } from './pages/settlements/settlements';
+import { StoreTiming } from './pages/store-timing/store-timing';
+import { Expense } from './pages/expense/expense';
+import { StockAdjustmentComponent } from './pages/stock-adjustment-component/stock-adjustment-component';
 
 const routes: Routes = [
   {path: '', component: LoginComponent},
@@ -36,7 +39,10 @@ const routes: Routes = [
       { path: 'advbanner', component: Advbanner },
       { path: 'reports/sales', component: SalesReport },
       { path: 'reports/brand-products', component: BrandProductsReport },
-      { path: 'settlements', component: Settlements }
+      { path: 'settlements', component: Settlements },
+      { path: 'expenses', component: Expense },
+      { path: 'store-timing', component: StoreTiming },
+      { path: 'stock-adjustments', component: StockAdjustmentComponent }
     ]
   },
 ];

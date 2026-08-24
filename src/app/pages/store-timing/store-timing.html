@@ -1,0 +1,48 @@
+<div class="page-container">
+
+  <div class="page-header">
+    <h2>Store Timing</h2>
+  </div>
+
+  <div class="table-card" style="padding: 20px; max-width: 480px;">
+
+    <div style="margin-bottom: 12px;">
+      <strong>Current status: </strong>
+      <span *ngIf="isOpenNow === true" style="color: #4CAF50; font-weight: bold;">OPEN</span>
+      <span *ngIf="isOpenNow === false" style="color: #e53935; font-weight: bold;">CLOSED</span>
+      <span *ngIf="isOpenNow === null">Loading...</span>
+    </div>
+
+    <div *ngIf="!loading">
+      <label>Opening Time</label>
+      <input type="time" [(ngModel)]="schedule.opens_at" />
+
+      <label>Closing Time</label>
+      <input type="time" [(ngModel)]="schedule.closes_at" />
+      <p style="font-size: 12px; color: #888; margin-top: 4px;">
+        If closing time is earlier than opening time, it's treated as closing after midnight
+        (e.g. opens 05:30, closes 00:00).
+      </p>
+
+      <div class="toggle-group">
+        <span>Force Closed (manual override)</span>
+        <label class="switch">
+          <input type="checkbox" [(ngModel)]="schedule.is_force_closed" />
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="modal-actions" style="margin-top: 20px;">
+        <button class="save-btn" (click)="save()" [disabled]="saving">
+          {{ saving ? 'Saving...' : 'Save' }}
+        </button>
+      </div>
+
+      <p *ngIf="saveMessage" style="margin-top: 10px;">{{ saveMessage }}</p>
+    </div>
+
+    <div *ngIf="loading">Loading schedule...</div>
+
+  </div>
+
+</div>
