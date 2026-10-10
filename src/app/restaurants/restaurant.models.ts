@@ -1,0 +1,111 @@
+export type RestaurantStatus = 'pending' | 'approved' | 'rejected' | 'suspended';
+
+export interface Cuisine {
+  id: number;
+  name: string;
+}
+
+export interface AdminRestaurant {
+  id: number;
+  owner: number;
+  owner_name: string;
+  name: string;
+  description: string;
+  cuisines: number[];
+  phone: string;
+  email: string;
+  address_line: string;
+  city: string;
+  pincode: string;
+  latitude: string | null;
+  longitude: string | null;
+  fssai_number: string;
+  logo: string | null;
+  cover_image: string | null;
+  opens_at: string;
+  closes_at: string;
+  is_accepting_orders: boolean;
+  is_open_now: boolean;
+  avg_prep_minutes: number;
+  delivery_fee: string;
+  delivery_radius_km: string;
+  min_order_amount: string;
+  offer_percent: number | null;
+  offer_max_discount: number;
+  offer_min_order: string;
+  offer_code: string;
+  rating: string;
+  rating_count: number;
+  status: RestaurantStatus;
+  rejection_reason: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export type OrderStatus =
+  | 'awaiting_payment'
+  | 'placed'
+  | 'accepted'
+  | 'preparing'
+  | 'ready'
+  | 'out_for_delivery'
+  | 'delivered'
+  | 'rejected'
+  | 'cancelled';
+
+export interface RestaurantOrderItem {
+  id: number;
+  name: string;
+  is_veg: boolean;
+  unit_price: string;
+  quantity: number;
+  line_total: string;
+}
+
+export interface RestaurantOrder {
+  id: number;
+  order_number: string;
+  status: OrderStatus;
+  status_label: string;
+  payment_method: 'online' | 'cod';
+  payment_method_label: string;
+  payment_status: string;
+  payment_status_label: string;
+  restaurant: { id: number; name: string; phone: string; image: string | null };
+  items: RestaurantOrderItem[];
+  item_total: string;
+  discount: string;
+  delivery_fee: string;
+  packaging_charge: string;
+  gst: string;
+  total_amount: string;
+  offer_code: string;
+  customer_name: string;
+  customer_phone: string;
+  delivery_address: Record<string, unknown>;
+  notes: string;
+  rejection_reason: string;
+  created_at: string;
+  updated_at: string;
+}
+
+/** Steps the Instant team can take. Cancel is added separately for non-final orders. */
+export const NEXT_STATUSES: Record<string, OrderStatus[]> = {
+  placed: ['accepted', 'rejected'],
+  accepted: ['preparing'],
+  preparing: ['ready'],
+  ready: ['out_for_delivery'],
+  out_for_delivery: ['delivered'],
+};
+
+export const FINAL_STATUSES: OrderStatus[] = ['delivered', 'rejected', 'cancelled'];
+
+export const STATUS_BUTTON_LABEL: Record<string, string> = {
+  accepted: 'Accept',
+  rejected: 'Reject',
+  preparing: 'Start preparing',
+  ready: 'Mark ready',
+  out_for_delivery: 'Out for delivery',
+  delivered: 'Delivered',
+  cancelled: 'Cancel order',
+};
