@@ -33,6 +33,7 @@ import { Settlements } from './pages/settlements/settlements';
 import { Expense } from './pages/expense/expense';
 import { StoreTiming } from './pages/store-timing/store-timing';
 import { StockAdjustmentComponent } from './pages/stock-adjustment-component/stock-adjustment-component';
+import { Users } from './pages/users/users';
 
 @NgModule({
   declarations: [
@@ -57,6 +58,7 @@ import { StockAdjustmentComponent } from './pages/stock-adjustment-component/sto
     Expense,
     StoreTiming,
     StockAdjustmentComponent,
+    Users,
   ],
   imports: [BrowserModule, AppRoutingModule, FormsModule, HttpClientModule, CommonModule],
   providers: [

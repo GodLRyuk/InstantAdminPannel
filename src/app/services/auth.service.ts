@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, Subject } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { BrandModel } from '../models/brand.model';
@@ -15,6 +15,7 @@ import { RecordRemittancePayload } from '../models/settlements.model';
 import { ExpenseCategoryModel, ExpenseModel, ExpenseSummaryModel } from '../models/expense.model';
 import { StoreScheduleModel, StoreStatusModel } from '../models/store-schedule.model';
 import { StockAdjustmentModel } from '../models/stock-adjustment.model';
+import { AdminUser, UserRole } from '../models/user.model';
 
 @Injectable({
   providedIn: 'root'
@@ -55,6 +56,14 @@ export class MasterService {
   newOrderIds$ = this.newOrderIdsSubject.asObservable();
 
   constructor(private http: HttpClient) { }
+
+  getUsers(role?: UserRole): Observable<AdminUser[] | { results: AdminUser[] }> {
+    const params = role ? new HttpParams().set('role', role) : new HttpParams();
+    return this.http.get<AdminUser[] | { results: AdminUser[] }>(
+      `${this.apiUrl}/accounts/users/`,
+      { params }
+    );
+  }
 
   // ✅ Return Brand[] instead of BrandComponent[]
   getAllBrands(): Observable<BrandModel[]> {

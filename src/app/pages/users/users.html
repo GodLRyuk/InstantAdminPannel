@@ -1,0 +1,61 @@
+<section class="users-page">
+  <header class="page-header">
+    <div>
+      <h1>Users</h1>
+      <p>View customers, admins, delivery users, and pickup users.</p>
+    </div>
+    <label class="role-filter">
+      <span>Filter by role</span>
+      <select [value]="selectedRole()" (change)="onRoleChange($event)">
+        @for (role of roles; track role.value) {
+          <option [value]="role.value">{{ role.label }}</option>
+        }
+      </select>
+    </label>
+  </header>
+
+  @if (error()) {
+    <p class="message error" role="alert">{{ error() }}</p>
+  }
+
+  @if (loading()) {
+    <p class="message" role="status">Loading users...</p>
+  } @else {
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Username</th>
+            <th scope="col">Email</th>
+            <th scope="col">Phone</th>
+            <th scope="col">Role</th>
+            <th scope="col">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (user of users(); track user.id) {
+            <tr>
+              <td>{{ displayName(user) }}</td>
+              <td>{{ user.username }}</td>
+              <td>{{ user.email || '—' }}</td>
+              <td>{{ user.phone || user.phone_number || '—' }}</td>
+              <td>{{ user.role }}</td>
+              <td>
+                @if (user.is_active === undefined) {
+                  —
+                } @else {
+                  {{ user.is_active ? 'Active' : 'Inactive' }}
+                }
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td class="empty" colspan="6">No users found for this role.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>
