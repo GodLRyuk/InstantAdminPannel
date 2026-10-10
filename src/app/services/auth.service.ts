@@ -66,7 +66,7 @@ export class MasterService {
   }
 
   createUser(data: CreateUserPayload): Observable<AdminUser> {
-    return this.http.post<AdminUser>(`${this.apiUrl}/accounts/users/`, data);
+    return this.http.post<AdminUser>(`${this.apiUrl}/accounts/register/`, data);
   }
 
   // ✅ Return Brand[] instead of BrandComponent[]
