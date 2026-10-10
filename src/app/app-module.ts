@@ -6,7 +6,7 @@ import {
   provideHttpClient,
   withInterceptorsFromDi,
 } from '@angular/common/http';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { AppRoutingModule } from './app-routing-module';
 import { App } from './app';
@@ -60,7 +60,7 @@ import { Users } from './pages/users/users';
     StockAdjustmentComponent,
     Users,
   ],
-  imports: [BrowserModule, AppRoutingModule, FormsModule, HttpClientModule, CommonModule],
+  imports: [BrowserModule, AppRoutingModule, FormsModule, ReactiveFormsModule, HttpClientModule, CommonModule],
   providers: [
     provideBrowserGlobalErrorListeners(),
     {

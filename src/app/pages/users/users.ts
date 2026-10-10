@@ -1,5 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
-import { AdminUser, UserRole } from '../../models/user.model';
+import { HttpErrorResponse } from '@angular/common/http';
+import { FormBuilder, Validators } from '@angular/forms';
+import { AdminUser, CreateUserPayload, UserRole } from '../../models/user.model';
 import { MasterService } from '../../services/auth.service';
 
 @Component({
@@ -11,6 +13,7 @@ import { MasterService } from '../../services/auth.service';
 })
 export class Users implements OnInit {
   private readonly masterService = inject(MasterService);
+  private readonly formBuilder = inject(FormBuilder);
 
   readonly roles: { value: UserRole | ''; label: string }[] = [
     { value: '', label: 'All roles' },
@@ -18,11 +21,27 @@ export class Users implements OnInit {
     { value: 'ADMIN', label: 'Admins' },
     { value: 'DELIVERY', label: 'Delivery' },
     { value: 'PICKUP', label: 'Pickup' },
+    { value: 'RESTAURANT', label: 'Restaurants' },
   ];
+  readonly createRoles = this.roles.filter((role) => role.value !== '');
+  readonly userForm = this.formBuilder.nonNullable.group({
+    username: ['', Validators.required],
+    first_name: ['', Validators.required],
+    last_name: ['', Validators.required],
+    email: ['', [Validators.required, Validators.email]],
+    password: ['', [Validators.required, Validators.minLength(6)]],
+    phone: ['', Validators.required],
+    address: ['', Validators.required],
+    role: ['RESTAURANT' as UserRole, Validators.required],
+  });
   readonly users = signal<AdminUser[]>([]);
   readonly selectedRole = signal<UserRole | ''>('');
   readonly loading = signal(false);
   readonly error = signal('');
+  readonly createError = signal('');
+  readonly createSuccess = signal('');
+  readonly creating = signal(false);
+  readonly addFormOpen = signal(false);
 
   ngOnInit(): void {
     this.loadUsers();
@@ -44,6 +63,63 @@ export class Users implements OnInit {
         this.loading.set(false);
       },
     });
+  }
+
+  toggleAddForm(): void {
+    this.addFormOpen.update((open) => !open);
+    this.createError.set('');
+    this.createSuccess.set('');
+  }
+
+  createUser(): void {
+    if (this.userForm.invalid || this.creating()) {
+      this.userForm.markAllAsTouched();
+      return;
+    }
+
+    this.creating.set(true);
+    this.createError.set('');
+    this.createSuccess.set('');
+    const payload: CreateUserPayload = this.userForm.getRawValue();
+    this.masterService.createUser(payload).subscribe({
+      next: () => {
+        this.createSuccess.set('User created successfully.');
+        this.userForm.reset({
+          username: '',
+          first_name: '',
+          last_name: '',
+          email: '',
+          password: '',
+          phone: '',
+          address: '',
+          role: 'RESTAURANT',
+        });
+        this.creating.set(false);
+        this.loadUsers();
+      },
+      error: (error: unknown) => {
+        console.error('Failed to create user', error);
+        this.createError.set(this.createUserError(error));
+        this.creating.set(false);
+      },
+    });
+  }
+
+  private createUserError(error: unknown): string {
+    if (error instanceof HttpErrorResponse) {
+      if (error.error && typeof error.error === 'object') {
+        const details = Object.entries(error.error as Record<string, unknown>)
+          .map(([field, value]) => {
+            const message = Array.isArray(value) ? value.join(' ') : String(value);
+            return `${field}: ${message}`;
+          })
+          .join(' ');
+        if (details) return details;
+      }
+      if (error.status === 0) return 'Cannot reach the server.';
+      return error.message;
+    }
+    return 'Unable to create user. Check the details and try again.';
   }
 
   setRole(role: UserRole | ''): void {

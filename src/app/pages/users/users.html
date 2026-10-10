@@ -4,15 +4,71 @@
       <h1>Users</h1>
       <p>View customers, admins, delivery users, and pickup users.</p>
     </div>
-    <label class="role-filter">
-      <span>Filter by role</span>
-      <select [value]="selectedRole()" (change)="onRoleChange($event)">
-        @for (role of roles; track role.value) {
-          <option [value]="role.value">{{ role.label }}</option>
-        }
-      </select>
-    </label>
+    <div class="header-actions">
+      <label class="role-filter">
+        <span>Filter by role</span>
+        <select [value]="selectedRole()" (change)="onRoleChange($event)">
+          @for (role of roles; track role.value) {
+            <option [value]="role.value">{{ role.label }}</option>
+          }
+        </select>
+      </label>
+      <button class="primary-button" type="button" (click)="toggleAddForm()">
+        {{ addFormOpen() ? 'Close form' : 'Add user' }}
+      </button>
+    </div>
   </header>
+
+  @if (createSuccess()) {
+    <p class="message success" role="status">{{ createSuccess() }}</p>
+  }
+
+  @if (addFormOpen()) {
+    <form class="user-form" [formGroup]="userForm" (ngSubmit)="createUser()">
+      <h2>Add user</h2>
+      @if (createError()) {
+        <p class="message error" role="alert">{{ createError() }}</p>
+      }
+      @if (userForm.invalid && userForm.touched) {
+        <p class="message error" role="alert">Complete all required fields and enter a valid email address.</p>
+      }
+      <div class="form-grid">
+        <label>Username *
+          <input formControlName="username" autocomplete="username" />
+        </label>
+        <label>First name *
+          <input formControlName="first_name" autocomplete="given-name" />
+        </label>
+        <label>Last name *
+          <input formControlName="last_name" autocomplete="family-name" />
+        </label>
+        <label>Email *
+          <input type="email" formControlName="email" autocomplete="email" />
+        </label>
+        <label>Password *
+          <input type="password" formControlName="password" autocomplete="new-password" />
+        </label>
+        <label>Phone *
+          <input type="tel" formControlName="phone" autocomplete="tel" />
+        </label>
+        <label>Address *
+          <input formControlName="address" autocomplete="street-address" />
+        </label>
+        <label>Role *
+          <select formControlName="role">
+            @for (role of createRoles; track role.value) {
+              <option [value]="role.value">{{ role.label }}</option>
+            }
+          </select>
+        </label>
+      </div>
+      <div class="form-actions">
+        <button class="primary-button" type="submit" [disabled]="creating()">
+          {{ creating() ? 'Creating...' : 'Create user' }}
+        </button>
+      </div>
+    </form>
+  }
 
   @if (error()) {
     <p class="message error" role="alert">{{ error() }}</p>
