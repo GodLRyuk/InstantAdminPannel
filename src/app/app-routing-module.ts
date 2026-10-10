@@ -44,7 +44,12 @@ const routes: Routes = [
       { path: 'settlements', component: Settlements },
       { path: 'expenses', component: Expense },
       { path: 'store-timing', component: StoreTiming },
-      { path: 'stock-adjustments', component: StockAdjustmentComponent }
+      { path: 'stock-adjustments', component: StockAdjustmentComponent },
+      {
+        path: 'restaurants',
+        loadChildren: () =>
+          import('./restaurants/restaurants.routes').then((m) => m.RESTAURANT_ROUTES),
+      },
     ]
   },
 ];
