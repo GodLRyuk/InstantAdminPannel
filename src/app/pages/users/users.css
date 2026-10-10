@@ -1,0 +1,74 @@
+.users-page {
+  padding: 1rem;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+h1 {
+  margin: 0;
+}
+
+.page-header p {
+  margin: 0.35rem 0 0;
+  color: #64748b;
+}
+
+.role-filter {
+  display: grid;
+  gap: 0.35rem;
+  min-width: 11rem;
+}
+
+select {
+  padding: 0.55rem 0.7rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.4rem;
+  background: #fff;
+}
+
+.table-wrap {
+  overflow-x: auto;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+th,
+td {
+  padding: 0.8rem 1rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+th {
+  background: #f8fafc;
+}
+
+.empty,
+.message {
+  padding: 1.25rem;
+  color: #64748b;
+  text-align: center;
+}
+
+.error {
+  color: #b91c1c;
+}
+
+@media (max-width: 640px) {
+  .page-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}

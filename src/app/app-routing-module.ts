@@ -19,6 +19,7 @@ import { Settlements } from './pages/settlements/settlements';
 import { StoreTiming } from './pages/store-timing/store-timing';
 import { Expense } from './pages/expense/expense';
 import { StockAdjustmentComponent } from './pages/stock-adjustment-component/stock-adjustment-component';
+import { Users } from './pages/users/users';
 
 const routes: Routes = [
   {path: '', component: LoginComponent},
@@ -32,6 +33,7 @@ const routes: Routes = [
       { path: 'category', component: Category },
       { path: 'subcategory', component: Subcategory },
       { path: 'orders', component: OrdersComponent },
+      { path: 'users', component: Users },
       { path: 'products', component: Products },
       { path: 'stock', component: Stock },
       { path: 'inventory', component: Inventory },

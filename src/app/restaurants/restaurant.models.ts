@@ -5,6 +5,14 @@ export interface Cuisine {
   name: string;
 }
 
+export interface MenuCategory {
+  id: number;
+  restaurant: number;
+  restaurant_name: string;
+  name: string;
+  sort_order: number;
+}
+
 export interface AdminRestaurant {
   id: number;
   owner: number;

@@ -2,7 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { AdminRestaurant, Cuisine, RestaurantOrder } from './restaurant.models';
+import { AdminRestaurant, Cuisine, MenuCategory, RestaurantOrder } from './restaurant.models';
 
 /**
  * Calls the Django restaurants API. The JWT header is added by your existing
@@ -54,7 +54,20 @@ export class RestaurantAdminService {
   }
 
   cuisines(): Observable<Cuisine[]> {
-    return this.http.get<Cuisine[]>(`${this.base}/cuisines/`);
+    return this.http.get<Cuisine[]>(`${this.base}/admin/cuisines/`);
+  }
+
+  createCuisine(name: string): Observable<Cuisine> {
+    return this.http.post<Cuisine>(`${this.base}/admin/cuisines/`, { name });
+  }
+
+  menuCategories(restaurantId: number): Observable<MenuCategory[]> {
+    const params = new HttpParams().set('restaurant', restaurantId);
+    return this.http.get<MenuCategory[]>(`${this.base}/admin/menu-categories/`, { params });
+  }
+
+  createMenuCategory(data: Pick<MenuCategory, 'restaurant' | 'name' | 'sort_order'>): Observable<MenuCategory> {
+    return this.http.post<MenuCategory>(`${this.base}/admin/menu-categories/`, data);
   }
 
   // ---------------- orders
