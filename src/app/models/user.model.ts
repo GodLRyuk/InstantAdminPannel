@@ -1,4 +1,15 @@
-export type UserRole = 'CUSTOMER' | 'ADMIN' | 'DELIVERY' | 'PICKUP';
+export type UserRole = 'CUSTOMER' | 'ADMIN' | 'DELIVERY' | 'PICKUP' | 'RESTAURANT';
+
+export interface CreateUserPayload {
+  username: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  password: string;
+  phone: string;
+  address: string;
+  role: UserRole;
+}
 
 export interface AdminUser {
   id: number;

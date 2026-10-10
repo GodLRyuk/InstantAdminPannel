@@ -15,7 +15,7 @@ import { RecordRemittancePayload } from '../models/settlements.model';
 import { ExpenseCategoryModel, ExpenseModel, ExpenseSummaryModel } from '../models/expense.model';
 import { StoreScheduleModel, StoreStatusModel } from '../models/store-schedule.model';
 import { StockAdjustmentModel } from '../models/stock-adjustment.model';
-import { AdminUser, UserRole } from '../models/user.model';
+import { AdminUser, CreateUserPayload, UserRole } from '../models/user.model';
 
 @Injectable({
   providedIn: 'root'
@@ -63,6 +63,10 @@ export class MasterService {
       `${this.apiUrl}/accounts/users/`,
       { params }
     );
+  }
+
+  createUser(data: CreateUserPayload): Observable<AdminUser> {
+    return this.http.post<AdminUser>(`${this.apiUrl}/accounts/users/`, data);
   }
 
   // ✅ Return Brand[] instead of BrandComponent[]
