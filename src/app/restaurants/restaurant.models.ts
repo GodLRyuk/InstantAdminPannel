@@ -25,6 +25,7 @@ export interface PartnerMenuItem {
   is_available: boolean;
   packaging_charge: string;
   sort_order: number;
+  image?: string | null;
   photo?: string | null;
 }
 
