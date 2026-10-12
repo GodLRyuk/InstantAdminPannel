@@ -81,6 +81,18 @@ export class RestaurantAdminService {
     return this.http.get<MenuCategory[] | { results: MenuCategory[] }>(`${this.base}/partner/categories/`);
   }
 
+  createPartnerCategory(data: Pick<MenuCategory, 'name' | 'sort_order'>): Observable<MenuCategory> {
+    return this.http.post<MenuCategory>(`${this.base}/partner/categories/`, data);
+  }
+
+  updatePartnerCategory(id: number, data: Partial<Pick<MenuCategory, 'name' | 'sort_order'>>): Observable<MenuCategory> {
+    return this.http.patch<MenuCategory>(`${this.base}/partner/categories/${id}/`, data);
+  }
+
+  deletePartnerCategory(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/partner/categories/${id}/`);
+  }
+
   menuItems(): Observable<PartnerMenuItem[] | { results: PartnerMenuItem[] }> {
     return this.http.get<PartnerMenuItem[] | { results: PartnerMenuItem[] }>(`${this.base}/partner/items/`);
   }

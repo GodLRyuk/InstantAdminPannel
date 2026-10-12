@@ -85,6 +85,21 @@ import { ADMIN_CSS, errorText } from './restaurants-shared';
               {{ savingCategory() ? 'Adding...' : 'Add category' }}
             </button>
           </form>
+        } @else {
+          <form class="bar" [formGroup]="partnerCategoryForm" (ngSubmit)="savePartnerCategory()">
+            <label class="f">Category name *
+              <input formControlName="name" placeholder="e.g. Beverages" />
+            </label>
+            <label class="f">Sort order
+              <input type="number" min="0" formControlName="sort_order" />
+            </label>
+            <button class="btn" type="submit" [disabled]="savingCategory() || partnerCategoryForm.invalid">
+              {{ savingCategory() ? 'Saving...' : editingCategoryId() ? 'Save category' : 'Add category' }}
+            </button>
+            @if (editingCategoryId()) {
+              <button class="btn grey" type="button" (click)="cancelPartnerCategoryEdit()">Cancel</button>
+            }
+          </form>
         }
 
         @if (loadingCategories()) {
@@ -95,7 +110,9 @@ import { ADMIN_CSS, errorText } from './restaurants-shared';
               <thead>
                 <tr>
                   <th scope="col">Category</th>
-                  @if (!isRestaurantOwner) {
+                  @if (isRestaurantOwner) {
+                    <th scope="col">Actions</th>
+                  } @else {
                     <th scope="col">Restaurant</th>
                   }
                   <th scope="col">Sort order</th>
@@ -105,14 +122,29 @@ import { ADMIN_CSS, errorText } from './restaurants-shared';
                 @for (category of categories(); track category.id) {
                   <tr>
                     <td>{{ category.name }}</td>
-                    @if (!isRestaurantOwner) {
+                    @if (isRestaurantOwner) {
+                      <td>
+                        @if (deleteCategoryConfirmationId() === category.id) {
+                          <span class="muted">Delete category?</span>
+                          <button class="btn red sm" type="button" [disabled]="deletingCategoryId() === category.id" (click)="deletePartnerCategory(category)">
+                            Confirm
+                          </button>
+                          <button class="btn grey sm" type="button" (click)="deleteCategoryConfirmationId.set(null)">Cancel</button>
+                        } @else {
+                          <div class="actions">
+                            <button class="btn ghost sm" type="button" (click)="editPartnerCategory(category)" [disabled]="savingCategory()">Edit</button>
+                            <button class="btn red sm" type="button" (click)="deleteCategoryConfirmationId.set(category.id)">Delete</button>
+                          </div>
+                        }
+                      </td>
+                    } @else {
                       <td>{{ category.restaurant_name }}</td>
                     }
                     <td>{{ category.sort_order }}</td>
                   </tr>
                 } @empty {
                   <tr>
-                    <td [attr.colspan]="isRestaurantOwner ? 2 : 3" class="muted">No categories for this restaurant yet.</td>
+                    <td colspan="3" class="muted">No categories for this restaurant yet.</td>
                   </tr>
                 }
               </tbody>
@@ -136,6 +168,10 @@ export class RestaurantMenuComponent implements OnInit {
     name: ['', Validators.required],
     sort_order: [0, [Validators.required, Validators.min(0)]],
   });
+  readonly partnerCategoryForm = this.fb.nonNullable.group({
+    name: ['', Validators.required],
+    sort_order: [0, [Validators.required, Validators.min(0)]],
+  });
 
   readonly cuisines = signal<Cuisine[]>([]);
   readonly restaurants = signal<AdminRestaurant[]>([]);
@@ -150,6 +186,9 @@ export class RestaurantMenuComponent implements OnInit {
   readonly categoryError = signal('');
   readonly cuisineSuccess = signal('');
   readonly categorySuccess = signal('');
+  readonly editingCategoryId = signal<number | null>(null);
+  readonly deletingCategoryId = signal<number | null>(null);
+  readonly deleteCategoryConfirmationId = signal<number | null>(null);
 
   ngOnInit(): void {
     if (this.isRestaurantOwner) {
@@ -206,6 +245,69 @@ export class RestaurantMenuComponent implements OnInit {
       error: (err: unknown) => {
         this.categoryError.set(errorText(err));
         this.savingCategory.set(false);
+      },
+    });
+  }
+
+  editPartnerCategory(category: MenuCategory): void {
+    this.editingCategoryId.set(category.id);
+    this.partnerCategoryForm.setValue({
+      name: category.name,
+      sort_order: category.sort_order,
+    });
+    this.categoryError.set('');
+    this.categorySuccess.set('');
+  }
+
+  cancelPartnerCategoryEdit(): void {
+    this.editingCategoryId.set(null);
+    this.partnerCategoryForm.reset({ name: '', sort_order: 0 });
+  }
+
+  savePartnerCategory(): void {
+    if (this.partnerCategoryForm.invalid || this.savingCategory()) return;
+    this.savingCategory.set(true);
+    this.categoryError.set('');
+    this.categorySuccess.set('');
+    const value = this.partnerCategoryForm.getRawValue();
+    const payload = { name: value.name.trim(), sort_order: value.sort_order };
+    const id = this.editingCategoryId();
+    const request = id
+      ? this.api.updatePartnerCategory(id, payload)
+      : this.api.createPartnerCategory(payload);
+    request.subscribe({
+      next: (saved) => {
+        this.categories.update((current) => current
+          .filter((category) => category.id !== saved.id)
+          .concat(saved)
+          .sort((a, b) => a.sort_order - b.sort_order));
+        this.cancelPartnerCategoryEdit();
+        this.categorySuccess.set(id ? 'Category updated.' : 'Category added.');
+        this.savingCategory.set(false);
+      },
+      error: (err: unknown) => {
+        this.categoryError.set(errorText(err));
+        this.savingCategory.set(false);
+      },
+    });
+  }
+
+  deletePartnerCategory(category: MenuCategory): void {
+    if (this.deletingCategoryId()) return;
+    this.deletingCategoryId.set(category.id);
+    this.categoryError.set('');
+    this.categorySuccess.set('');
+    this.api.deletePartnerCategory(category.id).subscribe({
+      next: () => {
+        this.categories.update((current) => current.filter((item) => item.id !== category.id));
+        this.deleteCategoryConfirmationId.set(null);
+        this.deletingCategoryId.set(null);
+        this.categorySuccess.set(`Deleted ${category.name}.`);
+      },
+      error: (err: unknown) => {
+        this.categoryError.set(errorText(err));
+        this.deleteCategoryConfirmationId.set(null);
+        this.deletingCategoryId.set(null);
       },
     });
   }
