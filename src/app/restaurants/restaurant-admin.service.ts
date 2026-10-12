@@ -134,6 +134,23 @@ export class RestaurantAdminService {
     return this.http.get<RestaurantOrder[]>(`${this.base}/admin/orders/`, { params });
   }
 
+  partnerOrders(filters: { status?: string; active?: boolean } = {}): Observable<RestaurantOrder[]> {
+    let params = new HttpParams();
+    if (filters.status) params = params.set('status', filters.status);
+    if (filters.active) params = params.set('active', '1');
+    return this.http.get<RestaurantOrder[]>(`${this.base}/partner/orders/`, { params });
+  }
+
+  partnerOrder(id: number): Observable<RestaurantOrder> {
+    return this.http.get<RestaurantOrder>(`${this.base}/partner/orders/${id}/`);
+  }
+
+  setPartnerOrderStatus(id: number, status: string, reason?: string): Observable<RestaurantOrder> {
+    const body: { status: string; reason?: string } = { status };
+    if (reason) body.reason = reason;
+    return this.http.post<RestaurantOrder>(`${this.base}/partner/orders/${id}/status/`, body);
+  }
+
   setOrderStatus(id: number, status: string, reason = ''): Observable<RestaurantOrder> {
     return this.http.post<RestaurantOrder>(`${this.base}/admin/orders/${id}/status/`, { status, reason });
   }

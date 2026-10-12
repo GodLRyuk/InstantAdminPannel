@@ -14,6 +14,7 @@ export const roleAccessGuard: CanActivateChildFn = (_route, state) => {
   if (auth.isRestaurant()) {
     return targetPath === '/restaurants'
       || /^\/restaurants\/\d+$/.test(targetPath)
+      || targetPath === '/restaurants/orders'
       || targetPath === '/restaurants/menu-items'
       || targetPath === '/restaurants/menu-categories'
       ? true
