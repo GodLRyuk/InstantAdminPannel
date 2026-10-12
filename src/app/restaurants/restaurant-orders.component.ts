@@ -27,27 +27,50 @@ import { ADMIN_CSS, errorText } from './restaurants-shared';
       <a class="btn ghost" routerLink="/restaurants">Restaurants</a>
     </div>
 
-    <div class="bar">
-      @if (isOwner) {
-        <label class="f">
-          Filter by status
-          <select multiple size="4" [(ngModel)]="ownerStatuses" (ngModelChange)="load()">
+    @if (isOwner) {
+      <section class="card" aria-label="Order filters">
+        <div class="bar" style="justify-content: space-between">
+          <div>
+            <h2>Filter orders</h2>
+            <p class="muted">Choose one or more statuses</p>
+          </div>
+          <button
+            type="button"
+            class="btn grey sm"
+            [disabled]="ownerStatuses.length === 0 && !activeOnly"
+            (click)="clearOwnerFilters()"
+          >Clear filters</button>
+        </div>
+        <div class="bar" style="justify-content: space-between">
+          <div class="tabs" role="group" aria-label="Filter orders by status">
             @for (s of ownerStatusOptions; track s) {
-              <option [value]="s">{{ label(s) }}</option>
+              <button
+                type="button"
+                class="tab"
+                [class.on]="ownerStatuses.includes(s)"
+                [attr.aria-pressed]="ownerStatuses.includes(s)"
+                (click)="toggleOwnerStatus(s)"
+              >{{ label(s) }}</button>
             }
-          </select>
-        </label>
-        <label class="chk">
-          <input type="checkbox" [(ngModel)]="activeOnly" (ngModelChange)="load()" /> Active orders only
-        </label>
-      } @else {
-        <select [(ngModel)]="status" (ngModelChange)="load()">
+          </div>
+          <div class="bar">
+            <label class="chk">
+              <input type="checkbox" [(ngModel)]="activeOnly" (ngModelChange)="load()" />
+              Active orders only
+            </label>
+            <button type="button" class="btn grey" (click)="load()">Refresh</button>
+          </div>
+        </div>
+      </section>
+    } @else {
+      <div class="bar">
+        <select [(ngModel)]="status" (ngModelChange)="load()" aria-label="Filter by status">
           <option value="">All statuses</option>
           @for (s of statusOptions; track s) {
             <option [value]="s">{{ s }}</option>
           }
         </select>
-        <select [(ngModel)]="restaurantId" (ngModelChange)="load()">
+        <select [(ngModel)]="restaurantId" (ngModelChange)="load()" aria-label="Filter by restaurant">
           <option [ngValue]="null">All restaurants</option>
           @for (r of restaurants(); track r.id) {
             <option [ngValue]="r.id">{{ r.name }}</option>
@@ -56,9 +79,9 @@ import { ADMIN_CSS, errorText } from './restaurants-shared';
         <label class="chk">
           <input type="checkbox" [(ngModel)]="activeOnly" (ngModelChange)="load()" /> Active only
         </label>
-      }
-      <button type="button" class="btn grey" (click)="load()">Refresh</button>
-    </div>
+        <button type="button" class="btn grey" (click)="load()">Refresh</button>
+      </div>
+    }
 
     @if (error()) {
       <div class="err">{{ error() }}</div>
@@ -195,6 +218,19 @@ export class RestaurantOrdersComponent implements OnInit {
     this.load();
     const timer = setInterval(() => this.load(true), 30000);
     this.destroyRef.onDestroy(() => clearInterval(timer));
+  }
+
+  toggleOwnerStatus(status: string) {
+    this.ownerStatuses = this.ownerStatuses.includes(status)
+      ? this.ownerStatuses.filter((selected) => selected !== status)
+      : [...this.ownerStatuses, status];
+    this.load();
+  }
+
+  clearOwnerFilters() {
+    this.ownerStatuses = [];
+    this.activeOnly = false;
+    this.load();
   }
 
   load(quiet = false) {
