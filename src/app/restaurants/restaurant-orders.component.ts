@@ -2,11 +2,13 @@ import { DatePipe, DecimalPipe } from '@angular/common';
 import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { AuthService } from '../services/auth.service';
 import { RestaurantAdminService } from './restaurant-admin.service';
 import {
   AdminRestaurant,
   FINAL_STATUSES,
   NEXT_STATUSES,
+  OWNER_NEXT_STATUSES,
   RestaurantOrder,
   STATUS_BUTTON_LABEL,
 } from './restaurant.models';
@@ -26,21 +28,35 @@ import { ADMIN_CSS, errorText } from './restaurants-shared';
     </div>
 
     <div class="bar">
-      <select [(ngModel)]="status" (ngModelChange)="load()">
-        <option value="">All statuses</option>
-        @for (s of statusOptions; track s) {
-          <option [value]="s">{{ s }}</option>
-        }
-      </select>
-      <select [(ngModel)]="restaurantId" (ngModelChange)="load()">
-        <option [ngValue]="null">All restaurants</option>
-        @for (r of restaurants(); track r.id) {
-          <option [ngValue]="r.id">{{ r.name }}</option>
-        }
-      </select>
-      <label class="chk">
-        <input type="checkbox" [(ngModel)]="activeOnly" (ngModelChange)="load()" /> Active only
-      </label>
+      @if (isOwner) {
+        <label class="f">
+          Filter by status
+          <select multiple size="4" [(ngModel)]="ownerStatuses" (ngModelChange)="load()">
+            @for (s of ownerStatusOptions; track s) {
+              <option [value]="s">{{ label(s) }}</option>
+            }
+          </select>
+        </label>
+        <label class="chk">
+          <input type="checkbox" [(ngModel)]="activeOnly" (ngModelChange)="load()" /> Active orders only
+        </label>
+      } @else {
+        <select [(ngModel)]="status" (ngModelChange)="load()">
+          <option value="">All statuses</option>
+          @for (s of statusOptions; track s) {
+            <option [value]="s">{{ s }}</option>
+          }
+        </select>
+        <select [(ngModel)]="restaurantId" (ngModelChange)="load()">
+          <option [ngValue]="null">All restaurants</option>
+          @for (r of restaurants(); track r.id) {
+            <option [ngValue]="r.id">{{ r.name }}</option>
+          }
+        </select>
+        <label class="chk">
+          <input type="checkbox" [(ngModel)]="activeOnly" (ngModelChange)="load()" /> Active only
+        </label>
+      }
       <button type="button" class="btn grey" (click)="load()">Refresh</button>
     </div>
 
@@ -133,7 +149,9 @@ import { ADMIN_CSS, errorText } from './restaurants-shared';
         <div class="modal" (click)="$event.stopPropagation()">
           <h3>{{ label(p.status) }} {{ p.order.order_number }}</h3>
           @if (p.order.payment_method === 'online' && p.order.payment_status === 'paid') {
-            <p class="muted">This order is paid online. It will be marked "refund pending". Refund it in the Razorpay dashboard.</p>
+            @if (!isOwner) {
+              <p class="muted">This order is paid online. It will be marked "refund pending". Refund it in the Razorpay dashboard.</p>
+            }
           }
           <textarea [(ngModel)]="reason" placeholder="Reason (shown to the customer)"></textarea>
           <div class="row-end">
@@ -147,12 +165,16 @@ import { ADMIN_CSS, errorText } from './restaurants-shared';
 })
 export class RestaurantOrdersComponent implements OnInit {
   private api = inject(RestaurantAdminService);
+  private auth = inject(AuthService);
   private destroyRef = inject(DestroyRef);
+  isOwner = this.auth.isRestaurant();
 
   statusOptions = [
     'awaiting_payment', 'placed', 'accepted', 'preparing', 'ready',
     'out_for_delivery', 'delivered', 'rejected', 'cancelled',
   ];
+  ownerStatusOptions = ['placed', 'accepted', 'preparing', 'ready', 'rejected', 'cancelled', 'delivered'];
+  ownerStatuses: string[] = [];
   status = '';
   restaurantId: number | null = null;
   activeOnly = true;
@@ -167,7 +189,9 @@ export class RestaurantOrdersComponent implements OnInit {
   pending = signal<{ order: RestaurantOrder; status: string } | null>(null);
 
   ngOnInit() {
-    this.api.list({ status: 'approved' }).subscribe((r) => this.restaurants.set(r));
+    if (!this.isOwner) {
+      this.api.list({ status: 'approved' }).subscribe((r) => this.restaurants.set(r));
+    }
     this.load();
     const timer = setInterval(() => this.load(true), 30000);
     this.destroyRef.onDestroy(() => clearInterval(timer));
@@ -175,8 +199,17 @@ export class RestaurantOrdersComponent implements OnInit {
 
   load(quiet = false) {
     if (!quiet) this.loading.set(true);
-    this.api
-      .orders({ status: this.status, restaurant: this.restaurantId, active: this.activeOnly && !this.status })
+    const request = this.isOwner
+      ? this.api.partnerOrders({
+          status: this.ownerStatuses.join(','),
+          active: this.activeOnly,
+        })
+      : this.api.orders({
+          status: this.status,
+          restaurant: this.restaurantId,
+          active: this.activeOnly && !this.status,
+        });
+    request
       .subscribe({
         next: (rows) => {
           this.orders.set(rows);
@@ -195,11 +228,13 @@ export class RestaurantOrdersComponent implements OnInit {
   }
 
   nextStatuses(o: RestaurantOrder): string[] {
-    return NEXT_STATUSES[o.status] ?? [];
+    return this.isOwner
+      ? OWNER_NEXT_STATUSES[o.status] ?? []
+      : NEXT_STATUSES[o.status] ?? [];
   }
 
   canCancel(o: RestaurantOrder) {
-    return !FINAL_STATUSES.includes(o.status);
+    return !this.isOwner && !FINAL_STATUSES.includes(o.status);
   }
 
   label(status: string) {
@@ -231,7 +266,10 @@ export class RestaurantOrdersComponent implements OnInit {
 
   private send(order: RestaurantOrder, status: string, reason = '', done?: () => void) {
     this.busy.set(true);
-    this.api.setOrderStatus(order.id, status, reason).subscribe({
+    const request = this.isOwner
+      ? this.api.setPartnerOrderStatus(order.id, status, reason || undefined)
+      : this.api.setOrderStatus(order.id, status, reason);
+    request.subscribe({
       next: () => {
         this.busy.set(false);
         done?.();

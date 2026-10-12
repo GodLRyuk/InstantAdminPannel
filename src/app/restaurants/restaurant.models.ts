@@ -134,6 +134,12 @@ export const NEXT_STATUSES: Record<string, OrderStatus[]> = {
   out_for_delivery: ['delivered'],
 };
 
+export const OWNER_NEXT_STATUSES: Partial<Record<OrderStatus, OrderStatus[]>> = {
+  placed: ['accepted', 'rejected'],
+  accepted: ['preparing'],
+  preparing: ['ready'],
+};
+
 export const FINAL_STATUSES: OrderStatus[] = ['delivered', 'rejected', 'cancelled'];
 
 export const STATUS_BUTTON_LABEL: Record<string, string> = {
