@@ -7,9 +7,36 @@ export interface Cuisine {
 
 export interface MenuCategory {
   id: number;
-  restaurant: number;
-  restaurant_name: string;
+  restaurant?: number;
+  restaurant_name?: string;
   name: string;
+  sort_order: number;
+}
+
+export interface PartnerMenuItem {
+  id: number;
+  name: string;
+  description: string;
+  category: number | MenuCategory | null;
+  category_name?: string | null;
+  is_veg: boolean;
+  price: string;
+  mrp: string;
+  is_available: boolean;
+  packaging_charge: string;
+  sort_order: number;
+  photo?: string | null;
+}
+
+export interface MenuItemPayload {
+  name: string;
+  description: string;
+  category: number | null;
+  is_veg: boolean;
+  price: string;
+  mrp: string;
+  is_available: boolean;
+  packaging_charge: string;
   sort_order: number;
 }
 
