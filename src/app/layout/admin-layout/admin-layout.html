@@ -8,7 +8,9 @@
 
 <ul class="menu">
   @if (isRestaurant()) {
+    <li routerLink="/restaurants">Restaurants</li>
     <li routerLink="/restaurants/menu-items">Menu Items</li>
+     <li routerLink="/restaurants/menu-categories">Menu Categories &amp; Cuisines</li>
   } @else {
     <li routerLink="/dashboard">Dashboard</li>
     <li routerLink="/users">Users</li>
