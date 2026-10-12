@@ -2,7 +2,14 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { AdminRestaurant, Cuisine, MenuCategory, RestaurantOrder } from './restaurant.models';
+import {
+  AdminRestaurant,
+  Cuisine,
+  MenuCategory,
+  MenuItemPayload,
+  PartnerMenuItem,
+  RestaurantOrder,
+} from './restaurant.models';
 
 /**
  * Calls the Django restaurants API. The JWT header is added by your existing
@@ -68,6 +75,30 @@ export class RestaurantAdminService {
 
   createMenuCategory(data: Pick<MenuCategory, 'restaurant' | 'name' | 'sort_order'>): Observable<MenuCategory> {
     return this.http.post<MenuCategory>(`${this.base}/admin/menu-categories/`, data);
+  }
+
+  partnerCategories(): Observable<MenuCategory[] | { results: MenuCategory[] }> {
+    return this.http.get<MenuCategory[] | { results: MenuCategory[] }>(`${this.base}/partner/categories/`);
+  }
+
+  menuItems(): Observable<PartnerMenuItem[] | { results: PartnerMenuItem[] }> {
+    return this.http.get<PartnerMenuItem[] | { results: PartnerMenuItem[] }>(`${this.base}/partner/items/`);
+  }
+
+  menuItem(id: number): Observable<PartnerMenuItem> {
+    return this.http.get<PartnerMenuItem>(`${this.base}/partner/items/${id}/`);
+  }
+
+  createMenuItem(data: MenuItemPayload | FormData): Observable<PartnerMenuItem> {
+    return this.http.post<PartnerMenuItem>(`${this.base}/partner/items/`, data);
+  }
+
+  updateMenuItem(id: number, data: Partial<MenuItemPayload> | FormData): Observable<PartnerMenuItem> {
+    return this.http.patch<PartnerMenuItem>(`${this.base}/partner/items/${id}/`, data);
+  }
+
+  deleteMenuItem(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/partner/items/${id}/`);
   }
 
   // ---------------- orders
