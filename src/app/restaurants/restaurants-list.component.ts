@@ -2,6 +2,7 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { RestaurantAdminService } from './restaurant-admin.service';
+import { AuthService } from '../services/auth.service';
 import { AdminRestaurant } from './restaurant.models';
 import { ADMIN_CSS, errorText } from './restaurants-shared';
 
@@ -19,7 +20,9 @@ type Pending = { restaurant: AdminRestaurant; action: 'reject' | 'suspend' };
       </div>
       <div class="actions">
         <a class="btn ghost" routerLink="orders">Orders</a>
-        <a class="btn" routerLink="new">+ Add restaurant</a>
+        @if (!isRestaurantOwner) {
+          <a class="btn" routerLink="new">+ Add restaurant</a>
+        }
       </div>
     </div>
 
@@ -122,6 +125,7 @@ type Pending = { restaurant: AdminRestaurant; action: 'reject' | 'suspend' };
 })
 export class RestaurantsListComponent implements OnInit {
   private api = inject(RestaurantAdminService);
+  readonly isRestaurantOwner = inject(AuthService).isRestaurant();
 
   tabs = [
     { key: '', label: 'All' },
