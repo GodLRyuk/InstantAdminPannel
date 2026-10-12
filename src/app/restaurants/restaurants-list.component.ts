@@ -15,17 +15,23 @@ type Pending = { restaurant: AdminRestaurant; action: 'reject' | 'suspend' };
   template: `
     <div class="bar" style="justify-content: space-between">
       <div>
-        <h1>Restaurants</h1>
-        <p class="sub">Approve new restaurants, set their delivery fee and watch their status.</p>
+        <h1>{{ isRestaurantOwner ? 'Your restaurant' : 'Restaurants' }}</h1>
+        <p class="sub">
+          {{ isRestaurantOwner ? 'Manage your restaurant menu and menu categories.' : 'Approve new restaurants, set their delivery fee and watch their status.' }}
+        </p>
       </div>
       <div class="actions">
-        <a class="btn ghost" routerLink="orders">Orders</a>
-        @if (!isRestaurantOwner) {
+        @if (isRestaurantOwner) {
+          <a class="btn" routerLink="menu-items">Menu Items</a>
+          <a class="btn ghost" routerLink="menu-categories">Menu Categories</a>
+        } @else {
+          <a class="btn ghost" routerLink="orders">Orders</a>
           <a class="btn" routerLink="new">+ Add restaurant</a>
         }
       </div>
     </div>
 
+    @if (!isRestaurantOwner) {
     <div class="bar">
       <div class="tabs">
         @for (t of tabs; track t.key) {
@@ -121,6 +127,7 @@ type Pending = { restaurant: AdminRestaurant; action: 'reject' | 'suspend' };
         </div>
       </div>
     }
+    }
   `,
 })
 export class RestaurantsListComponent implements OnInit {
@@ -145,7 +152,9 @@ export class RestaurantsListComponent implements OnInit {
   pending = signal<Pending | null>(null);
 
   ngOnInit() {
-    this.load();
+    if (!this.isRestaurantOwner) {
+      this.load();
+    }
   }
 
   setTab(key: string) {
@@ -154,6 +163,7 @@ export class RestaurantsListComponent implements OnInit {
   }
 
   load() {
+    if (this.isRestaurantOwner) return;
     this.loading.set(true);
     this.error.set('');
     this.api.list({ status: this.status, q: this.search.trim() }).subscribe({
