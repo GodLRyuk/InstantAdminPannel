@@ -1,6 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RestaurantAdminService } from './restaurant-admin.service';
+import { AuthService } from '../services/auth.service';
 import { AdminRestaurant, Cuisine, MenuCategory } from './restaurant.models';
 import { ADMIN_CSS, errorText } from './restaurants-shared';
 
@@ -11,39 +12,43 @@ import { ADMIN_CSS, errorText } from './restaurants-shared';
   template: `
     <div class="bar" style="justify-content: space-between">
       <div>
-        <h1>Cuisines and menu categories</h1>
-        <p class="sub">Create cuisine options and restaurant-specific menu categories.</p>
+        <h1>{{ isRestaurantOwner ? 'Menu categories' : 'Cuisines and menu categories' }}</h1>
+        <p class="sub">
+          {{ isRestaurantOwner ? 'View the categories for your restaurant menu.' : 'Create cuisine options and restaurant-specific menu categories.' }}
+        </p>
       </div>
     </div>
 
-    <div class="card">
-      <h2>Cuisines</h2>
-      @if (cuisineError()) {
-        <div class="err" role="alert">{{ cuisineError() }}</div>
-      }
-      @if (cuisineSuccess()) {
-        <div class="ok" role="status">{{ cuisineSuccess() }}</div>
-      }
-      <form class="bar" [formGroup]="cuisineForm" (ngSubmit)="addCuisine()">
-        <label class="f">Cuisine name *
-          <input formControlName="name" placeholder="e.g. South Indian" />
-        </label>
-        <button class="btn" type="submit" [disabled]="savingCuisine() || cuisineForm.invalid">
-          {{ savingCuisine() ? 'Adding...' : 'Add cuisine' }}
-        </button>
-      </form>
-      @if (loadingCuisines()) {
-        <p class="muted" role="status">Loading cuisines...</p>
-      } @else {
-        <div class="chips">
-          @for (cuisine of cuisines(); track cuisine.id) {
-            <span class="badge">{{ cuisine.name }}</span>
-          } @empty {
-            <span class="muted">No cuisines yet.</span>
-          }
+    @if (!isRestaurantOwner) {
+      <div class="card">
+        <h2>Cuisines</h2>
+        @if (cuisineError()) {
+          <div class="err" role="alert">{{ cuisineError() }}</div>
+        }
+        @if (cuisineSuccess()) {
+          <div class="ok" role="status">{{ cuisineSuccess() }}</div>
+        }
+        <form class="bar" [formGroup]="cuisineForm" (ngSubmit)="addCuisine()">
+          <label class="f">Cuisine name *
+            <input formControlName="name" placeholder="e.g. South Indian" />
+          </label>
+          <button class="btn" type="submit" [disabled]="savingCuisine() || cuisineForm.invalid">
+            {{ savingCuisine() ? 'Adding...' : 'Add cuisine' }}
+          </button>
+        </form>
+        @if (loadingCuisines()) {
+          <p class="muted" role="status">Loading cuisines...</p>
+        } @else {
+          <div class="chips">
+            @for (cuisine of cuisines(); track cuisine.id) {
+              <span class="badge">{{ cuisine.name }}</span>
+            } @empty {
+              <span class="muted">No cuisines yet.</span>
+            }
         </div>
       }
-    </div>
+      </div>
+    }
 
     <div class="card">
       <h2>Menu categories</h2>
@@ -53,32 +58,34 @@ import { ADMIN_CSS, errorText } from './restaurants-shared';
       @if (categorySuccess()) {
         <div class="ok" role="status">{{ categorySuccess() }}</div>
       }
-      @if (restaurantError()) {
+      @if (!isRestaurantOwner && restaurantError()) {
         <div class="err" role="alert">{{ restaurantError() }}</div>
       }
-      @if (loadingRestaurants()) {
+      @if (!isRestaurantOwner && loadingRestaurants()) {
         <p class="muted" role="status">Loading restaurants...</p>
-      } @else if (restaurants().length === 0) {
+      } @else if (!isRestaurantOwner && restaurants().length === 0) {
         <p class="muted">Add a restaurant before creating menu categories.</p>
       } @else {
-        <form class="bar" [formGroup]="categoryForm" (ngSubmit)="addCategory()">
-          <label class="f">Restaurant *
-            <select formControlName="restaurant" (change)="onRestaurantChange()">
-              @for (restaurant of restaurants(); track restaurant.id) {
-                <option [ngValue]="restaurant.id">{{ restaurant.name }}</option>
-              }
-            </select>
-          </label>
-          <label class="f">Category name *
-            <input formControlName="name" placeholder="e.g. Beverages" />
-          </label>
-          <label class="f">Sort order
-            <input type="number" min="0" formControlName="sort_order" />
-          </label>
-          <button class="btn" type="submit" [disabled]="savingCategory() || categoryForm.invalid">
-            {{ savingCategory() ? 'Adding...' : 'Add category' }}
-          </button>
-        </form>
+        @if (!isRestaurantOwner) {
+          <form class="bar" [formGroup]="categoryForm" (ngSubmit)="addCategory()">
+            <label class="f">Restaurant *
+              <select formControlName="restaurant" (change)="onRestaurantChange()">
+                @for (restaurant of restaurants(); track restaurant.id) {
+                  <option [ngValue]="restaurant.id">{{ restaurant.name }}</option>
+                }
+              </select>
+            </label>
+            <label class="f">Category name *
+              <input formControlName="name" placeholder="e.g. Beverages" />
+            </label>
+            <label class="f">Sort order
+              <input type="number" min="0" formControlName="sort_order" />
+            </label>
+            <button class="btn" type="submit" [disabled]="savingCategory() || categoryForm.invalid">
+              {{ savingCategory() ? 'Adding...' : 'Add category' }}
+            </button>
+          </form>
+        }
 
         @if (loadingCategories()) {
           <p class="muted" role="status">Loading categories...</p>
@@ -88,7 +95,9 @@ import { ADMIN_CSS, errorText } from './restaurants-shared';
               <thead>
                 <tr>
                   <th scope="col">Category</th>
-                  <th scope="col">Restaurant</th>
+                  @if (!isRestaurantOwner) {
+                    <th scope="col">Restaurant</th>
+                  }
                   <th scope="col">Sort order</th>
                 </tr>
               </thead>
@@ -96,12 +105,14 @@ import { ADMIN_CSS, errorText } from './restaurants-shared';
                 @for (category of categories(); track category.id) {
                   <tr>
                     <td>{{ category.name }}</td>
-                    <td>{{ category.restaurant_name }}</td>
+                    @if (!isRestaurantOwner) {
+                      <td>{{ category.restaurant_name }}</td>
+                    }
                     <td>{{ category.sort_order }}</td>
                   </tr>
                 } @empty {
                   <tr>
-                    <td colspan="3" class="muted">No categories for this restaurant yet.</td>
+                    <td [attr.colspan]="isRestaurantOwner ? 2 : 3" class="muted">No categories for this restaurant yet.</td>
                   </tr>
                 }
               </tbody>
@@ -115,6 +126,7 @@ import { ADMIN_CSS, errorText } from './restaurants-shared';
 export class RestaurantMenuComponent implements OnInit {
   private readonly api = inject(RestaurantAdminService);
   private readonly fb = inject(FormBuilder);
+  readonly isRestaurantOwner = inject(AuthService).isRestaurant();
 
   readonly cuisineForm = this.fb.nonNullable.group({
     name: ['', Validators.required],
@@ -140,8 +152,12 @@ export class RestaurantMenuComponent implements OnInit {
   readonly categorySuccess = signal('');
 
   ngOnInit(): void {
-    this.loadCuisines();
-    this.loadRestaurants();
+    if (this.isRestaurantOwner) {
+      this.loadPartnerCategories();
+    } else {
+      this.loadCuisines();
+      this.loadRestaurants();
+    }
   }
 
   addCuisine(): void {
@@ -239,6 +255,22 @@ export class RestaurantMenuComponent implements OnInit {
     this.api.menuCategories(restaurantId).subscribe({
       next: (rows) => {
         this.categories.set(rows);
+        this.loadingCategories.set(false);
+      },
+      error: (err: unknown) => {
+        this.categoryError.set(errorText(err));
+        this.loadingCategories.set(false);
+      },
+    });
+  }
+
+  private loadPartnerCategories(): void {
+    this.loadingCategories.set(true);
+    this.categoryError.set('');
+    this.api.partnerCategories().subscribe({
+      next: (response) => {
+        const rows = Array.isArray(response) ? response : response.results;
+        this.categories.set(rows.sort((a, b) => a.sort_order - b.sort_order));
         this.loadingCategories.set(false);
       },
       error: (err: unknown) => {
