@@ -80,7 +80,7 @@ import { ADMIN_CSS, errorText } from './restaurants-shared';
           <input type="file" accept="image/*" (change)="onPhotoSelected($event)" />
         </label>
         @if (currentPhotoUrl()) {
-          <p class="muted">Current photo: <a [href]="currentPhotoUrl()" target="_blank" rel="noopener">View image</a></p>
+          <p class="muted">Current image: <a [href]="currentPhotoUrl()" target="_blank" rel="noopener">View image</a></p>
         }
         <div class="form-actions">
           <button class="btn" type="submit" [disabled]="saving() || form.invalid">
@@ -110,8 +110,8 @@ import { ADMIN_CSS, errorText } from './restaurants-shared';
             @for (item of items(); track item.id) {
               <tr>
                 <td>
-                  @if (item.photo) {
-                    <img class="item-photo" [src]="item.photo" [alt]="item.name" />
+                  @if (item.image || item.photo) {
+                    <img class="item-photo" [src]="item.image || item.photo || ''" [alt]="item.name" />
                   }
                   <strong>{{ item.name }}</strong>
                   @if (item.description) {
@@ -211,7 +211,7 @@ export class RestaurantMenuItemsComponent implements OnInit {
           packaging_charge: detail.packaging_charge ?? '0.00',
           sort_order: detail.sort_order,
         });
-        this.currentPhotoUrl.set(detail.photo ?? null);
+        this.currentPhotoUrl.set(detail.image ?? detail.photo ?? null);
         this.formOpen.set(true);
         this.saving.set(false);
       },
@@ -347,10 +347,12 @@ export class RestaurantMenuItemsComponent implements OnInit {
     });
   }
 
-  private toFormData(payload: MenuItemPayload, photo: File): FormData {
+  private toFormData(payload: MenuItemPayload, image: File): FormData {
     const data = new FormData();
-    Object.entries(payload).forEach(([key, value]) => data.append(key, String(value)));
-    data.append('photo', photo);
+    Object.entries(payload).forEach(([key, value]) => {
+      data.append(key, key === 'category' && value === null ? '' : String(value));
+    });
+    data.append('image', image);
     return data;
   }
 
