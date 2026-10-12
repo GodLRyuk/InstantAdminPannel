@@ -60,6 +60,14 @@ export class RestaurantAdminService {
     return this.http.post<AdminRestaurant>(`${this.base}/admin/restaurants/${id}/suspend/`, { reason });
   }
 
+  partnerRestaurant(): Observable<AdminRestaurant> {
+    return this.http.get<AdminRestaurant>(`${this.base}/partner/`);
+  }
+
+  updatePartnerRestaurant(data: Record<string, unknown> | FormData): Observable<AdminRestaurant> {
+    return this.http.patch<AdminRestaurant>(`${this.base}/partner/`, data);
+  }
+
   cuisines(): Observable<Cuisine[]> {
     return this.http.get<Cuisine[]>(`${this.base}/admin/cuisines/`);
   }

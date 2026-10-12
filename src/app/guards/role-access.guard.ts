@@ -14,6 +14,7 @@ export const roleAccessGuard: CanActivateChildFn = (_route, state) => {
   if (auth.isRestaurant()) {
     return [
       '/restaurants',
+      '/restaurants/profile',
       '/restaurants/menu-items',
       '/restaurants/menu-categories',
     ].includes(targetPath)
@@ -25,7 +26,7 @@ export const roleAccessGuard: CanActivateChildFn = (_route, state) => {
     return router.parseUrl('/');
   }
 
-  return targetPath.startsWith('/restaurants/menu-items')
+  return targetPath.startsWith('/restaurants/menu-items') || targetPath === '/restaurants/profile'
     ? router.parseUrl('/restaurants')
     : true;
 };

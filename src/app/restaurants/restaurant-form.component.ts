@@ -2,6 +2,7 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { RestaurantAdminService } from './restaurant-admin.service';
+import { AuthService } from '../services/auth.service';
 import { AdminRestaurant, Cuisine } from './restaurant.models';
 import { ADMIN_CSS, errorText } from './restaurants-shared';
 
@@ -12,14 +13,19 @@ import { ADMIN_CSS, errorText } from './restaurants-shared';
   template: `
     <div class="bar" style="justify-content: space-between">
       <div>
-        <h1>{{ id ? 'Edit restaurant' : 'Add restaurant' }}</h1>
+        <h1>{{ isRestaurantOwner ? 'Your restaurant details' : id ? 'Edit restaurant' : 'Add restaurant' }}</h1>
         <p class="sub">
-          {{ id ? 'Owner: ' + ownerName() : 'Creates the restaurant for an existing user account.' }}
+          {{ isRestaurantOwner ? 'Update your restaurant profile and operating details.' : id ? 'Owner: ' + ownerName() : 'Creates the restaurant for an existing user account.' }}
         </p>
       </div>
-      <a class="btn ghost" routerLink="/restaurants">Back to list</a>
+      <a class="btn ghost" [routerLink]="isRestaurantOwner ? '/restaurants/menu-items' : '/restaurants'">
+        {{ isRestaurantOwner ? 'Back to menu items' : 'Back to list' }}
+      </a>
     </div>
 
+    @if (profileLoading()) {
+      <p class="muted" role="status">Loading restaurant details...</p>
+    } @else {
     @if (error()) {
       <div class="err">{{ error() }}</div>
     }
@@ -31,9 +37,11 @@ import { ADMIN_CSS, errorText } from './restaurants-shared';
       <div class="card">
         <h2>Basic details</h2>
         <div class="grid">
-          <label class="f">Owner user ID *
-            <input type="number" formControlName="owner" />
-          </label>
+          @if (!isRestaurantOwner) {
+            <label class="f">Owner user ID *
+              <input type="number" formControlName="owner" />
+            </label>
+          }
           <label class="f">Restaurant name *
             <input formControlName="name" />
           </label>
@@ -50,17 +58,19 @@ import { ADMIN_CSS, errorText } from './restaurants-shared';
         <label class="f" style="margin-top: 12px">Description
           <textarea formControlName="description"></textarea>
         </label>
-        <h2 style="margin-top: 16px">Cuisines</h2>
-        <div class="chips">
-          @for (c of cuisines(); track c.id) {
-            <label class="chk">
-              <input type="checkbox" [checked]="hasCuisine(c.id)" (change)="toggleCuisine(c.id, $any($event.target).checked)" />
-              {{ c.name }}
-            </label>
-          } @empty {
-            <span class="muted">No cuisines yet. Add them in Django admin first.</span>
-          }
-        </div>
+        @if (!isRestaurantOwner) {
+          <h2 style="margin-top: 16px">Cuisines</h2>
+          <div class="chips">
+            @for (c of cuisines(); track c.id) {
+              <label class="chk">
+                <input type="checkbox" [checked]="hasCuisine(c.id)" (change)="toggleCuisine(c.id, $any($event.target).checked)" />
+                {{ c.name }}
+              </label>
+            } @empty {
+              <span class="muted">No cuisines yet. Add them in Django admin first.</span>
+            }
+          </div>
+        }
       </div>
 
       <div class="card">
@@ -148,34 +158,37 @@ import { ADMIN_CSS, errorText } from './restaurants-shared';
         }
       </div>
 
-      <div class="card">
-        <h2>Approval and rating</h2>
-        <div class="grid">
-          <label class="f">Status
-            <select formControlName="status">
-              <option value="pending">Pending</option>
-              <option value="approved">Approved</option>
-              <option value="rejected">Rejected</option>
-              <option value="suspended">Suspended</option>
-            </select>
-          </label>
-          <label class="f">Reason (for rejected / suspended)
-            <input formControlName="rejection_reason" />
-          </label>
-          <label class="f">Rating (0 - 5)
-            <input type="number" step="0.1" formControlName="rating" />
-          </label>
-          <label class="f">Number of ratings
-            <input type="number" formControlName="rating_count" />
-          </label>
+      @if (!isRestaurantOwner) {
+        <div class="card">
+          <h2>Approval and rating</h2>
+          <div class="grid">
+            <label class="f">Status
+              <select formControlName="status">
+                <option value="pending">Pending</option>
+                <option value="approved">Approved</option>
+                <option value="rejected">Rejected</option>
+                <option value="suspended">Suspended</option>
+              </select>
+            </label>
+            <label class="f">Reason (for rejected / suspended)
+              <input formControlName="rejection_reason" />
+            </label>
+            <label class="f">Rating (0 - 5)
+              <input type="number" step="0.1" formControlName="rating" />
+            </label>
+            <label class="f">Number of ratings
+              <input type="number" formControlName="rating_count" />
+            </label>
+          </div>
         </div>
-      </div>
+      }
 
       <div class="actions">
-        <button type="submit" class="btn" [disabled]="saving()">{{ saving() ? 'Saving...' : 'Save' }}</button>
-        <a class="btn grey" routerLink="/restaurants">Cancel</a>
+        <button type="submit" class="btn" [disabled]="saving()">{{ saving() ? 'Saving...' : isRestaurantOwner ? 'Save changes' : 'Save' }}</button>
+        <a class="btn grey" [routerLink]="isRestaurantOwner ? '/restaurants/menu-items' : '/restaurants'">Cancel</a>
       </div>
     </form>
+    }
   `,
 })
 export class RestaurantFormComponent implements OnInit {
@@ -183,6 +196,7 @@ export class RestaurantFormComponent implements OnInit {
   private fb = inject(FormBuilder);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  readonly isRestaurantOwner = inject(AuthService).isRestaurant();
 
   id: number | null = null;
   cuisines = signal<Cuisine[]>([]);
@@ -191,6 +205,7 @@ export class RestaurantFormComponent implements OnInit {
   saving = signal(false);
   saved = signal(false);
   error = signal('');
+  profileLoading = signal(false);
   private selectedCuisines: number[] = [];
   private files: { logo: File | null; cover_image: File | null } = { logo: null, cover_image: null };
 
@@ -224,6 +239,22 @@ export class RestaurantFormComponent implements OnInit {
   });
 
   ngOnInit() {
+    if (this.isRestaurantOwner) {
+      this.profileLoading.set(true);
+      this.api.partnerRestaurant().subscribe({
+        next: (restaurant) => {
+          this.id = restaurant.id;
+          this.fill(restaurant);
+          this.profileLoading.set(false);
+        },
+        error: (e) => {
+          this.error.set(errorText(e));
+          this.profileLoading.set(false);
+        },
+      });
+      return;
+    }
+
     this.api.cuisines().subscribe((c) => this.cuisines.set(c));
     const param = this.route.snapshot.paramMap.get('id');
     if (param) {
@@ -238,7 +269,7 @@ export class RestaurantFormComponent implements OnInit {
   private fill(r: AdminRestaurant) {
     this.current.set(r);
     this.ownerName.set(r.owner_name);
-    this.selectedCuisines = [...r.cuisines];
+    this.selectedCuisines = [...(r.cuisines ?? [])];
     this.form.patchValue({
       owner: r.owner,
       name: r.name,
@@ -289,18 +320,29 @@ export class RestaurantFormComponent implements OnInit {
     const v = this.form.getRawValue();
     const body: Record<string, unknown> = {
       ...v,
-      cuisines: this.selectedCuisines,
       latitude: v.latitude === null || (v.latitude as unknown) === '' ? null : v.latitude,
       longitude: v.longitude === null || (v.longitude as unknown) === '' ? null : v.longitude,
       offer_percent: v.offer_percent === null || (v.offer_percent as unknown) === '' ? null : v.offer_percent,
     };
-    if (!this.id && !v.owner) {
+    if (!this.isRestaurantOwner) {
+      body['cuisines'] = this.selectedCuisines;
+    }
+    if (this.isRestaurantOwner) {
+      delete body['owner'];
+      delete body['cuisines'];
+      delete body['status'];
+      delete body['rejection_reason'];
+      delete body['rating'];
+      delete body['rating_count'];
+    } else if (!this.id && !v.owner) {
       this.error.set('Enter the owner user ID.');
       return;
     }
 
     this.saving.set(true);
-    const call = this.id ? this.api.update(this.id, body) : this.api.create(body);
+    const call = this.isRestaurantOwner
+      ? this.api.updatePartnerRestaurant(body)
+      : this.id ? this.api.update(this.id, body) : this.api.create(body);
     call.subscribe({
       next: (r) => this.afterSave(r),
       error: (e) => {
@@ -316,7 +358,10 @@ export class RestaurantFormComponent implements OnInit {
       this.finish(r);
       return;
     }
-    this.api.uploadImages(r.id, { logo, cover_image }).subscribe({
+    const upload = this.isRestaurantOwner
+      ? this.api.updatePartnerRestaurant(this.imageFormData({ logo, cover_image }))
+      : this.api.uploadImages(r.id, { logo, cover_image });
+    upload.subscribe({
       next: (withImages) => {
         this.files = { logo: null, cover_image: null };
         this.finish(withImages);
@@ -331,11 +376,24 @@ export class RestaurantFormComponent implements OnInit {
 
   private finish(r: AdminRestaurant) {
     this.saving.set(false);
+    if (this.isRestaurantOwner) {
+      this.id = r.id;
+      this.fill(r);
+      this.saved.set(true);
+      return;
+    }
     if (!this.id) {
       this.router.navigate(['/restaurants']);
       return;
     }
     this.fill(r);
     this.saved.set(true);
+  }
+
+  private imageFormData(files: { logo: File | null; cover_image: File | null }): FormData {
+    const data = new FormData();
+    if (files.logo) data.append('logo', files.logo);
+    if (files.cover_image) data.append('cover_image', files.cover_image);
+    return data;
   }
 }

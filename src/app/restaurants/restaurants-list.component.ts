@@ -1,6 +1,6 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { RestaurantAdminService } from './restaurant-admin.service';
 import { AuthService } from '../services/auth.service';
 import { AdminRestaurant } from './restaurant.models';
@@ -132,6 +132,7 @@ type Pending = { restaurant: AdminRestaurant; action: 'reject' | 'suspend' };
 })
 export class RestaurantsListComponent implements OnInit {
   private api = inject(RestaurantAdminService);
+  private router = inject(Router);
   readonly isRestaurantOwner = inject(AuthService).isRestaurant();
 
   tabs = [
@@ -152,9 +153,11 @@ export class RestaurantsListComponent implements OnInit {
   pending = signal<Pending | null>(null);
 
   ngOnInit() {
-    if (!this.isRestaurantOwner) {
-      this.load();
+    if (this.isRestaurantOwner) {
+      this.router.navigate(['/restaurants/profile']);
+      return;
     }
+    this.load();
   }
 
   setTab(key: string) {
