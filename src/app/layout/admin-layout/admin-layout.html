@@ -7,29 +7,32 @@
   </div>
 
 <ul class="menu">
-  <li routerLink="/dashboard">Dashboard</li>
-  <li routerLink="/users">Users</li>
-  <li routerLink="/restaurants">Restaurants</li>
-  <li routerLink="/restaurants/menu-categories">Menu Categories &amp; Cuisines</li>
-  <li routerLink="/restaurants/menu-items">Menu Items</li>
-  <li routerLink="/banner">Banner</li>
-  <li routerLink="/advbanner">Adv Banner</li>
-  <li routerLink="/brand">Brand</li>
-  <li routerLink="/unit">Unit</li>
-  <li routerLink="/category">Category</li>
-  <li routerLink="/subcategory">Sub Category</li>
-  <li class="submenu-label" (click)="toggleReports()" [class.open]="reportsOpen">
-    <span class="submenu-title">Reports</span>
-    <span class="submenu-arrow">{{ reportsOpen ? '▾' : '▸' }}</span>
-  </li>
-  <ul class="submenu" *ngIf="reportsOpen">
-    <li routerLink="/reports/sales">Sales Report</li>
-    <li routerLink="/reports/brand-products">Brand Products Report</li>
-  </ul>
-  <li routerLink="/settlements">Settlements</li>
-  <li routerLink="/expenses">Store Expense</li>
-  <li routerLink="/store-timing">Store Timing</li>
-  <li routerLink="/stock-adjustments">Stock Adjustments</li>
+  @if (isRestaurant()) {
+    <li routerLink="/restaurants/menu-items">Menu Items</li>
+  } @else {
+    <li routerLink="/dashboard">Dashboard</li>
+    <li routerLink="/users">Users</li>
+    <li routerLink="/restaurants">Restaurants</li>
+    <li routerLink="/restaurants/menu-categories">Menu Categories &amp; Cuisines</li>
+    <li routerLink="/banner">Banner</li>
+    <li routerLink="/advbanner">Adv Banner</li>
+    <li routerLink="/brand">Brand</li>
+    <li routerLink="/unit">Unit</li>
+    <li routerLink="/category">Category</li>
+    <li routerLink="/subcategory">Sub Category</li>
+    <li class="submenu-label" (click)="toggleReports()" [class.open]="reportsOpen">
+      <span class="submenu-title">Reports</span>
+      <span class="submenu-arrow">{{ reportsOpen ? '▾' : '▸' }}</span>
+    </li>
+    <ul class="submenu" *ngIf="reportsOpen">
+      <li routerLink="/reports/sales">Sales Report</li>
+      <li routerLink="/reports/brand-products">Brand Products Report</li>
+    </ul>
+    <li routerLink="/settlements">Settlements</li>
+    <li routerLink="/expenses">Store Expense</li>
+    <li routerLink="/store-timing">Store Timing</li>
+    <li routerLink="/stock-adjustments">Stock Adjustments</li>
+  }
 </ul>
 
   </div>

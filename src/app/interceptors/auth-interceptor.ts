@@ -25,6 +25,7 @@ export class AuthInterceptor implements HttpInterceptor {
 
     // ✅ Define public APIs (NO TOKEN)
     const publicUrls = [
+      '/api/accounts/admin-login/',
       '/api/token/',          // login
       '/api/token/refresh/',  // refresh
     ];

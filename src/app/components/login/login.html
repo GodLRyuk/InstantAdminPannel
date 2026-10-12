@@ -2,7 +2,7 @@
 
   <div class="login-card">
 
-    <h2>Admin Login</h2>
+    <h2>Admin / Restaurant Owner Login</h2>
 
     <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
       <div class="form-group">
@@ -28,7 +28,13 @@
         />
       </div>
 
-      <button type="submit" class="login-btn">Login</button>
+      @if (error()) {
+        <p class="login-error" role="alert">{{ error() }}</p>
+      }
+
+      <button type="submit" class="login-btn" [disabled]="submitting()">
+        {{ submitting() ? 'Signing in...' : 'Login' }}
+      </button>
 
     </form>
 
