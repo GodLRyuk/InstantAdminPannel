@@ -14,6 +14,10 @@ export class Header {
     private router: Router
   ) {}
 
+  get accountLabel(): string {
+    return this.authService.accountLabel;
+  }
+
   logout() {
     console.log("sjhdhb");
   this.authService.logout();

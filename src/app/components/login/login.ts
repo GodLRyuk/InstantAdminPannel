@@ -1,7 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from '../../services/auth.service';
 import { Router } from '@angular/router';
+import { Login } from '../../models/login.model';
 
 @Component({
   selector: 'app-login',
@@ -16,27 +18,33 @@ constructor(
   private router: Router
 ) 
 {}
-  loginData = {
+  loginData: Login = {
     email: '',
     password: ''
   };
+  readonly error = signal('');
+  readonly submitting = signal(false);
 
   onSubmit() {
-   this.authService.login(this.loginData).subscribe({
+    if (this.submitting()) return;
+    this.submitting.set(true);
+    this.error.set('');
+    this.authService.login(this.loginData).subscribe({
 
       next: (response) => {
-        console.log('Login success:', response);
-
-        // save token
-        localStorage.setItem('token', response.access);
-        localStorage.setItem('refresh', response.refresh);
-        this.router.navigate(['/dashboard']);
-
-        // redirect later to dashboard
+        this.authService.saveSession(response);
+        this.submitting.set(false);
+        this.router.navigate([this.authService.isRestaurant() ? '/restaurants/menu-items' : '/dashboard']);
       },
 
-      error: (error) => {
+      error: (error: unknown) => {
         console.error('Login failed:', error);
+        this.error.set(error instanceof HttpErrorResponse
+          ? error.status === 0
+            ? 'Unable to connect to the server.'
+            : 'Invalid email or password, or this account cannot access the admin panel.'
+          : 'Login failed. Please try again.');
+        this.submitting.set(false);
       }
 
     });

@@ -20,12 +20,16 @@ import { StoreTiming } from './pages/store-timing/store-timing';
 import { Expense } from './pages/expense/expense';
 import { StockAdjustmentComponent } from './pages/stock-adjustment-component/stock-adjustment-component';
 import { Users } from './pages/users/users';
+import { authGuard } from './guards/auth.guard';
+import { roleAccessGuard } from './guards/role-access.guard';
 
 const routes: Routes = [
   {path: '', component: LoginComponent},
   {
     path: '',
     component: AdminLayoutComponent,
+    canActivate: [authGuard],
+    canActivateChild: [roleAccessGuard],
     children: [
       { path: 'dashboard', component: DashboardComponent },
       { path: 'brand', component: Brand },

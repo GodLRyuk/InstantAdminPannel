@@ -1,0 +1,9 @@
+.login-error {
+  color: #b91c1c;
+  margin: 0 0 1rem;
+}
+
+.login-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}

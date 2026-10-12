@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { interval, Subject, startWith, switchMap, takeUntil } from 'rxjs';
-import { MasterService } from '../../services/auth.service';
+import { AuthService, MasterService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-admin-layout',
@@ -17,14 +17,23 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
   private notificationRepeatTimer: number | null = null;
   private notificationAudio: HTMLAudioElement | null = null;
 
-  constructor(private masterService: MasterService) {}
+  constructor(
+    private masterService: MasterService,
+    private authService: AuthService
+  ) {}
+
+  isRestaurant(): boolean {
+    return this.authService.isRestaurant();
+  }
 
   ngOnInit(): void {
     this.masterService.orderNotificationStop$
       .pipe(takeUntil(this.destroy$))
       .subscribe(() => this.dismissNotification());
 
-    this.startAdminOrderPolling();
+    if (this.authService.isStaff()) {
+      this.startAdminOrderPolling();
+    }
   }
 
   ngOnDestroy(): void {

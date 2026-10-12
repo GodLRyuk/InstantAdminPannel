@@ -16,6 +16,7 @@ import { ExpenseCategoryModel, ExpenseModel, ExpenseSummaryModel } from '../mode
 import { StoreScheduleModel, StoreStatusModel } from '../models/store-schedule.model';
 import { StockAdjustmentModel } from '../models/stock-adjustment.model';
 import { AdminUser, CreateUserPayload, UserRole } from '../models/user.model';
+import { Login, LoginResponse } from '../models/login.model';
 
 @Injectable({
   providedIn: 'root'
@@ -26,8 +27,39 @@ export class AuthService {
 
   constructor(private http: HttpClient) { }
 
-  login(data: any): Observable<any> {
-    return this.http.post(this.apiUrl, data);
+  login(data: Login): Observable<LoginResponse> {
+    return this.http.post<LoginResponse>(this.apiUrl, data);
+  }
+
+  saveSession(response: LoginResponse): void {
+    localStorage.setItem('token', response.access);
+    localStorage.setItem('refresh', response.refresh);
+    if (response.role) {
+      localStorage.setItem('role', response.role.toUpperCase());
+    }
+    localStorage.setItem('is_restaurant', String(response.is_restaurant === true));
+    localStorage.setItem('is_staff', String(response.is_staff === true));
+    if (response.username) {
+      localStorage.setItem('username', response.username);
+    }
+  }
+
+  isAuthenticated(): boolean {
+    return Boolean(localStorage.getItem('token'));
+  }
+
+  isRestaurant(): boolean {
+    return localStorage.getItem('is_restaurant') === 'true'
+      || localStorage.getItem('role') === 'RESTAURANT';
+  }
+
+  isStaff(): boolean {
+    return localStorage.getItem('is_staff') === 'true'
+      || localStorage.getItem('role') === 'ADMIN';
+  }
+
+  get accountLabel(): string {
+    return this.isRestaurant() ? 'Restaurant Owner' : 'Admin';
   }
 
   refreshToken(refresh: string) {
