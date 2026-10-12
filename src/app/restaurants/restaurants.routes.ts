@@ -12,5 +12,6 @@ export const RESTAURANT_ROUTES: Routes = [
   { path: 'orders', component: RestaurantOrdersComponent },
   { path: 'menu-items', component: RestaurantMenuItemsComponent },
   { path: 'menu-categories', component: RestaurantMenuComponent },
+  { path: 'profile', component: RestaurantFormComponent },
   { path: ':id', component: RestaurantFormComponent },
 ];
