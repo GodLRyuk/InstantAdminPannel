@@ -1,6 +1,6 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { RestaurantAdminService } from './restaurant-admin.service';
 import { AuthService } from '../services/auth.service';
 import { AdminRestaurant } from './restaurant.models';
@@ -31,7 +31,50 @@ type Pending = { restaurant: AdminRestaurant; action: 'reject' | 'suspend' };
       </div>
     </div>
 
-    @if (!isRestaurantOwner) {
+    @if (isRestaurantOwner) {
+      @if (error()) {
+        <div class="err" role="alert">{{ error() }}</div>
+      }
+      @if (loading()) {
+        <p class="muted" role="status">Loading your restaurant...</p>
+      } @else {
+        <div class="wrap">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Restaurant</th>
+                <th scope="col">City</th>
+                <th scope="col">Status</th>
+                <th scope="col">Phone</th>
+                <th scope="col">FSSAI</th>
+                <th scope="col">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (restaurant of restaurants(); track restaurant.id) {
+                <tr>
+                  <td>
+                    <strong>{{ restaurant.name }}</strong>
+                    @if (restaurant.address_line) {
+                      <div class="muted">{{ restaurant.address_line }}</div>
+                    }
+                  </td>
+                  <td>{{ restaurant.city }}</td>
+                  <td><span class="badge" [class]="'badge ' + restaurant.status">{{ restaurant.status }}</span></td>
+                  <td>{{ restaurant.phone }}</td>
+                  <td>{{ restaurant.fssai_number || '—' }}</td>
+                  <td><a class="btn sm" [routerLink]="[restaurant.id]">Edit details</a></td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="6" class="muted">No restaurant is registered to this account.</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    } @else {
     <div class="bar">
       <div class="tabs">
         @for (t of tabs; track t.key) {
@@ -132,7 +175,6 @@ type Pending = { restaurant: AdminRestaurant; action: 'reject' | 'suspend' };
 })
 export class RestaurantsListComponent implements OnInit {
   private api = inject(RestaurantAdminService);
-  private router = inject(Router);
   readonly isRestaurantOwner = inject(AuthService).isRestaurant();
 
   tabs = [
@@ -153,10 +195,6 @@ export class RestaurantsListComponent implements OnInit {
   pending = signal<Pending | null>(null);
 
   ngOnInit() {
-    if (this.isRestaurantOwner) {
-      this.router.navigate(['/restaurants/profile']);
-      return;
-    }
     this.load();
   }
 
@@ -166,10 +204,12 @@ export class RestaurantsListComponent implements OnInit {
   }
 
   load() {
-    if (this.isRestaurantOwner) return;
     this.loading.set(true);
     this.error.set('');
-    this.api.list({ status: this.status, q: this.search.trim() }).subscribe({
+    const request = this.isRestaurantOwner
+      ? this.api.ownerRestaurants()
+      : this.api.list({ status: this.status, q: this.search.trim() });
+    request.subscribe({
       next: (rows) => {
         this.restaurants.set(rows);
         this.loading.set(false);
