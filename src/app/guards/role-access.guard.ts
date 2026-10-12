@@ -12,12 +12,10 @@ export const roleAccessGuard: CanActivateChildFn = (_route, state) => {
 
   const targetPath = state.url.split('?')[0];
   if (auth.isRestaurant()) {
-    return [
-      '/restaurants',
-      '/restaurants/profile',
-      '/restaurants/menu-items',
-      '/restaurants/menu-categories',
-    ].includes(targetPath)
+    return targetPath === '/restaurants'
+      || /^\/restaurants\/\d+$/.test(targetPath)
+      || targetPath === '/restaurants/menu-items'
+      || targetPath === '/restaurants/menu-categories'
       ? true
       : router.parseUrl('/restaurants/menu-items');
   }
@@ -26,7 +24,7 @@ export const roleAccessGuard: CanActivateChildFn = (_route, state) => {
     return router.parseUrl('/');
   }
 
-  return targetPath.startsWith('/restaurants/menu-items') || targetPath === '/restaurants/profile'
+  return targetPath.startsWith('/restaurants/menu-items')
     ? router.parseUrl('/restaurants')
     : true;
 };

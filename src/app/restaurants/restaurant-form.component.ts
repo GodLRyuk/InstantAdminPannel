@@ -18,9 +18,7 @@ import { ADMIN_CSS, errorText } from './restaurants-shared';
           {{ isRestaurantOwner ? 'Update your restaurant profile and operating details.' : id ? 'Owner: ' + ownerName() : 'Creates the restaurant for an existing user account.' }}
         </p>
       </div>
-      <a class="btn ghost" [routerLink]="isRestaurantOwner ? '/restaurants/menu-items' : '/restaurants'">
-        {{ isRestaurantOwner ? 'Back to menu items' : 'Back to list' }}
-      </a>
+      <a class="btn ghost" routerLink="/restaurants">Back to list</a>
     </div>
 
     @if (profileLoading()) {
@@ -185,7 +183,7 @@ import { ADMIN_CSS, errorText } from './restaurants-shared';
 
       <div class="actions">
         <button type="submit" class="btn" [disabled]="saving()">{{ saving() ? 'Saving...' : isRestaurantOwner ? 'Save changes' : 'Save' }}</button>
-        <a class="btn grey" [routerLink]="isRestaurantOwner ? '/restaurants/menu-items' : '/restaurants'">Cancel</a>
+        <a class="btn grey" routerLink="/restaurants">Cancel</a>
       </div>
     </form>
     }
@@ -239,11 +237,20 @@ export class RestaurantFormComponent implements OnInit {
   });
 
   ngOnInit() {
+    const param = this.route.snapshot.paramMap.get('id');
     if (this.isRestaurantOwner) {
+      if (!param) {
+        this.router.navigate(['/restaurants']);
+        return;
+      }
+      this.id = Number(param);
+      if (!Number.isInteger(this.id) || this.id <= 0) {
+        this.error.set('Invalid restaurant ID.');
+        return;
+      }
       this.profileLoading.set(true);
-      this.api.partnerRestaurant().subscribe({
+      this.api.getOwnerRestaurant(this.id).subscribe({
         next: (restaurant) => {
-          this.id = restaurant.id;
           this.fill(restaurant);
           this.profileLoading.set(false);
         },
@@ -254,9 +261,7 @@ export class RestaurantFormComponent implements OnInit {
       });
       return;
     }
-
     this.api.cuisines().subscribe((c) => this.cuisines.set(c));
-    const param = this.route.snapshot.paramMap.get('id');
     if (param) {
       this.id = Number(param);
       this.api.get(this.id).subscribe({
@@ -340,8 +345,8 @@ export class RestaurantFormComponent implements OnInit {
     }
 
     this.saving.set(true);
-    const call = this.isRestaurantOwner
-      ? this.api.updatePartnerRestaurant(body)
+    const call = this.isRestaurantOwner && this.id
+      ? this.api.updateOwnerRestaurant(this.id, body)
       : this.id ? this.api.update(this.id, body) : this.api.create(body);
     call.subscribe({
       next: (r) => this.afterSave(r),
@@ -359,7 +364,7 @@ export class RestaurantFormComponent implements OnInit {
       return;
     }
     const upload = this.isRestaurantOwner
-      ? this.api.updatePartnerRestaurant(this.imageFormData({ logo, cover_image }))
+      ? this.api.updateOwnerRestaurant(r.id, this.imageFormData({ logo, cover_image }))
       : this.api.uploadImages(r.id, { logo, cover_image });
     upload.subscribe({
       next: (withImages) => {
@@ -377,7 +382,6 @@ export class RestaurantFormComponent implements OnInit {
   private finish(r: AdminRestaurant) {
     this.saving.set(false);
     if (this.isRestaurantOwner) {
-      this.id = r.id;
       this.fill(r);
       this.saved.set(true);
       return;

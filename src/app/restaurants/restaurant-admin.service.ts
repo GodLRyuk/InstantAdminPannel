@@ -28,8 +28,16 @@ export class RestaurantAdminService {
     return this.http.get<AdminRestaurant[]>(`${this.base}/admin/restaurants/`, { params });
   }
 
+  ownerRestaurants(): Observable<AdminRestaurant[]> {
+    return this.http.get<AdminRestaurant[]>(`${this.base}/`);
+  }
+
   get(id: number): Observable<AdminRestaurant> {
     return this.http.get<AdminRestaurant>(`${this.base}/admin/restaurants/${id}/`);
+  }
+
+  getOwnerRestaurant(id: number): Observable<AdminRestaurant> {
+    return this.http.get<AdminRestaurant>(`${this.base}/${id}/`);
   }
 
   create(data: Record<string, unknown>): Observable<AdminRestaurant> {
@@ -38,6 +46,10 @@ export class RestaurantAdminService {
 
   update(id: number, data: Record<string, unknown>): Observable<AdminRestaurant> {
     return this.http.patch<AdminRestaurant>(`${this.base}/admin/restaurants/${id}/`, data);
+  }
+
+  updateOwnerRestaurant(id: number, data: Record<string, unknown> | FormData): Observable<AdminRestaurant> {
+    return this.http.patch<AdminRestaurant>(`${this.base}/${id}/`, data);
   }
 
   /** Logo and cover are sent separately as multipart. */
@@ -58,14 +70,6 @@ export class RestaurantAdminService {
 
   suspend(id: number, reason: string): Observable<AdminRestaurant> {
     return this.http.post<AdminRestaurant>(`${this.base}/admin/restaurants/${id}/suspend/`, { reason });
-  }
-
-  partnerRestaurant(): Observable<AdminRestaurant> {
-    return this.http.get<AdminRestaurant>(`${this.base}/partner/`);
-  }
-
-  updatePartnerRestaurant(data: Record<string, unknown> | FormData): Observable<AdminRestaurant> {
-    return this.http.patch<AdminRestaurant>(`${this.base}/partner/`, data);
   }
 
   cuisines(): Observable<Cuisine[]> {
