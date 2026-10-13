@@ -42,6 +42,9 @@ export class AuthService {
     if (response.username) {
       localStorage.setItem('username', response.username);
     }
+    if (response.user_id !== undefined) {
+      localStorage.setItem('user_id', String(response.user_id));
+    }
   }
 
   isAuthenticated(): boolean {
@@ -58,6 +61,35 @@ export class AuthService {
       || localStorage.getItem('role') === 'ADMIN';
   }
 
+  getUserId(): string | null {
+    const storedId = localStorage.getItem('user_id');
+    if (storedId) {
+      return storedId;
+    }
+
+    const token = localStorage.getItem('token');
+    const payload = token?.split('.')[1];
+    if (!payload) {
+      return null;
+    }
+
+    try {
+      const normalizedPayload = payload.replace(/-/g, '+').replace(/_/g, '/');
+      const decoded = atob(normalizedPayload.padEnd(Math.ceil(normalizedPayload.length / 4) * 4, '='));
+      const claims: unknown = JSON.parse(decoded);
+      if (claims && typeof claims === 'object' && 'user_id' in claims) {
+        const userId = claims.user_id;
+        if ((typeof userId === 'string' && userId.length > 0) || (typeof userId === 'number' && Number.isFinite(userId))) {
+          return String(userId);
+        }
+      }
+    } catch (error) {
+      console.error('Unable to read the user ID from the access token.', error);
+    }
+
+    return null;
+  }
+
   get accountLabel(): string {
     return this.isRestaurant() ? 'Restaurant Owner' : 'Admin';
   }
@@ -72,6 +104,7 @@ export class AuthService {
   logout() {
     localStorage.removeItem('token');
     localStorage.removeItem('refresh');
+    localStorage.removeItem('user_id');
     localStorage.clear();
   }
 }

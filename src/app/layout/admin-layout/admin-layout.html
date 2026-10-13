@@ -49,6 +49,19 @@
       {{ notificationMessage }}
     </div>
 
+    @if (isRestaurant() && notificationPermission !== 'granted') {
+      <div class="browser-notification-setup" role="status">
+        @if (notificationPermission === 'default') {
+          <span>Enable desktop alerts to hear about new orders when this tab is in the background.</span>
+          <button type="button" (click)="enableBrowserNotifications()">Enable alerts</button>
+        } @else if (notificationPermission === 'denied') {
+          <span>Desktop alerts are blocked. Allow notifications for this site in your browser settings.</span>
+        } @else {
+          <span>This browser does not support desktop notifications.</span>
+        }
+      </div>
+    }
+
     <div class="admin-content">
       <router-outlet></router-outlet>
     </div>
