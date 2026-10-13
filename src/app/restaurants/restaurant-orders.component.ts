@@ -200,7 +200,7 @@ export class RestaurantOrdersComponent implements OnInit {
   ownerStatuses: string[] = [];
   status = '';
   restaurantId: number | null = null;
-  activeOnly = true;
+  activeOnly = false;
   reason = '';
 
   orders = signal<RestaurantOrder[]>([]);
@@ -238,7 +238,7 @@ export class RestaurantOrdersComponent implements OnInit {
     const request = this.isOwner
       ? this.api.partnerOrders({
           status: this.ownerStatuses.join(','),
-          active: this.activeOnly,
+          active: this.activeOnly && this.ownerStatuses.length === 0,
         })
       : this.api.orders({
           status: this.status,
