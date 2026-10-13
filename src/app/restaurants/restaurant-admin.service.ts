@@ -130,14 +130,14 @@ export class RestaurantAdminService {
     let params = new HttpParams();
     if (filters.status) params = params.set('status', filters.status);
     if (filters.restaurant) params = params.set('restaurant', filters.restaurant);
-    if (filters.active) params = params.set('active', '1');
+    if (filters.active !== undefined) params = params.set('active', filters.active ? '1' : '0');
     return this.http.get<RestaurantOrder[]>(`${this.base}/admin/orders/`, { params });
   }
 
   partnerOrders(filters: { status?: string; active?: boolean } = {}): Observable<RestaurantOrder[]> {
     let params = new HttpParams();
     if (filters.status) params = params.set('status', filters.status);
-    if (filters.active) params = params.set('active', '1');
+    if (filters.active !== undefined) params = params.set('active', filters.active ? '1' : '0');
     return this.http.get<RestaurantOrder[]>(`${this.base}/partner/orders/`, { params });
   }
 
