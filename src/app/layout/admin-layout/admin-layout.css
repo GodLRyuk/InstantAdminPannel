@@ -85,6 +85,36 @@
   font-size: 1.1rem;
 }
 
+.browser-notification-setup {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 12px 20px;
+  padding: 10px 14px;
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+  background: #fff;
+  color: #344054;
+  font-size: 14px;
+}
+
+.browser-notification-setup button {
+  flex: 0 0 auto;
+  border: 0;
+  border-radius: 6px;
+  padding: 7px 12px;
+  background: #2e7d32;
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+}
+
+.browser-notification-setup button:focus-visible {
+  outline: 3px solid #98a2b3;
+  outline-offset: 2px;
+}
+
 @keyframes adminNotificationFade {
   from {
     opacity: 0;
@@ -93,5 +123,12 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@media (max-width: 600px) {
+  .browser-notification-setup {
+    align-items: flex-start;
+    flex-direction: column;
   }
 }

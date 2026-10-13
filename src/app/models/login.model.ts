@@ -10,4 +10,5 @@ export interface LoginResponse {
   is_restaurant?: boolean;
   is_staff?: boolean;
   username?: string;
+  user_id?: number | string;
 }
