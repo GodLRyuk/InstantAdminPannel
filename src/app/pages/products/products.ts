@@ -58,7 +58,7 @@ export class Products implements OnInit {
     });
   }
 
-  // Search
+  // Search (name or barcode)
   onSearch() {
     this.currentPage = 1;
     this.applyFilter();
@@ -67,7 +67,10 @@ export class Products implements OnInit {
   applyFilter() {
     const term = this.searchTerm.trim().toLowerCase();
     this.filteredProducts = term
-      ? this.products.filter(p => p.name.toLowerCase().includes(term))
+      ? this.products.filter(p =>
+          p.name.toLowerCase().includes(term) ||
+          (p.barcode ?? '').toLowerCase().includes(term)
+        )
       : this.products;
 
     this.totalPages = Math.max(1, Math.ceil(this.filteredProducts.length / this.pageSize));
@@ -119,16 +122,16 @@ export class Products implements OnInit {
     });
   }
   onCategoryChange() {
-  console.log('product.category:', this.product.category, typeof this.product.category);
-  console.log('all subcategories:', this.subcategories);
+    console.log('product.category:', this.product.category, typeof this.product.category);
+    console.log('all subcategories:', this.subcategories);
 
-  this.filteredSubcategories = this.subcategories.filter(
-    sub => sub.category === this.product.category
-  );
+    this.filteredSubcategories = this.subcategories.filter(
+      sub => sub.category === this.product.category
+    );
 
-  console.log('filteredSubcategories result:', this.filteredSubcategories);
-  this.product.subcategory = 0;
-}
+    console.log('filteredSubcategories result:', this.filteredSubcategories);
+    this.product.subcategory = 0;
+  }
   loadUnits() {
     this.masterService.getAllunits().subscribe({
       next: (res: any) => {
@@ -139,13 +142,14 @@ export class Products implements OnInit {
   }
 
   openAddModal() {
-  this.modalType = 'add';
-  this.product = this.getEmptyProduct();
-  this.selectedFile = null;
-  this.imagePreview = null;
-  this.filteredSubcategories = this.subcategories;
-  this.showModal = true;
-}
+    this.modalType = 'add';
+    this.product = this.getEmptyProduct();
+    this.selectedFile = null;
+    this.imagePreview = null;
+    this.filteredSubcategories = this.subcategories;
+    this.showModal = true;
+  }
+
   getEmptyProduct(): ProductModel {
     return {
       id: 0,
@@ -161,65 +165,68 @@ export class Products implements OnInit {
       brand: null,
       unit: 0,
       unit_size: null,
+      barcode: '',
     };
   }
 
   openEditModal(product: ProductModel) {
-  this.modalType = 'edit';
-  this.selectedProduct = product;
-  this.product = { ...product };
-  this.selectedFile = null;
-  this.imagePreview = product.image || null;
+    this.modalType = 'edit';
+    this.selectedProduct = product;
+    this.product = { ...product, barcode: product.barcode ?? '' };
+    this.selectedFile = null;
+    this.imagePreview = product.image || null;
 
-  this.filteredSubcategories = this.subcategories.filter(
-    sub => sub.category_id === this.product.category
-  );
+    this.filteredSubcategories = this.subcategories.filter(
+      sub => sub.category_id === this.product.category
+    );
 
-  this.showModal = true;
-}
+    this.showModal = true;
+  }
 
   save() {
-  const formData = new FormData();
+    const formData = new FormData();
 
-  formData.append('name', String(this.product.name));
-  formData.append('price', String(this.product.price));
-  formData.append('discount_percent', String(this.product.discount_percent));
-  formData.append('description', String(this.product.description));
-  formData.append('category', String(this.product.category));
-  formData.append('subcategory', String(this.product.subcategory));
-  formData.append('unit', String(this.product.unit));
-  formData.append('unit_size', String(this.product.unit_size));
-  formData.append('brand', String(this.product.brand));
-  formData.append('is_active', String(this.product.is_active));
+    formData.append('name', String(this.product.name));
+    formData.append('price', String(this.product.price));
+    formData.append('discount_percent', String(this.product.discount_percent));
+    formData.append('description', String(this.product.description));
+    formData.append('category', String(this.product.category));
+    formData.append('subcategory', String(this.product.subcategory));
+    formData.append('unit', String(this.product.unit));
+    formData.append('unit_size', String(this.product.unit_size));
+    formData.append('brand', String(this.product.brand));
+    formData.append('is_active', String(this.product.is_active));
+    formData.append('barcode', (this.product.barcode ?? '').toString().trim());
 
-  if (this.selectedFile) {
-    formData.append('image', this.selectedFile);
+    if (this.selectedFile) {
+      formData.append('image', this.selectedFile);
+    }
+
+    if (this.modalType === 'add') {
+      this.masterService.addProduct(formData).subscribe({
+        next: () => {
+          this.loadProducts();
+          this.showModal = false;
+        },
+        error: err => console.error(err)
+      });
+    } else {
+      this.masterService.updateProduct(this.product.id, formData).subscribe({
+        next: () => {
+          this.loadProducts();
+          this.showModal = false;
+        },
+        error: err => console.error(err)
+      });
+    }
   }
-
-  if (this.modalType === 'add') {
-    this.masterService.addProduct(formData).subscribe({
-      next: () => {
-        this.loadProducts();
-        this.showModal = false;
-      },
-      error: err => console.error(err)
-    });
-  } else {
-    this.masterService.updateProduct(this.product.id, formData).subscribe({
-      next: () => {
-        this.loadProducts();
-        this.showModal = false;
-      },
-      error: err => console.error(err)
-    });
-  }
-}
 
   deleteProduct(id: number) {
     if (confirm('Are you sure you want to delete this product?')) {
       this.masterService.deleteproduct(id).subscribe(() => this.loadProducts());
     }
   }
+
   onFileSelected(event: any) {
     const file = event.target.files[0];
     if (file) {
