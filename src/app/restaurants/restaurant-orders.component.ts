@@ -13,6 +13,12 @@ import {
   STATUS_BUTTON_LABEL,
 } from './restaurant.models';
 import { ADMIN_CSS, errorText } from './restaurants-shared';
+import {
+  escapeReceiptText,
+  formatReceiptCurrency,
+  formatReceiptDate,
+  printThermalReceipt,
+} from '../shared/thermal-receipt';
 
 @Component({
   selector: 'app-restaurant-orders',
@@ -116,6 +122,7 @@ import { ADMIN_CSS, errorText } from './restaurants-shared';
               <td>{{ o.created_at | date: 'dd MMM, h:mm a' }}</td>
               <td (click)="$event.stopPropagation()">
                 <div class="actions">
+                  <button type="button" class="btn sm grey" (click)="printReceipt(o)" [attr.aria-label]="'Print bill for order ' + o.order_number">Print bill</button>
                   @for (next of nextStatuses(o); track next) {
                     <button type="button" class="btn sm" [class.red]="next === 'rejected'" [disabled]="busy()" (click)="change(o, next)">
                       {{ label(next) }}
@@ -284,6 +291,44 @@ export class RestaurantOrdersComponent implements OnInit {
       .filter(([k, v]) => !skip.includes(k) && v !== null && v !== '')
       .map(([, v]) => String(v));
     return parts.length ? parts.join(', ') : '-';
+  }
+
+  printReceipt(order: RestaurantOrder) {
+    const items = order.items.map(item => `
+      <div class="item">
+        <div>${escapeReceiptText(item.quantity)} × ${escapeReceiptText(item.name)}</div>
+        <div class="row">
+          <span>${formatReceiptCurrency(item.unit_price)} each</span>
+          <strong>${formatReceiptCurrency(item.line_total)}</strong>
+        </div>
+      </div>
+    `).join('');
+
+    printThermalReceipt(`Order ${order.order_number}`, `
+      <h1>${escapeReceiptText(order.restaurant.name)}</h1>
+      <p class="center muted">${escapeReceiptText(order.restaurant.phone)}</p>
+      <div class="divider"></div>
+      <p>Order: ${escapeReceiptText(order.order_number)}</p>
+      <p>Date: ${formatReceiptDate(order.created_at)}</p>
+      <p>Customer: ${escapeReceiptText(order.customer_name)}</p>
+      <p>Phone: ${escapeReceiptText(order.customer_phone)}</p>
+      <div class="divider"></div>
+      <h2>Items</h2>
+      ${items}
+      <div class="divider"></div>
+      <div class="row"><span>Items</span><span>${formatReceiptCurrency(order.item_total)}</span></div>
+      <div class="row"><span>Discount${order.offer_code ? ` (${escapeReceiptText(order.offer_code)})` : ''}</span><span>−${formatReceiptCurrency(order.discount)}</span></div>
+      <div class="row"><span>Delivery</span><span>${formatReceiptCurrency(order.delivery_fee)}</span></div>
+      <div class="row"><span>Packaging</span><span>${formatReceiptCurrency(order.packaging_charge)}</span></div>
+      <div class="row"><span>GST</span><span>${formatReceiptCurrency(order.gst)}</span></div>
+      <div class="row total"><span>Total</span><span>${formatReceiptCurrency(order.total_amount)}</span></div>
+      <div class="divider"></div>
+      <p>Payment: ${escapeReceiptText(order.payment_method_label)} — ${escapeReceiptText(order.payment_status_label)}</p>
+      <p>Status: ${escapeReceiptText(order.status_label)}</p>
+      <p>Deliver to: ${escapeReceiptText(this.addressText(order))}</p>
+      ${order.notes ? `<p>Note: ${escapeReceiptText(order.notes)}</p>` : ''}
+      <p class="center">Thank you</p>
+    `);
   }
 
   change(order: RestaurantOrder, status: string) {
