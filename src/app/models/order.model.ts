@@ -12,7 +12,14 @@ export interface OrderModel {
   id: number;
   total_amount: string;      // ✅ matches API
   discount_amount: string;   // ✅ matches API
+  item_total?: string;
+  delivery_fee?: string;
+  packaging_charge?: string;
+  gst?: string;
   coupon_code?: string;
+  customer_name?: string;
+  customer_phone?: string;
+  delivery_address?: string;
   payment_status: string;
   order_status: string;
   created_at: string;

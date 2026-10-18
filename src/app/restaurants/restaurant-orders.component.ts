@@ -304,8 +304,9 @@ export class RestaurantOrdersComponent implements OnInit {
       </div>
     `).join('');
 
-    printThermalReceipt(`Order ${order.order_number}`, `
-      <h1>${escapeReceiptText(order.restaurant.name)}</h1>
+    printThermalReceipt(`Instant Delivery - Order ${order.order_number}`, `
+      <h1>Instant Delivery</h1>
+      <p class="center">${escapeReceiptText(order.restaurant.name)}</p>
       <p class="center muted">${escapeReceiptText(order.restaurant.phone)}</p>
       <div class="divider"></div>
       <p>Order: ${escapeReceiptText(order.order_number)}</p>
