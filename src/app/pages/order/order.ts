@@ -2,6 +2,12 @@ import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { interval, Subject, startWith, switchMap, takeUntil } from 'rxjs';
 import { MasterService } from '../../services/auth.service';
 import { OrderModel } from '../../models/order.model';
+import {
+  escapeReceiptText,
+  formatReceiptCurrency,
+  formatReceiptDate,
+  printThermalReceipt,
+} from '../../shared/thermal-receipt';
 
 @Component({
   selector: 'app-order',
@@ -142,6 +148,39 @@ export class OrdersComponent implements OnInit, OnDestroy {
 
   get pages(): number[] {
     return Array.from({ length: this.totalPages }, (_, i) => i + 1);
+  }
+
+  printReceipt(order: OrderModel): void {
+    const items = order.items.map(item => `
+      <div class="item">
+        <div>${escapeReceiptText(item.product_name)}</div>
+        ${item.batch_no ? `<div class="muted">Batch: ${escapeReceiptText(item.batch_no)}</div>` : ''}
+        <div class="row">
+          <span>${escapeReceiptText(item.quantity)} × ${formatReceiptCurrency(item.price)}</span>
+          <strong>${formatReceiptCurrency(item.total_price)}</strong>
+        </div>
+      </div>
+    `).join('');
+    const coupon = order.coupon_code
+      ? `<p>Coupon: ${escapeReceiptText(order.coupon_code)}</p>`
+      : '';
+
+    printThermalReceipt(`Order ${order.id}`, `
+      <h1>Order Receipt</h1>
+      <p class="center">Order #${escapeReceiptText(order.id)}</p>
+      <p class="center muted">${formatReceiptDate(order.created_at)}</p>
+      <div class="divider"></div>
+      <h2>Items</h2>
+      ${items}
+      <div class="divider"></div>
+      <div class="row"><span>Discount</span><span>−${formatReceiptCurrency(order.discount_amount)}</span></div>
+      ${coupon}
+      <div class="row total"><span>Total</span><span>${formatReceiptCurrency(order.total_amount)}</span></div>
+      <div class="divider"></div>
+      <p>Status: ${escapeReceiptText(order.order_status)}</p>
+      <p>Payment: ${escapeReceiptText(order.payment_status)}</p>
+      <p class="center">Thank you</p>
+    `);
   }
 
   // =========================
