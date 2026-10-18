@@ -154,27 +154,49 @@ export class OrdersComponent implements OnInit, OnDestroy {
     const items = order.items.map(item => `
       <div class="item">
         <div>${escapeReceiptText(item.product_name)}</div>
-        ${item.batch_no ? `<div class="muted">Batch: ${escapeReceiptText(item.batch_no)}</div>` : ''}
         <div class="row">
           <span>${escapeReceiptText(item.quantity)} × ${formatReceiptCurrency(item.price)}</span>
           <strong>${formatReceiptCurrency(item.total_price)}</strong>
         </div>
       </div>
     `).join('');
+    const itemTotal = order.item_total ?? String(
+      order.items.reduce((total, item) => total + Number(item.total_price || 0), 0)
+    );
     const coupon = order.coupon_code
       ? `<p>Coupon: ${escapeReceiptText(order.coupon_code)}</p>`
       : '';
+    const customerDetails = [
+      order.customer_name ? `<p>Customer: ${escapeReceiptText(order.customer_name)}</p>` : '',
+      order.customer_phone ? `<p>Phone: ${escapeReceiptText(order.customer_phone)}</p>` : '',
+      order.delivery_address ? `<p>Deliver to: ${escapeReceiptText(order.delivery_address)}</p>` : '',
+    ].join('');
+    const additionalCharges = [
+      order.delivery_fee !== undefined
+        ? `<div class="row"><span>Delivery fee</span><span>${formatReceiptCurrency(order.delivery_fee)}</span></div>`
+        : '',
+      order.packaging_charge !== undefined
+        ? `<div class="row"><span>Packaging</span><span>${formatReceiptCurrency(order.packaging_charge)}</span></div>`
+        : '',
+      order.gst !== undefined
+        ? `<div class="row"><span>GST</span><span>${formatReceiptCurrency(order.gst)}</span></div>`
+        : '',
+    ].join('');
 
-    printThermalReceipt(`Order ${order.id}`, `
-      <h1>Order Receipt</h1>
+    printThermalReceipt(`Instant Delivery - Order ${order.id}`, `
+      <h1>Instant Delivery</h1>
+      <p class="center">Order Receipt</p>
       <p class="center">Order #${escapeReceiptText(order.id)}</p>
       <p class="center muted">${formatReceiptDate(order.created_at)}</p>
+      ${customerDetails}
       <div class="divider"></div>
       <h2>Items</h2>
       ${items}
       <div class="divider"></div>
+      <div class="row"><span>Items</span><span>${formatReceiptCurrency(itemTotal)}</span></div>
       <div class="row"><span>Discount</span><span>−${formatReceiptCurrency(order.discount_amount)}</span></div>
       ${coupon}
+      ${additionalCharges}
       <div class="row total"><span>Total</span><span>${formatReceiptCurrency(order.total_amount)}</span></div>
       <div class="divider"></div>
       <p>Status: ${escapeReceiptText(order.order_status)}</p>
