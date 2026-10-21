@@ -23,8 +23,13 @@ export class Products implements OnInit {
   filteredSubcategories: any[] = [];
   units: any[] = [];
   brands: any[] = [];
+  brandSearchTerm = '';
+  categorySearchTerm = '';
+  subcategorySearchTerm = '';
+  unitSearchTerm = '';
   selectedFile: File | null = null;
   imagePreview: string | ArrayBuffer | null = null;
+  saving = false;
 
   // Search
   searchTerm = '';
@@ -96,6 +101,29 @@ export class Products implements OnInit {
     return Array.from({ length: this.totalPages }, (_, i) => i + 1);
   }
 
+  get filteredBrands(): any[] {
+    return this.filterDropdownOptions(this.brands, this.brandSearchTerm);
+  }
+
+  get filteredCategories(): any[] {
+    return this.filterDropdownOptions(this.categories, this.categorySearchTerm);
+  }
+
+  get searchedSubcategories(): any[] {
+    return this.filterDropdownOptions(this.filteredSubcategories, this.subcategorySearchTerm);
+  }
+
+  get filteredUnits(): any[] {
+    return this.filterDropdownOptions(this.units, this.unitSearchTerm);
+  }
+
+  private filterDropdownOptions(options: any[], searchTerm: string): any[] {
+    const term = searchTerm.trim().toLowerCase();
+    return term
+      ? options.filter(option => String(option.name ?? '').toLowerCase().includes(term))
+      : options;
+  }
+
   loadBrands() {
     this.masterService.getAllBrands().subscribe({
       next: (res: any) => {
@@ -125,6 +153,7 @@ export class Products implements OnInit {
     console.log('product.category:', this.product.category, typeof this.product.category);
     console.log('all subcategories:', this.subcategories);
 
+    this.subcategorySearchTerm = '';
     this.filteredSubcategories = this.subcategories.filter(
       sub => sub.category === this.product.category
     );
@@ -146,8 +175,16 @@ export class Products implements OnInit {
     this.product = this.getEmptyProduct();
     this.selectedFile = null;
     this.imagePreview = null;
+    this.resetDropdownSearches();
     this.filteredSubcategories = this.subcategories;
     this.showModal = true;
+  }
+
+  private resetDropdownSearches(): void {
+    this.brandSearchTerm = '';
+    this.categorySearchTerm = '';
+    this.subcategorySearchTerm = '';
+    this.unitSearchTerm = '';
   }
 
   getEmptyProduct(): ProductModel {
@@ -175,6 +212,7 @@ export class Products implements OnInit {
     this.product = { ...product, barcode: product.barcode ?? '' };
     this.selectedFile = null;
     this.imagePreview = product.image || null;
+    this.resetDropdownSearches();
 
     this.filteredSubcategories = this.subcategories.filter(
       sub => sub.category_id === this.product.category
@@ -184,6 +222,8 @@ export class Products implements OnInit {
   }
 
   save() {
+    if (this.saving) return;
+
     const formData = new FormData();
 
     formData.append('name', String(this.product.name));
@@ -202,23 +242,22 @@ export class Products implements OnInit {
       formData.append('image', this.selectedFile);
     }
 
-    if (this.modalType === 'add') {
-      this.masterService.addProduct(formData).subscribe({
-        next: () => {
-          this.loadProducts();
-          this.showModal = false;
-        },
-        error: err => console.error(err)
-      });
-    } else {
-      this.masterService.updateProduct(this.product.id, formData).subscribe({
-        next: () => {
-          this.loadProducts();
-          this.showModal = false;
-        },
-        error: err => console.error(err)
-      });
-    }
+    this.saving = true;
+    const request = this.modalType === 'add'
+      ? this.masterService.addProduct(formData)
+      : this.masterService.updateProduct(this.product.id, formData);
+
+    request.subscribe({
+      next: () => {
+        this.saving = false;
+        this.loadProducts();
+        this.showModal = false;
+      },
+      error: err => {
+        console.error(err);
+        this.saving = false;
+      }
+    });
   }
 
   deleteProduct(id: number) {

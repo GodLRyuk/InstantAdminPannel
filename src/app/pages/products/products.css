@@ -1,0 +1,21 @@
+.save-spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  margin-right: 6px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  vertical-align: -2px;
+  animation: save-spinner-rotate 0.7s linear infinite;
+}
+
+.save-status {
+  align-self: center;
+}
+
+@keyframes save-spinner-rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
