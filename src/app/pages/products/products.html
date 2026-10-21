@@ -88,8 +88,13 @@
           </div>
           <div class="form-group">
             <label>Brand</label>
+            <input
+              type="search"
+              [(ngModel)]="brandSearchTerm"
+              placeholder="Search brands..."
+              aria-label="Search brands" />
             <select [(ngModel)]="product.brand">
-              <option *ngFor="let u of brands" [value]="u.id">
+              <option *ngFor="let u of filteredBrands" [ngValue]="u.id">
                 {{ u.name }}
               </option>
             </select>
@@ -100,8 +105,13 @@
         <div class="row">
           <div class="form-group">
             <label>Category</label>
+            <input
+              type="search"
+              [(ngModel)]="categorySearchTerm"
+              placeholder="Search categories..."
+              aria-label="Search categories" />
             <select [(ngModel)]="product.category" (change)="onCategoryChange()">
-              <option *ngFor="let cat of categories" [ngValue]="cat.id">
+              <option *ngFor="let cat of filteredCategories" [ngValue]="cat.id">
                 {{ cat.name }}
               </option>
             </select>
@@ -109,8 +119,13 @@
 
           <div class="form-group">
             <label>Subcategory</label>
+            <input
+              type="search"
+              [(ngModel)]="subcategorySearchTerm"
+              placeholder="Search subcategories..."
+              aria-label="Search subcategories" />
             <select [(ngModel)]="product.subcategory">
-              <option *ngFor="let sub of filteredSubcategories" [ngValue]="sub.id">
+              <option *ngFor="let sub of searchedSubcategories" [ngValue]="sub.id">
                 {{ sub.name }}
               </option>
             </select>
@@ -121,8 +136,13 @@
         <div class="row">
           <div class="form-group">
             <label>Unit</label>
+            <input
+              type="search"
+              [(ngModel)]="unitSearchTerm"
+              placeholder="Search units..."
+              aria-label="Search units" />
             <select [(ngModel)]="product.unit">
-              <option *ngFor="let u of units" [value]="u.id">
+              <option *ngFor="let u of filteredUnits" [ngValue]="u.id">
                 {{ u.name }}
               </option>
             </select>
@@ -175,8 +195,12 @@
       </div>
 
       <div class="modal-actions">
-        <button class="save-btn" (click)="save()">Save</button>
-        <button class="cancel-btn" (click)="showModal=false">Cancel</button>
+        <button class="save-btn" (click)="save()" [disabled]="saving" [attr.aria-busy]="saving">
+          <span *ngIf="saving" class="save-spinner" aria-hidden="true"></span>
+          {{ saving ? 'Saving...' : 'Save' }}
+        </button>
+        <span *ngIf="saving" class="save-status" role="status">Saving product...</span>
+        <button class="cancel-btn" (click)="showModal=false" [disabled]="saving">Cancel</button>
       </div>
 
     </div>
