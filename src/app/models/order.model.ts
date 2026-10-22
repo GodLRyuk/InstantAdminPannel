@@ -2,6 +2,9 @@ export interface OrderItem {
   id: number;
   product: number;
   product_name: string;
+  subcategory?: number;
+  subcategory_id?: number;
+  subcategory_name?: string | null;
   quantity: number;
   price: number;
   total_price: number;

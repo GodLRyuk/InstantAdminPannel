@@ -154,6 +154,7 @@ export class OrdersComponent implements OnInit, OnDestroy {
     const items = order.items.map(item => `
       <div class="item">
         <div>${escapeReceiptText(item.product_name)}</div>
+        ${item.subcategory_name ? `<div class="muted">${escapeReceiptText(item.subcategory_name)}</div>` : ''}
         <div class="row">
           <span>${escapeReceiptText(item.quantity)} × ${formatReceiptCurrency(item.price)}</span>
           <strong>${formatReceiptCurrency(item.total_price)}</strong>
