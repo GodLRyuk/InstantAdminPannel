@@ -1,6 +1,7 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ProductModel } from '../../models/products.model';
 import { MasterService } from '../../services/auth.service';
+import { getVisiblePageNumbers } from '../../shared/pagination';
 
 @Component({
   selector: 'app-products',
@@ -99,7 +100,7 @@ export class Products implements OnInit {
   }
 
   get pages(): number[] {
-    return Array.from({ length: this.totalPages }, (_, i) => i + 1);
+    return getVisiblePageNumbers(this.currentPage, this.totalPages);
   }
 
   get filteredBrands(): any[] {
