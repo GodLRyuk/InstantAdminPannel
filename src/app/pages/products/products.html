@@ -88,16 +88,24 @@
           </div>
           <div class="form-group">
             <label>Brand</label>
-            <input
-              type="search"
-              [(ngModel)]="brandSearchTerm"
-              placeholder="Search brands..."
-              aria-label="Search brands" />
-            <select [(ngModel)]="product.brand">
-              <option *ngFor="let u of filteredBrands" [ngValue]="u.id">
-                {{ u.name }}
-              </option>
-            </select>
+            <div class="searchable-dropdown" (keydown.escape)="openDropdown = null">
+              <button type="button" class="dropdown-trigger" (click)="toggleDropdown('brand')"
+                [attr.aria-expanded]="openDropdown === 'brand'" aria-haspopup="listbox">
+                <span>{{ dropdownLabel(brands, product.brand, 'Select brand') }}</span>
+                <span class="dropdown-arrow" aria-hidden="true"></span>
+              </button>
+              <div class="dropdown-menu" *ngIf="openDropdown === 'brand'">
+                <input type="search" [(ngModel)]="brandSearchTerm" placeholder="Search brands..."
+                  aria-label="Search brands" (click)="$event.stopPropagation()" />
+                <div class="dropdown-options" role="listbox" aria-label="Brands">
+                  <button type="button" role="option" *ngFor="let u of filteredBrands"
+                    [attr.aria-selected]="product.brand === u.id" (click)="selectBrand(u.id)">
+                    {{ u.name }}
+                  </button>
+                  <span class="no-options" *ngIf="filteredBrands.length === 0">No brands found</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -105,30 +113,46 @@
         <div class="row">
           <div class="form-group">
             <label>Category</label>
-            <input
-              type="search"
-              [(ngModel)]="categorySearchTerm"
-              placeholder="Search categories..."
-              aria-label="Search categories" />
-            <select [(ngModel)]="product.category" (change)="onCategoryChange()">
-              <option *ngFor="let cat of filteredCategories" [ngValue]="cat.id">
-                {{ cat.name }}
-              </option>
-            </select>
+            <div class="searchable-dropdown" (keydown.escape)="openDropdown = null">
+              <button type="button" class="dropdown-trigger" (click)="toggleDropdown('category')"
+                [attr.aria-expanded]="openDropdown === 'category'" aria-haspopup="listbox">
+                <span>{{ dropdownLabel(categories, product.category, 'Select category') }}</span>
+                <span class="dropdown-arrow" aria-hidden="true"></span>
+              </button>
+              <div class="dropdown-menu" *ngIf="openDropdown === 'category'">
+                <input type="search" [(ngModel)]="categorySearchTerm" placeholder="Search categories..."
+                  aria-label="Search categories" (click)="$event.stopPropagation()" />
+                <div class="dropdown-options" role="listbox" aria-label="Categories">
+                  <button type="button" role="option" *ngFor="let cat of filteredCategories"
+                    [attr.aria-selected]="product.category === cat.id" (click)="selectCategory(cat.id)">
+                    {{ cat.name }}
+                  </button>
+                  <span class="no-options" *ngIf="filteredCategories.length === 0">No categories found</span>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div class="form-group">
             <label>Subcategory</label>
-            <input
-              type="search"
-              [(ngModel)]="subcategorySearchTerm"
-              placeholder="Search subcategories..."
-              aria-label="Search subcategories" />
-            <select [(ngModel)]="product.subcategory">
-              <option *ngFor="let sub of searchedSubcategories" [ngValue]="sub.id">
-                {{ sub.name }}
-              </option>
-            </select>
+            <div class="searchable-dropdown" (keydown.escape)="openDropdown = null">
+              <button type="button" class="dropdown-trigger" (click)="toggleDropdown('subcategory')"
+                [attr.aria-expanded]="openDropdown === 'subcategory'" aria-haspopup="listbox">
+                <span>{{ dropdownLabel(filteredSubcategories, product.subcategory, 'Select subcategory') }}</span>
+                <span class="dropdown-arrow" aria-hidden="true"></span>
+              </button>
+              <div class="dropdown-menu" *ngIf="openDropdown === 'subcategory'">
+                <input type="search" [(ngModel)]="subcategorySearchTerm" placeholder="Search subcategories..."
+                  aria-label="Search subcategories" (click)="$event.stopPropagation()" />
+                <div class="dropdown-options" role="listbox" aria-label="Subcategories">
+                  <button type="button" role="option" *ngFor="let sub of searchedSubcategories"
+                    [attr.aria-selected]="product.subcategory === sub.id" (click)="selectSubcategory(sub.id)">
+                    {{ sub.name }}
+                  </button>
+                  <span class="no-options" *ngIf="searchedSubcategories.length === 0">No subcategories found</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -136,16 +160,24 @@
         <div class="row">
           <div class="form-group">
             <label>Unit</label>
-            <input
-              type="search"
-              [(ngModel)]="unitSearchTerm"
-              placeholder="Search units..."
-              aria-label="Search units" />
-            <select [(ngModel)]="product.unit">
-              <option *ngFor="let u of filteredUnits" [ngValue]="u.id">
-                {{ u.name }}
-              </option>
-            </select>
+            <div class="searchable-dropdown" (keydown.escape)="openDropdown = null">
+              <button type="button" class="dropdown-trigger" (click)="toggleDropdown('unit')"
+                [attr.aria-expanded]="openDropdown === 'unit'" aria-haspopup="listbox">
+                <span>{{ dropdownLabel(units, product.unit, 'Select unit') }}</span>
+                <span class="dropdown-arrow" aria-hidden="true"></span>
+              </button>
+              <div class="dropdown-menu" *ngIf="openDropdown === 'unit'">
+                <input type="search" [(ngModel)]="unitSearchTerm" placeholder="Search units..."
+                  aria-label="Search units" (click)="$event.stopPropagation()" />
+                <div class="dropdown-options" role="listbox" aria-label="Units">
+                  <button type="button" role="option" *ngFor="let u of filteredUnits"
+                    [attr.aria-selected]="product.unit === u.id" (click)="selectUnit(u.id)">
+                    {{ u.name }}
+                  </button>
+                  <span class="no-options" *ngIf="filteredUnits.length === 0">No units found</span>
+                </div>
+              </div>
+            </div>
           </div>
           <div class="form-group">
             <label>Unit Size</label>

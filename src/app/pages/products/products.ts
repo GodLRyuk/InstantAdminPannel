@@ -9,6 +9,7 @@ import { MasterService } from '../../services/auth.service';
   styleUrl: './products.css',
 })
 export class Products implements OnInit {
+  openDropdown: 'brand' | 'category' | 'subcategory' | 'unit' | null = null;
   products: ProductModel[] = [];
   filteredProducts: ProductModel[] = [];
   pagedProducts: ProductModel[] = [];
@@ -117,6 +118,39 @@ export class Products implements OnInit {
     return this.filterDropdownOptions(this.units, this.unitSearchTerm);
   }
 
+  dropdownLabel(options: any[], selectedId: number | null, placeholder: string): string {
+    return options.find(option => option.id === selectedId)?.name ?? placeholder;
+  }
+
+  toggleDropdown(dropdown: 'brand' | 'category' | 'subcategory' | 'unit'): void {
+    this.openDropdown = this.openDropdown === dropdown ? null : dropdown;
+  }
+
+  selectBrand(id: number): void {
+    this.product.brand = id;
+    this.brandSearchTerm = '';
+    this.openDropdown = null;
+  }
+
+  selectCategory(id: number): void {
+    this.product.category = id;
+    this.onCategoryChange();
+    this.categorySearchTerm = '';
+    this.openDropdown = null;
+  }
+
+  selectSubcategory(id: number): void {
+    this.product.subcategory = id;
+    this.subcategorySearchTerm = '';
+    this.openDropdown = null;
+  }
+
+  selectUnit(id: number): void {
+    this.product.unit = id;
+    this.unitSearchTerm = '';
+    this.openDropdown = null;
+  }
+
   private filterDropdownOptions(options: any[], searchTerm: string): any[] {
     const term = searchTerm.trim().toLowerCase();
     return term
@@ -185,6 +219,7 @@ export class Products implements OnInit {
     this.categorySearchTerm = '';
     this.subcategorySearchTerm = '';
     this.unitSearchTerm = '';
+    this.openDropdown = null;
   }
 
   getEmptyProduct(): ProductModel {
