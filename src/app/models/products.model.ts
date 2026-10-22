@@ -9,6 +9,7 @@ export interface ProductModel {
   created_at: string;
   category: number;
   subcategory: number;
+  subcategory_id?: number;
   brand: number | null;
   unit: number;
   unit_size: null,

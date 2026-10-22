@@ -170,7 +170,11 @@ export class Products implements OnInit {
     this.masterService.getAllSubCat().subscribe({
       next: (res: any) => {
         this.subcategories = res;
-        this.filteredSubcategories = res; // initial
+        if (this.showModal && this.modalType === 'edit') {
+          this.syncEditSubcategory();
+        } else {
+          this.filteredSubcategories = res;
+        }
       },
       error: err => console.error(err)
     });
@@ -184,17 +188,39 @@ export class Products implements OnInit {
     });
   }
   onCategoryChange() {
-    console.log('product.category:', this.product.category, typeof this.product.category);
-    console.log('all subcategories:', this.subcategories);
-
     this.subcategorySearchTerm = '';
-    this.filteredSubcategories = this.subcategories.filter(
-      sub => sub.category === this.product.category
-    );
-
-    console.log('filteredSubcategories result:', this.filteredSubcategories);
+    this.filteredSubcategories = this.getSubcategoriesForCategory(this.product.category);
     this.product.subcategory = 0;
   }
+
+  private getSubcategoriesForCategory(categoryId: number): any[] {
+    return this.subcategories.filter(
+      sub => this.getSubcategoryCategoryId(sub) === Number(categoryId)
+    );
+  }
+
+  private getSubcategoryCategoryId(subcategory: any): number | null {
+    const category = subcategory.category ?? subcategory.category_id ?? subcategory.categoryId;
+    const id = typeof category === 'object' && category !== null ? category.id : category;
+    const categoryId = Number(id);
+    return Number.isFinite(categoryId) ? categoryId : null;
+  }
+
+  private syncEditSubcategory(): void {
+    const selectedId = Number(this.product.subcategory_id ?? this.product.subcategory);
+    const selectedSubcategory = this.subcategories.find(
+      subcategory => Number(subcategory.id) === selectedId
+    );
+
+    this.filteredSubcategories = this.getSubcategoriesForCategory(this.product.category);
+    if (selectedSubcategory) {
+      this.product.subcategory = Number(selectedSubcategory.id);
+      if (!this.filteredSubcategories.some(subcategory => Number(subcategory.id) === selectedId)) {
+        this.filteredSubcategories = [...this.filteredSubcategories, selectedSubcategory];
+      }
+    }
+  }
+
   loadUnits() {
     this.masterService.getAllunits().subscribe({
       next: (res: any) => {
@@ -245,13 +271,12 @@ export class Products implements OnInit {
     this.modalType = 'edit';
     this.selectedProduct = product;
     this.product = { ...product, barcode: product.barcode ?? '' };
+    this.product.subcategory = Number(product.subcategory_id ?? product.subcategory) || 0;
     this.selectedFile = null;
     this.imagePreview = product.image || null;
     this.resetDropdownSearches();
 
-    this.filteredSubcategories = this.subcategories.filter(
-      sub => sub.category_id === this.product.category
-    );
+    this.syncEditSubcategory();
 
     this.showModal = true;
   }
