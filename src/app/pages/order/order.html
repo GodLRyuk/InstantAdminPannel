@@ -88,13 +88,13 @@
   <div class="loader" *ngIf="loading">Updating status...</div>
 
   <div class="pagination" *ngIf="totalPages > 1">
-    <button class="pg-btn" (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1">&#8249;</button>
-    <button class="pg-btn"
+    <button (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1">Prev</button>
+    <button
       *ngFor="let p of pages"
       [class.active]="currentPage === p"
       (click)="goToPage(p)">
       {{ p }}
     </button>
-    <button class="pg-btn" (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages">&#8250;</button>
+    <button (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages">Next</button>
   </div>
 </div>

@@ -2,6 +2,7 @@ import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { interval, Subject, startWith, switchMap, takeUntil } from 'rxjs';
 import { MasterService } from '../../services/auth.service';
 import { OrderModel } from '../../models/order.model';
+import { getVisiblePageNumbers } from '../../shared/pagination';
 import {
   escapeReceiptText,
   formatReceiptCurrency,
@@ -147,7 +148,7 @@ export class OrdersComponent implements OnInit, OnDestroy {
   }
 
   get pages(): number[] {
-    return Array.from({ length: this.totalPages }, (_, i) => i + 1);
+    return getVisiblePageNumbers(this.currentPage, this.totalPages);
   }
 
   printReceipt(order: OrderModel): void {

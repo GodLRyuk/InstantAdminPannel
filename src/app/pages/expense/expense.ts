@@ -1,6 +1,7 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ExpenseModel, ExpenseCategoryModel, ExpenseSummaryModel } from '../../models/expense.model';
 import { MasterService } from '../../services/auth.service';
+import { getVisiblePageNumbers } from '../../shared/pagination';
 
 @Component({
   selector: 'app-expense',
@@ -145,7 +146,7 @@ export class Expense implements OnInit {
   }
 
   get pages(): number[] {
-    return Array.from({ length: this.totalPages }, (_, i) => i + 1);
+    return getVisiblePageNumbers(this.currentPage, this.totalPages);
   }
 
   // ── Expense modal ──────────────────────────────

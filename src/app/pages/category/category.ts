@@ -1,6 +1,7 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CategoryModel } from '../../models/category.model';
 import { MasterService } from '../../services/auth.service';
+import { getVisiblePageNumbers } from '../../shared/pagination';
 
 @Component({
   selector: 'app-category',
@@ -75,7 +76,7 @@ updatePagedCats() {
   }
 
   get pages(): number[] {
-    return Array.from({ length: this.totalPages }, (_, i) => i + 1);
+    return getVisiblePageNumbers(this.currentPage, this.totalPages);
   }
 
   onFileSelected(event: any) {

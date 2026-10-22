@@ -1,6 +1,7 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { BrandModel } from '../../models/brand.model';
 import { MasterService } from '../../services/auth.service';
+import { getVisiblePageNumbers } from '../../shared/pagination';
 
 @Component({
   selector: 'app-brand',
@@ -79,7 +80,7 @@ export class Brand implements OnInit {
   }
 
   get pages(): number[] {
-    return Array.from({ length: this.totalPages }, (_, i) => i + 1);
+    return getVisiblePageNumbers(this.currentPage, this.totalPages);
   }
 
   openAddModal() {

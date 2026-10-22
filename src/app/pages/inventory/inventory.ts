@@ -1,6 +1,7 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { MasterService } from '../../services/auth.service';
 import { InventoryModel } from '../../models/inventory.model';
+import { getVisiblePageNumbers } from '../../shared/pagination';
 
 @Component({
   selector: 'app-inventory',
@@ -77,7 +78,7 @@ export class Inventory implements OnInit {
   }
 
   get pages(): number[] {
-    return Array.from({ length: this.totalPages }, (_, i) => i + 1);
+    return getVisiblePageNumbers(this.currentPage, this.totalPages);
   }
 
   openAddModal() {
