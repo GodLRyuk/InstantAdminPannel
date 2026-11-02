@@ -18,6 +18,8 @@ import { StockAdjustmentModel } from '../models/stock-adjustment.model';
 import { AdminUser, CreateUserPayload, UserRole } from '../models/user.model';
 import { Login, LoginResponse } from '../models/login.model';
 import {
+  AnalyticsAssistantRequest,
+  AnalyticsAssistantResponse,
   AnalyticsDemandForecast,
   AnalyticsDemandSignal,
   AnalyticsInventoryInsights,
@@ -413,6 +415,13 @@ export class MasterService {
 
   getAnalyticsDemandSignals() {
     return this.http.get<AnalyticsDemandSignal[]>(`${this.apiUrl}/analytics/demand-signals/`);
+  }
+
+  askAnalyticsAssistant(request: AnalyticsAssistantRequest) {
+    return this.http.post<AnalyticsAssistantResponse>(
+      `${this.apiUrl}/analytics/assistant/ask/`,
+      request
+    );
   }
 
 // ── COD SETTLEMENTS ──────────────────────────────

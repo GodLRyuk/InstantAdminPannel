@@ -123,3 +123,18 @@ export interface AnalyticsDemandSignal {
   quantity: number | null;
   created_at: string;
 }
+
+export interface AnalyticsAssistantRequest {
+  question: string;
+  start_date: string;
+  end_date: string;
+}
+
+export interface AnalyticsAssistantResponse {
+  answer: string;
+  intent: 'overview' | 'sales' | 'top_products' | 'inventory';
+  start_date: string;
+  end_date: string;
+  model: string;
+  data: Record<string, unknown>;
+}

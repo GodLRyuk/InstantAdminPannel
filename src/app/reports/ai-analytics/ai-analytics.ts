@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Chart, registerables } from 'chart.js';
 import { Observable } from 'rxjs';
 import {
+  AnalyticsAssistantResponse,
   AnalyticsDemandForecast,
   AnalyticsDemandForecastResult,
   AnalyticsDemandSignal,
@@ -42,6 +43,10 @@ export class AiAnalytics implements AfterViewInit, OnDestroy {
   groupBy: 'day' | 'week' | 'month' = 'day';
   forecastHorizon = 7;
   selectedForecastProductId: number | null = null;
+  assistantQuestion = '';
+  assistantResponse: AnalyticsAssistantResponse | null = null;
+  assistantLoading = false;
+  assistantError = '';
   filterError = '';
 
   overview: AnalyticsOverview | null = null;
@@ -91,9 +96,7 @@ export class AiAnalytics implements AfterViewInit, OnDestroy {
   }
 
   refreshReports(): void {
-    this.filterError = '';
-    if (!this.startDate || !this.endDate || this.startDate > this.endDate) {
-      this.filterError = 'Choose a valid date range. The start date must be on or before the end date.';
+    if (!this.validateDateRange()) {
       return;
     }
 
@@ -140,6 +143,38 @@ export class AiAnalytics implements AfterViewInit, OnDestroy {
     this.loadSection('signals', this.masterService.getAnalyticsDemandSignals(), data => {
       this.demandSignals = data;
       this.renderSignalsChart(data);
+    });
+  }
+
+  askAssistant(): void {
+    this.assistantError = '';
+    this.assistantResponse = null;
+    if (!this.validateDateRange()) {
+      this.assistantError = this.filterError;
+      return;
+    }
+
+    const question = this.assistantQuestion.trim();
+    if (!question) {
+      this.assistantError = 'Enter a question about the reports.';
+      return;
+    }
+
+    this.assistantLoading = true;
+    this.masterService.askAnalyticsAssistant({
+      question,
+      start_date: this.startDate,
+      end_date: this.endDate,
+    }).subscribe({
+      next: response => {
+        this.assistantResponse = response;
+        this.assistantLoading = false;
+      },
+      error: error => {
+        console.error('Failed to ask the analytics assistant', error);
+        this.assistantError = this.getAssistantErrorMessage(error.status);
+        this.assistantLoading = false;
+      },
     });
   }
 
@@ -205,6 +240,40 @@ export class AiAnalytics implements AfterViewInit, OnDestroy {
         this.loading[section] = false;
       },
     });
+  }
+
+  private validateDateRange(): boolean {
+    this.filterError = '';
+    if (!this.startDate || !this.endDate || this.startDate > this.endDate) {
+      this.filterError = 'Choose a valid date range. The start date must be on or before the end date.';
+      return false;
+    }
+
+    const start = Date.parse(`${this.startDate}T00:00:00Z`);
+    const end = Date.parse(`${this.endDate}T00:00:00Z`);
+    const today = Date.parse(`${this.toDateInputValue(new Date())}T00:00:00Z`);
+    if (end > today) {
+      this.filterError = 'The end date cannot be in the future.';
+      return false;
+    }
+    if ((end - start) / 86_400_000 + 1 > 366) {
+      this.filterError = 'Date ranges cannot exceed 366 days.';
+      return false;
+    }
+    return true;
+  }
+
+  private getAssistantErrorMessage(status: number): string {
+    if (status === 503) {
+      return 'The analytics assistant is disabled on the server. Reports are still available.';
+    }
+    if (status === 502) {
+      return 'The AI model is unavailable or returned an invalid response. Please try again later.';
+    }
+    if (status === 504) {
+      return 'The AI model timed out. Please try again.';
+    }
+    return 'Unable to get an explanation right now. Please try again.';
   }
 
   private renderSalesChart(data: AnalyticsSalesSummary): void {
