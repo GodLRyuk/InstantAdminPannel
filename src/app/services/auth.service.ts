@@ -17,6 +17,14 @@ import { StoreScheduleModel, StoreStatusModel } from '../models/store-schedule.m
 import { StockAdjustmentModel } from '../models/stock-adjustment.model';
 import { AdminUser, CreateUserPayload, UserRole } from '../models/user.model';
 import { Login, LoginResponse } from '../models/login.model';
+import {
+  AnalyticsDemandForecast,
+  AnalyticsDemandSignal,
+  AnalyticsInventoryInsights,
+  AnalyticsOverview,
+  AnalyticsSalesSummary,
+  AnalyticsTopProducts,
+} from '../models/analytics.model';
 
 @Injectable({
   providedIn: 'root'
@@ -361,6 +369,50 @@ export class MasterService {
       `${this.apiUrl}/reports/brand-products-export/`,
       { responseType: 'blob' }
     );
+  }
+
+  getAnalyticsOverview(startDate: string, endDate: string) {
+    const params = new HttpParams()
+      .set('start_date', startDate)
+      .set('end_date', endDate);
+    return this.http.get<AnalyticsOverview>(`${this.apiUrl}/analytics/overview/`, { params });
+  }
+
+  getAnalyticsSalesSummary(
+    startDate: string,
+    endDate: string,
+    groupBy: 'day' | 'week' | 'month'
+  ) {
+    const params = new HttpParams()
+      .set('start_date', startDate)
+      .set('end_date', endDate)
+      .set('group_by', groupBy);
+    return this.http.get<AnalyticsSalesSummary>(`${this.apiUrl}/analytics/sales-summary/`, { params });
+  }
+
+  getAnalyticsTopProducts(startDate: string, endDate: string) {
+    const params = new HttpParams()
+      .set('start_date', startDate)
+      .set('end_date', endDate)
+      .set('limit', 10)
+      .set('sort_by', 'revenue');
+    return this.http.get<AnalyticsTopProducts>(`${this.apiUrl}/analytics/top-products/`, { params });
+  }
+
+  getAnalyticsDemandForecast(horizonDays: number) {
+    const params = new HttpParams()
+      .set('horizon_days', horizonDays)
+      .set('limit', 100);
+    return this.http.get<AnalyticsDemandForecast>(`${this.apiUrl}/analytics/demand-forecast/`, { params });
+  }
+
+  getAnalyticsInventoryInsights() {
+    const params = new HttpParams().set('limit', 100);
+    return this.http.get<AnalyticsInventoryInsights>(`${this.apiUrl}/analytics/inventory-insights/`, { params });
+  }
+
+  getAnalyticsDemandSignals() {
+    return this.http.get<AnalyticsDemandSignal[]>(`${this.apiUrl}/analytics/demand-signals/`);
   }
 
 // ── COD SETTLEMENTS ──────────────────────────────

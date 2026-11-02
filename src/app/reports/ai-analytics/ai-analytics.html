@@ -1,0 +1,239 @@
+<main class="analytics-page">
+  <header class="page-heading">
+    <div>
+      <p class="eyebrow">DATA-DRIVEN REPORTS</p>
+      <h1>AI Analytics</h1>
+      <p class="subtitle">A visual view of sales, product demand, inventory health, and customer signals.</p>
+    </div>
+    <button class="refresh-button" type="button" (click)="refreshReports()">Refresh reports</button>
+  </header>
+
+  <section class="filter-card" aria-label="Report filters">
+    <label>
+      <span>Date from</span>
+      <input type="date" [(ngModel)]="startDate" />
+    </label>
+    <label>
+      <span>Date to</span>
+      <input type="date" [(ngModel)]="endDate" />
+    </label>
+    <label>
+      <span>Sales interval</span>
+      <select [(ngModel)]="groupBy">
+        <option value="day">Daily</option>
+        <option value="week">Weekly</option>
+        <option value="month">Monthly</option>
+      </select>
+    </label>
+    <label>
+      <span>Forecast horizon</span>
+      <select [(ngModel)]="forecastHorizon">
+        <option [ngValue]="7">7 days</option>
+        <option [ngValue]="14">14 days</option>
+        <option [ngValue]="30">30 days</option>
+      </select>
+    </label>
+    <button class="apply-button" type="button" (click)="refreshReports()">Apply filters</button>
+    <p class="filter-error" *ngIf="filterError" role="alert">{{ filterError }}</p>
+  </section>
+
+  <section class="metric-grid" aria-label="Business overview">
+    <article class="metric-card">
+      <span class="metric-icon revenue-icon" aria-hidden="true">$</span>
+      <div>
+        <p>Order revenue</p>
+        <strong>{{ overview ? formatMoney(overview.sales.order_revenue) : '—' }}</strong>
+        <small>Delivered and paid orders</small>
+      </div>
+      <span class="loading-note" *ngIf="loading.overview">Loading</span>
+      <span class="error-note" *ngIf="errors.overview">Unavailable</span>
+    </article>
+    <article class="metric-card">
+      <span class="metric-icon orders-icon" aria-hidden="true">#</span>
+      <div>
+        <p>Completed orders</p>
+        <strong>{{ overview?.sales?.order_count ?? '—' }}</strong>
+        <small>{{ overview?.sales?.units_sold ?? '—' }} units sold</small>
+      </div>
+      <span class="loading-note" *ngIf="loading.overview">Loading</span>
+    </article>
+    <article class="metric-card">
+      <span class="metric-icon stock-icon" aria-hidden="true">▥</span>
+      <div>
+        <p>Available stock</p>
+        <strong>{{ overview?.inventory?.available_units ?? '—' }}</strong>
+        <small>{{ overview?.inventory?.total_products ?? '—' }} tracked products</small>
+      </div>
+      <span class="loading-note" *ngIf="loading.overview">Loading</span>
+    </article>
+    <article class="metric-card">
+      <span class="metric-icon alert-icon" aria-hidden="true">!</span>
+      <div>
+        <p>Low-stock products</p>
+        <strong>{{ overview?.inventory?.low_stock_count ?? '—' }}</strong>
+        <small>{{ overview ? lowStockPercent + '%' : '—' }} of tracked products</small>
+      </div>
+      <span class="loading-note" *ngIf="loading.overview">Loading</span>
+    </article>
+  </section>
+
+  <section class="chart-grid">
+    <article class="report-card">
+      <div class="card-heading">
+        <div>
+          <h2>Sales trend</h2>
+          <p>Order revenue across the selected date range</p>
+        </div>
+        <span class="report-tag">SALES</span>
+      </div>
+      <div class="chart-wrap">
+        <canvas #salesCanvas aria-label="Sales revenue trend chart"></canvas>
+        <div class="chart-state" *ngIf="loading.sales">Loading sales report…</div>
+        <div class="chart-state error-state" *ngIf="errors.sales" role="alert">{{ errors.sales }}</div>
+        <div class="chart-state" *ngIf="!loading.sales && !errors.sales && salesSummary?.periods?.length === 0">
+          No sales found for this date range.
+        </div>
+      </div>
+    </article>
+
+    <article class="report-card">
+      <div class="card-heading">
+        <div>
+          <h2>Top products</h2>
+          <p>Best-performing products by item subtotal</p>
+        </div>
+        <span class="report-tag">PRODUCTS</span>
+      </div>
+      <div class="chart-wrap">
+        <canvas #topProductsCanvas aria-label="Top products by item subtotal chart"></canvas>
+        <div class="chart-state" *ngIf="loading.topProducts">Loading product report…</div>
+        <div class="chart-state error-state" *ngIf="errors.topProducts" role="alert">{{ errors.topProducts }}</div>
+        <div class="chart-state" *ngIf="!loading.topProducts && !errors.topProducts && topProducts?.results?.length === 0">
+          No product sales found for this date range.
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <section class="report-card forecast-card">
+    <div class="card-heading">
+      <div>
+        <h2>Product demand forecast</h2>
+        <p>Estimated units per day for the selected forecast horizon</p>
+      </div>
+      <span class="report-tag forecast-tag">BASELINE MODEL</span>
+    </div>
+    <div class="forecast-summary" *ngIf="demandForecast as forecast">
+      <span>Model <strong>{{ forecast.model.name }} v{{ forecast.model.version }}</strong></span>
+      <span>History <strong>{{ forecast.history.start_date }} – {{ forecast.history.end_date }}</strong></span>
+      <span>Products shown <strong>{{ forecast.results.length }} / {{ forecast.count }}</strong></span>
+    </div>
+    <div class="forecast-layout">
+      <div class="chart-wrap forecast-chart">
+        <canvas #forecastCanvas aria-label="Selected product demand forecast chart"></canvas>
+        <div class="chart-state" *ngIf="loading.forecast">Loading demand forecasts…</div>
+        <div class="chart-state error-state" *ngIf="errors.forecast" role="alert">{{ errors.forecast }}</div>
+        <div class="chart-state" *ngIf="!loading.forecast && !errors.forecast && !selectedForecast?.forecast?.length">
+          No forecast is available for this product. More sales history may be needed.
+        </div>
+      </div>
+      <div class="forecast-details" *ngIf="selectedForecast as selected">
+        <label class="forecast-product-select">
+          <span>Product</span>
+          <select [(ngModel)]="selectedForecastProductId" (ngModelChange)="onForecastProductChange()">
+            <option *ngFor="let result of demandForecast?.results" [ngValue]="result.product_id">
+              {{ result.product_name }}
+            </option>
+          </select>
+        </label>
+        <div class="forecast-stat">
+          <span>History sales days</span>
+          <strong>{{ selected.history.sales_days }} / {{ selected.history.calendar_days }}</strong>
+        </div>
+        <div class="forecast-stat">
+          <span>Fulfilled units</span>
+          <strong>{{ selected.history.fulfilled_units }}</strong>
+        </div>
+        <div class="forecast-stat">
+          <span>Evaluation MAE</span>
+          <strong>{{ selected.evaluation.mae_units ?? 'Not evaluated' }} units</strong>
+        </div>
+        <div class="forecast-stat">
+          <span>Evaluation WAPE</span>
+          <strong>{{ selected.evaluation.wape_percent === null ? 'Not available' : selected.evaluation.wape_percent + '%' }}</strong>
+        </div>
+        <p class="forecast-status" [class.status-warning]="selected.status === 'insufficient_data'">
+          {{ selected.status === 'baseline_estimate' ? 'Baseline estimate available' : 'Insufficient sales history' }}
+        </p>
+      </div>
+    </div>
+    <p class="model-caveat" *ngIf="demandForecast?.caveats?.length">
+      {{ demandForecast?.caveats?.[0] }} {{ demandForecast?.caveats?.[1] }}
+    </p>
+  </section>
+
+  <section class="chart-grid">
+    <article class="report-card">
+      <div class="card-heading">
+        <div>
+          <h2>Inventory health</h2>
+          <p>Products with the least available stock</p>
+        </div>
+        <span class="report-tag">INVENTORY</span>
+      </div>
+      <div class="chart-wrap">
+        <canvas #inventoryCanvas aria-label="Available inventory by product chart"></canvas>
+        <div class="chart-state" *ngIf="loading.inventory">Loading inventory report…</div>
+        <div class="chart-state error-state" *ngIf="errors.inventory" role="alert">{{ errors.inventory }}</div>
+        <div class="chart-state" *ngIf="!loading.inventory && !errors.inventory && inventoryInsights?.results?.length === 0">
+          No inventory records found.
+        </div>
+      </div>
+      <p class="chart-footnote" *ngIf="inventoryInsights">
+        {{ inventoryInsights.low_stock_count }} products are at or below their low-stock threshold.
+        Showing {{ inventoryInsights.results.length }} of {{ inventoryInsights.count }} inventory records.
+      </p>
+    </article>
+
+    <article class="report-card">
+      <div class="card-heading">
+        <div>
+          <h2>Customer demand signals</h2>
+          <p>Search and add-to-cart activity captured by the store</p>
+        </div>
+        <span class="report-tag">DEMAND</span>
+      </div>
+      <div class="signals-layout">
+        <div class="signals-chart">
+          <canvas #signalsCanvas aria-label="Search and add-to-cart signals chart"></canvas>
+          <div class="chart-state" *ngIf="loading.signals">Loading demand signals…</div>
+          <div class="chart-state error-state" *ngIf="errors.signals" role="alert">{{ errors.signals }}</div>
+        </div>
+        <div class="signal-counts">
+          <div><span class="signal-dot search-dot"></span><span>Searches</span><strong>{{ searchSignalCount }}</strong></div>
+          <div><span class="signal-dot cart-dot"></span><span>Add to cart</span><strong>{{ addToCartSignalCount }}</strong></div>
+          <small>Latest {{ demandSignals.length }} recorded signals</small>
+        </div>
+      </div>
+      <div class="signals-empty" *ngIf="!loading.signals && !errors.signals && demandSignals.length === 0">
+        No demand signals have been recorded yet.
+      </div>
+      <div class="signal-list" *ngIf="demandSignals.length">
+        <div class="signal-row" *ngFor="let signal of demandSignals.slice(0, 6)">
+          <span class="signal-type" [class.cart-type]="signal.signal_type === 'ADD_TO_CART'">
+            {{ signal.signal_type === 'SEARCH' ? 'Search' : 'Add to cart' }}
+          </span>
+          <span class="signal-description">
+            {{ signal.signal_type === 'SEARCH' ? ('“' + (signal.normalized_query || '—') + '” · ' + (signal.result_count ?? 0) + ' results') : ('Product #' + signal.product + ' · ' + (signal.quantity ?? 0) + ' units') }}
+          </span>
+          <time [attr.datetime]="signal.created_at">{{ formatDate(signal.created_at) }}</time>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <p class="definitions-note" *ngIf="overview?.sales_definitions as definitions">
+    Revenue includes delivery fees and is based on delivered, paid orders. Item subtotals do not allocate order-level discounts.
+    <span [attr.title]="definitions['refunds']">Refunds are not adjusted.</span>
+  </p>
+</main>
