@@ -177,7 +177,7 @@
       <div class="card-heading">
         <div>
           <h2>Inventory health</h2>
-          <p>Products with the least available stock</p>
+          <p>Current stock levels; not a historical snapshot</p>
         </div>
         <span class="report-tag">INVENTORY</span>
       </div>
@@ -229,6 +229,51 @@
           <time [attr.datetime]="signal.created_at">{{ formatDate(signal.created_at) }}</time>
         </div>
       </div>
+    </article>
+  </section>
+
+  <section class="report-card assistant-card">
+    <div class="card-heading">
+      <div>
+        <h2>Ask the analytics assistant</h2>
+        <p>Get a plain-language explanation based on approved report aggregates.</p>
+      </div>
+      <span class="report-tag assistant-tag">OPTIONAL AI</span>
+    </div>
+    <form class="assistant-form" (ngSubmit)="askAssistant()">
+      <label for="analytics-question">Your question</label>
+      <textarea
+        id="analytics-question"
+        name="question"
+        [(ngModel)]="assistantQuestion"
+        maxlength="1000"
+        rows="3"
+        placeholder="For example: Explain sales and delivery fees for this period"
+        [disabled]="assistantLoading"></textarea>
+      <div class="assistant-form-footer">
+        <small>Uses the currently selected date range. Your question is not sent to the AI model.</small>
+        <button
+          class="apply-button"
+          type="submit"
+          [disabled]="assistantLoading || !assistantQuestion.trim()">
+          {{ assistantLoading ? 'Analyzing…' : 'Ask assistant' }}
+        </button>
+      </div>
+    </form>
+    <div class="assistant-status" *ngIf="assistantLoading" role="status">
+      Waiting for the analytics assistant…
+    </div>
+    <div class="assistant-error" *ngIf="assistantError" role="alert">{{ assistantError }}</div>
+    <article class="assistant-answer" *ngIf="assistantResponse as response">
+      <div class="assistant-answer-heading">
+        <h3>Explanation</h3>
+        <span>{{ response.model }} · {{ response.intent.replace('_', ' ') }} · {{ response.start_date }} to {{ response.end_date }}</span>
+      </div>
+      <p class="assistant-answer-text">{{ response.answer }}</p>
+      <details>
+        <summary>View the aggregate data behind this explanation</summary>
+        <pre>{{ response.data | json }}</pre>
+      </details>
     </article>
   </section>
 
