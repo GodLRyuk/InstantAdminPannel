@@ -45,6 +45,11 @@ const routes: Routes = [
       { path: 'advbanner', component: Advbanner },
       { path: 'reports/sales', component: SalesReport },
       { path: 'reports/brand-products', component: BrandProductsReport },
+      {
+        path: 'reports/ai-analytics',
+        loadComponent: () =>
+          import('./reports/ai-analytics/ai-analytics').then(module => module.AiAnalytics),
+      },
       { path: 'settlements', component: Settlements },
       { path: 'expenses', component: Expense },
       { path: 'store-timing', component: StoreTiming },
