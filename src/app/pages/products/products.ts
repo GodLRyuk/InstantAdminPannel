@@ -309,6 +309,7 @@ export class Products implements OnInit {
             }
           }
           this.generatingBarcode = false;
+          this.cdf.detectChanges();
         }
       },
       error: err => {
@@ -316,6 +317,7 @@ export class Products implements OnInit {
         if (this.barcodeGenerationRequest === requestId) {
           this.barcodeGenerationError = 'Unable to generate barcode. Please try again.';
           this.generatingBarcode = false;
+          this.cdf.detectChanges();
         }
       }
     });
