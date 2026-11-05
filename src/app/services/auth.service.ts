@@ -231,6 +231,11 @@ export class MasterService {
       `${this.apiUrl}/products/`, data
     );
   }
+  generateBarcode(): Observable<{ barcode: string }> {
+    return this.http.post<{ barcode: string }>(
+      `${this.apiUrl}/products/generate-barcode/`, null
+    );
+  }
   updateProduct(id: number, data: FormData): Observable<any> {
   return this.http.put<ProductModel[]>(
     `${this.apiUrl}/products/${id}/`, data

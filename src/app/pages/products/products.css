@@ -14,6 +14,27 @@
   align-self: center;
 }
 
+.barcode-generate-btn {
+  margin-top: 8px;
+  padding: 8px 12px;
+  color: #fff;
+  background: #0d6efd;
+  border: 0;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.barcode-generate-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.barcode-generation-error {
+  display: block;
+  margin-top: 6px;
+  color: #b02a37;
+}
+
 .searchable-dropdown {
   position: relative;
 }

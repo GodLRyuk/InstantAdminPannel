@@ -196,6 +196,17 @@
               maxlength="50"
               autocomplete="off"
               (keydown.enter)="$event.preventDefault()" />
+            <button
+              type="button"
+              class="barcode-generate-btn"
+              (click)="generateBarcode()"
+              [disabled]="generatingBarcode || !!product.barcode?.trim()">
+              <span *ngIf="generatingBarcode" class="save-spinner" aria-hidden="true"></span>
+              {{ generatingBarcode ? 'Generating...' : product.barcode?.trim() ? 'Barcode already set' : 'Generate barcode' }}
+            </button>
+            <span *ngIf="barcodeGenerationError" class="barcode-generation-error" role="alert">
+              {{ barcodeGenerationError }}
+            </span>
           </div>
 
           <div class="form-group">
