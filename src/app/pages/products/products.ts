@@ -32,6 +32,8 @@ export class Products implements OnInit {
   selectedFile: File | null = null;
   imagePreview: string | ArrayBuffer | null = null;
   saving = false;
+  generatingBarcode = false;
+  barcodeGenerationError = '';
 
   // Search
   searchTerm = '';
@@ -234,6 +236,8 @@ export class Products implements OnInit {
   openAddModal() {
     this.modalType = 'add';
     this.product = this.getEmptyProduct();
+    this.generatingBarcode = false;
+    this.barcodeGenerationError = '';
     this.selectedFile = null;
     this.imagePreview = null;
     this.resetDropdownSearches();
@@ -272,6 +276,8 @@ export class Products implements OnInit {
     this.modalType = 'edit';
     this.selectedProduct = product;
     this.product = { ...product, barcode: product.barcode ?? '' };
+    this.generatingBarcode = false;
+    this.barcodeGenerationError = '';
     this.product.subcategory = Number(product.subcategory_id ?? product.subcategory) || 0;
     this.selectedFile = null;
     this.imagePreview = product.image || null;
@@ -280,6 +286,36 @@ export class Products implements OnInit {
     this.syncEditSubcategory();
 
     this.showModal = true;
+  }
+
+  generateBarcode(): void {
+    if (this.generatingBarcode || this.product.barcode?.trim()) return;
+
+    const product = this.product;
+    this.generatingBarcode = true;
+    this.barcodeGenerationError = '';
+
+    this.masterService.generateBarcode().subscribe({
+      next: response => {
+        if (this.product === product) {
+          if (this.showModal && !this.product.barcode?.trim()) {
+            if (response?.barcode?.trim()) {
+              this.product.barcode = response.barcode;
+            } else {
+              this.barcodeGenerationError = 'The barcode service returned an empty barcode.';
+            }
+          }
+          this.generatingBarcode = false;
+        }
+      },
+      error: err => {
+        console.error('Error generating barcode', err);
+        if (this.product === product) {
+          this.barcodeGenerationError = 'Unable to generate barcode. Please try again.';
+          this.generatingBarcode = false;
+        }
+      }
+    });
   }
 
   save() {
