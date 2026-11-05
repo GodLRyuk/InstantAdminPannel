@@ -34,6 +34,7 @@ export class Products implements OnInit {
   saving = false;
   generatingBarcode = false;
   barcodeGenerationError = '';
+  private barcodeGenerationRequest = 0;
 
   // Search
   searchTerm = '';
@@ -235,6 +236,7 @@ export class Products implements OnInit {
 
   openAddModal() {
     this.modalType = 'add';
+    this.barcodeGenerationRequest++;
     this.product = this.getEmptyProduct();
     this.generatingBarcode = false;
     this.barcodeGenerationError = '';
@@ -274,6 +276,7 @@ export class Products implements OnInit {
 
   openEditModal(product: ProductModel) {
     this.modalType = 'edit';
+    this.barcodeGenerationRequest++;
     this.selectedProduct = product;
     this.product = { ...product, barcode: product.barcode ?? '' };
     this.generatingBarcode = false;
@@ -291,13 +294,13 @@ export class Products implements OnInit {
   generateBarcode(): void {
     if (this.generatingBarcode || this.product.barcode?.trim()) return;
 
-    const product = this.product;
+    const requestId = ++this.barcodeGenerationRequest;
     this.generatingBarcode = true;
     this.barcodeGenerationError = '';
 
     this.masterService.generateBarcode().subscribe({
       next: response => {
-        if (this.product === product) {
+        if (this.barcodeGenerationRequest === requestId) {
           if (this.showModal && !this.product.barcode?.trim()) {
             if (response?.barcode?.trim()) {
               this.product.barcode = response.barcode;
@@ -310,7 +313,7 @@ export class Products implements OnInit {
       },
       error: err => {
         console.error('Error generating barcode', err);
-        if (this.product === product) {
+        if (this.barcodeGenerationRequest === requestId) {
           this.barcodeGenerationError = 'Unable to generate barcode. Please try again.';
           this.generatingBarcode = false;
         }
