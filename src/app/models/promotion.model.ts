@@ -3,6 +3,29 @@ export interface CouponValidationRequest {
   order_total: number;
 }
 
+export type CouponType = 'PERCENTAGE' | 'FIXED';
+
+export interface Coupon {
+  id: number;
+  code: string;
+  coupon_type: CouponType;
+  value: number | string;
+  min_order_amount: number | string;
+  active: boolean;
+  expires_at: string | null;
+  one_time_per_user: boolean;
+}
+
+export interface CouponPayload {
+  code: string;
+  coupon_type: CouponType;
+  value: number;
+  min_order_amount: number;
+  active: boolean;
+  expires_at: string | null;
+  one_time_per_user: boolean;
+}
+
 export interface FlashSaleProduct {
   id: number;
   name?: string;
@@ -43,6 +66,17 @@ export function getPromotionApiError(error: unknown, fallback: string): string {
       }
       if ('message' in response && typeof response.message === 'string') {
         return response.message;
+      }
+
+      const fieldErrors = Object.entries(response)
+        .flatMap(([field, messages]) => {
+          const values = Array.isArray(messages) ? messages : [messages];
+          return values
+            .filter((message): message is string => typeof message === 'string')
+            .map((message) => `${field}: ${message}`);
+        });
+      if (fieldErrors.length > 0) {
+        return fieldErrors.join(' ');
       }
     }
   }

@@ -16,4 +16,11 @@ describe('getPromotionApiError', () => {
     expect(getPromotionApiError({ error: { detail: 'Coupons are for Pass members only.' } }, 'Request failed.'))
       .toBe('Coupons are for Pass members only.');
   });
+
+  it('formats serializer field validation errors', () => {
+    expect(getPromotionApiError(
+      { error: { code: ['This field must be unique.'], value: ['Ensure this value is greater than or equal to 0.'] } },
+      'Request failed.'
+    )).toBe('code: This field must be unique. value: Ensure this value is greater than or equal to 0.');
+  });
 });
