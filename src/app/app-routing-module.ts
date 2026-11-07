@@ -42,7 +42,7 @@ const routes: Routes = [
       {
         path: 'promotions/coupons',
         loadComponent: () =>
-          import('./pages/coupon-validation/coupon-validation').then(module => module.CouponValidation),
+          import('./pages/coupon-validation/coupon-validation').then(module => module.CouponManagement),
       },
       {
         path: 'promotions/flash-sales',

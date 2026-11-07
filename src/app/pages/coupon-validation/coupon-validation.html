@@ -1,54 +1,151 @@
 <div class="page-container">
   <div class="page-header">
-    <h2>Coupons</h2>
+    <h2>Coupon Management</h2>
+    <button class="add-btn" type="button" (click)="openCreateForm()">Create coupon</button>
   </div>
 
-  <section class="table-card manage-card">
-    <div>
-      <h3>Manage coupon codes</h3>
-      <p class="page-description">
-        Create and manage coupons in Django admin. The Pass-member restriction below applies to customer coupon validation, not coupon creation.
-      </p>
-    </div>
-    <a class="add-btn manage-link" [href]="couponAdminUrl" target="_blank" rel="noopener noreferrer">
-      Open coupon management
-    </a>
+  <p class="page-description">Create, edit, and manage customer coupon codes.</p>
+
+  <p class="promotion-error" role="alert" *ngIf="errorMessage">{{ errorMessage }}</p>
+  <p class="promotion-success" role="status" *ngIf="successMessage">{{ successMessage }}</p>
+
+  <section class="table-card coupon-form-card">
+    <h3>{{ editingId === null ? 'Create a coupon' : 'Edit coupon' }}</h3>
+    <p class="form-description">Configure the discount, eligibility, and coupon availability.</p>
+
+    <form (ngSubmit)="saveCoupon()">
+      <div class="coupon-form-grid">
+        <div class="coupon-field">
+          <label for="coupon-code">Code</label>
+          <input
+            id="coupon-code"
+            name="code"
+            type="text"
+            [(ngModel)]="form.code"
+            placeholder="e.g. SAVE10"
+            autocomplete="off"
+            required />
+        </div>
+
+        <div class="coupon-field">
+          <label for="coupon-type">Coupon type</label>
+          <select id="coupon-type" name="coupon_type" [(ngModel)]="form.coupon_type" required>
+            <option value="PERCENTAGE">Percentage</option>
+            <option value="FIXED">Fixed amount</option>
+          </select>
+        </div>
+
+        <div class="coupon-field">
+          <label for="coupon-value">Value</label>
+          <input
+            id="coupon-value"
+            name="value"
+            type="number"
+            [(ngModel)]="form.value"
+            min="0"
+            step="0.01"
+            required />
+        </div>
+
+        <div class="coupon-field">
+          <label for="coupon-min-order">Minimum order amount</label>
+          <input
+            id="coupon-min-order"
+            name="min_order_amount"
+            type="number"
+            [(ngModel)]="form.min_order_amount"
+            min="0"
+            step="0.01"
+            required />
+        </div>
+
+        <div class="coupon-field">
+          <label for="coupon-expires">Expiry date <span class="optional-label">Optional</span></label>
+          <input
+            id="coupon-expires"
+            name="expires_at"
+            type="datetime-local"
+            [(ngModel)]="form.expires_at" />
+        </div>
+      </div>
+
+      <div class="coupon-toggles">
+        <label class="coupon-toggle">
+          <input type="checkbox" name="active" [(ngModel)]="form.active" />
+          Coupon is active
+        </label>
+        <label class="coupon-toggle">
+          <input type="checkbox" name="one_time_per_user" [(ngModel)]="form.one_time_per_user" />
+          Limit to one use per customer
+        </label>
+      </div>
+
+      <div class="coupon-form-actions">
+        <button class="add-btn" type="submit" [disabled]="saving">
+          {{ saving ? 'Saving...' : editingId === null ? 'Create coupon' : 'Save changes' }}
+        </button>
+        <button class="cancel-btn" type="button" *ngIf="editingId !== null" (click)="cancelEdit()">
+          Cancel
+        </button>
+      </div>
+    </form>
   </section>
 
-  <section class="table-card promotion-card">
-    <h3>Validate a coupon</h3>
-    <p class="page-description">Check customer eligibility and the discount for an order total.</p>
-    <form class="promotion-form" (ngSubmit)="validateCoupon()">
-      <div class="promotion-field">
-        <label for="coupon-code">Coupon code</label>
-        <input
-          id="coupon-code"
-          name="code"
-          type="text"
-          [(ngModel)]="form.code"
-          placeholder="e.g. SAVE10"
-          required />
+  <section class="table-card coupon-list-card">
+    <div class="list-heading">
+      <div>
+        <h3>Coupons</h3>
+        <p class="form-description">Existing coupon codes and their current settings.</p>
       </div>
-      <div class="promotion-field">
-        <label for="order-total">Order total</label>
-        <input
-          id="order-total"
-          name="order_total"
-          type="number"
-          [(ngModel)]="form.order_total"
-          min="0"
-          step="0.01"
-          required />
-      </div>
-      <button class="add-btn" type="submit" [disabled]="loading || !form.code.trim()">
-        {{ loading ? 'Checking...' : 'Validate Coupon' }}
-      </button>
-    </form>
+      <span class="coupon-count">{{ coupons.length }} {{ coupons.length === 1 ? 'coupon' : 'coupons' }}</span>
+    </div>
 
-    <p class="promotion-error" role="alert" *ngIf="errorMessage">{{ errorMessage }}</p>
-    <div class="result-panel" *ngIf="result !== null" aria-live="polite">
-      <h3>Validation result</h3>
-      <pre>{{ formatResult() }}</pre>
+    <p class="list-loading" *ngIf="loading">Loading coupons...</p>
+    <div class="table-responsive" *ngIf="!loading">
+      <table>
+        <thead>
+          <tr>
+            <th>Code</th>
+            <th>Type</th>
+            <th>Value</th>
+            <th>Minimum order</th>
+            <th>Expires</th>
+            <th>Status</th>
+            <th>Per customer</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let coupon of coupons">
+            <td class="coupon-code">{{ coupon.code }}</td>
+            <td>{{ coupon.coupon_type === 'PERCENTAGE' ? 'Percentage' : 'Fixed' }}</td>
+            <td>{{ coupon.value }}{{ coupon.coupon_type === 'PERCENTAGE' ? '%' : '' }}</td>
+            <td>{{ coupon.min_order_amount }}</td>
+            <td>{{ coupon.expires_at ? (coupon.expires_at | date:'medium') : 'No expiry' }}</td>
+            <td>
+              <span class="status-badge" [class.status-active]="coupon.active" [class.status-inactive]="!coupon.active">
+                {{ coupon.active ? 'Active' : 'Inactive' }}
+              </span>
+            </td>
+            <td>{{ coupon.one_time_per_user ? 'One use' : 'Multiple uses' }}</td>
+            <td class="coupon-actions">
+              <button class="edit" type="button" (click)="editCoupon(coupon)" [disabled]="saving || deletingId !== null">
+                Edit
+              </button>
+              <button
+                class="delete"
+                type="button"
+                (click)="deleteCoupon(coupon)"
+                [disabled]="saving || deletingId !== null">
+                {{ deletingId === coupon.id ? 'Deleting...' : 'Delete' }}
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="coupons.length === 0">
+            <td colspan="8" class="empty-state">No coupons found. Create your first coupon above.</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </section>
 </div>

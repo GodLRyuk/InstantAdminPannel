@@ -18,6 +18,8 @@ import { StockAdjustmentModel } from '../models/stock-adjustment.model';
 import { AdminUser, CreateUserPayload, UserRole } from '../models/user.model';
 import { Login, LoginResponse } from '../models/login.model';
 import {
+  Coupon,
+  CouponPayload,
   CouponValidationRequest,
   FlashSale,
   FlashSalePayload,
@@ -233,6 +235,24 @@ export class MasterService {
 
   validateCoupon(data: CouponValidationRequest): Observable<unknown> {
     return this.http.post<unknown>(`${this.apiUrl}/promotions/validate-coupon/`, data);
+  }
+
+  getCoupons(): Observable<Coupon[] | { results: Coupon[] }> {
+    return this.http.get<Coupon[] | { results: Coupon[] }>(
+      `${this.apiUrl}/promotions/admin/coupons/`
+    );
+  }
+
+  createCoupon(data: CouponPayload): Observable<Coupon> {
+    return this.http.post<Coupon>(`${this.apiUrl}/promotions/admin/coupons/`, data);
+  }
+
+  updateCoupon(id: number, data: CouponPayload): Observable<Coupon> {
+    return this.http.patch<Coupon>(`${this.apiUrl}/promotions/admin/coupons/${id}/`, data);
+  }
+
+  deleteCoupon(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/promotions/admin/coupons/${id}/`);
   }
 
   getFlashSales(): Observable<FlashSale[] | { results: FlashSale[] }> {
