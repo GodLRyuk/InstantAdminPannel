@@ -1,10 +1,23 @@
 <div class="page-container">
   <div class="page-header">
-    <h2>Coupon Validation</h2>
+    <h2>Coupons</h2>
   </div>
 
+  <section class="table-card manage-card">
+    <div>
+      <h3>Manage coupon codes</h3>
+      <p class="page-description">
+        Create and manage coupons in Django admin. The Pass-member restriction below applies to customer coupon validation, not coupon creation.
+      </p>
+    </div>
+    <a class="add-btn manage-link" [href]="couponAdminUrl" target="_blank" rel="noopener noreferrer">
+      Open coupon management
+    </a>
+  </section>
+
   <section class="table-card promotion-card">
-    <p class="page-description">Check whether a coupon can be applied to an order total.</p>
+    <h3>Validate a coupon</h3>
+    <p class="page-description">Check customer eligibility and the discount for an order total.</p>
     <form class="promotion-form" (ngSubmit)="validateCoupon()">
       <div class="promotion-field">
         <label for="coupon-code">Coupon code</label>

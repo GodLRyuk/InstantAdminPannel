@@ -20,6 +20,7 @@ import { MasterService } from '../../services/auth.service';
 export class FlashSales implements OnInit {
   sales: FlashSale[] = [];
   products: ProductModel[] = [];
+  productSearch = '';
   form = this.emptyForm();
   editingId: number | null = null;
   loading = false;
@@ -28,6 +29,17 @@ export class FlashSales implements OnInit {
   successMessage = '';
 
   constructor(private masterService: MasterService) {}
+
+  get filteredProducts(): ProductModel[] {
+    const query = this.productSearch.trim().toLocaleLowerCase();
+    if (!query) {
+      return this.products;
+    }
+
+    return this.products.filter((product) =>
+      product.name.toLocaleLowerCase().includes(query) || String(product.id).includes(query)
+    );
+  }
 
   ngOnInit(): void {
     this.loadSales();
@@ -81,6 +93,7 @@ export class FlashSales implements OnInit {
   openCreateForm(): void {
     this.editingId = null;
     this.form = this.emptyForm();
+    this.productSearch = '';
     this.errorMessage = '';
   }
 
