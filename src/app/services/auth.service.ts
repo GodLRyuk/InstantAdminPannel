@@ -18,6 +18,11 @@ import { StockAdjustmentModel } from '../models/stock-adjustment.model';
 import { AdminUser, CreateUserPayload, UserRole } from '../models/user.model';
 import { Login, LoginResponse } from '../models/login.model';
 import {
+  CouponValidationRequest,
+  FlashSale,
+  FlashSalePayload,
+} from '../models/promotion.model';
+import {
   AnalyticsAssistantRequest,
   AnalyticsAssistantResponse,
   AnalyticsDemandForecast,
@@ -224,6 +229,28 @@ export class MasterService {
     return this.http.get<ProductModel[]>(
       `${this.apiUrl}/products/`,
     );
+  }
+
+  validateCoupon(data: CouponValidationRequest): Observable<unknown> {
+    return this.http.post<unknown>(`${this.apiUrl}/promotions/validate-coupon/`, data);
+  }
+
+  getFlashSales(): Observable<FlashSale[] | { results: FlashSale[] }> {
+    return this.http.get<FlashSale[] | { results: FlashSale[] }>(
+      `${this.apiUrl}/products/admin/flash-sales/`
+    );
+  }
+
+  createFlashSale(data: FlashSalePayload): Observable<FlashSale> {
+    return this.http.post<FlashSale>(`${this.apiUrl}/products/admin/flash-sales/`, data);
+  }
+
+  updateFlashSale(id: number, data: FlashSalePayload): Observable<FlashSale> {
+    return this.http.patch<FlashSale>(`${this.apiUrl}/products/admin/flash-sales/${id}/`, data);
+  }
+
+  deleteFlashSale(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/products/admin/flash-sales/${id}/`);
   }
   addProduct(data: FormData): Observable<any> {
 

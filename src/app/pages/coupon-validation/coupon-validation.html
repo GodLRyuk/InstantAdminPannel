@@ -1,0 +1,41 @@
+<div class="page-container">
+  <div class="page-header">
+    <h2>Coupon Validation</h2>
+  </div>
+
+  <section class="table-card promotion-card">
+    <p class="page-description">Check whether a coupon can be applied to an order total.</p>
+    <form class="promotion-form" (ngSubmit)="validateCoupon()">
+      <div class="promotion-field">
+        <label for="coupon-code">Coupon code</label>
+        <input
+          id="coupon-code"
+          name="code"
+          type="text"
+          [(ngModel)]="form.code"
+          placeholder="e.g. SAVE10"
+          required />
+      </div>
+      <div class="promotion-field">
+        <label for="order-total">Order total</label>
+        <input
+          id="order-total"
+          name="order_total"
+          type="number"
+          [(ngModel)]="form.order_total"
+          min="0"
+          step="0.01"
+          required />
+      </div>
+      <button class="add-btn" type="submit" [disabled]="loading || !form.code.trim()">
+        {{ loading ? 'Checking...' : 'Validate Coupon' }}
+      </button>
+    </form>
+
+    <p class="promotion-error" role="alert" *ngIf="errorMessage">{{ errorMessage }}</p>
+    <div class="result-panel" *ngIf="result !== null" aria-live="polite">
+      <h3>Validation result</h3>
+      <pre>{{ formatResult() }}</pre>
+    </div>
+  </section>
+</div>
