@@ -40,6 +40,11 @@ const routes: Routes = [
       { path: 'users', component: Users },
       { path: 'products', component: Products },
       {
+        path: 'bundles',
+        loadComponent: () =>
+          import('./pages/bundles/bundles').then(module => module.Bundles),
+      },
+      {
         path: 'promotions/coupons',
         loadComponent: () =>
           import('./pages/coupon-validation/coupon-validation').then(module => module.CouponManagement),

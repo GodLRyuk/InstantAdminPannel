@@ -7,6 +7,7 @@ import { UnitModel } from '../models/unit.model';
 import { CategoryModel } from '../models/category.model';
 import { SubCategoryModel } from '../models/sub-category.model';
 import { ProductModel } from '../models/products.model';
+import { Bundle, BundlePayload, toBundleFormData } from '../models/bundle.model';
 import { StockModel } from '../models/stock.model';
 import { OrderModel } from '../models/order.model';
 import { BannerModel } from '../models/banner.model';
@@ -272,6 +273,38 @@ export class MasterService {
   deleteFlashSale(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/products/admin/flash-sales/${id}/`);
   }
+
+  getBundles(): Observable<Bundle[] | { results: Bundle[] }> {
+    return this.http.get<Bundle[] | { results: Bundle[] }>(
+      `${this.apiUrl}/products/admin/bundles/`
+    );
+  }
+
+  createBundle(data: BundlePayload): Observable<Bundle> {
+    return this.http.post<Bundle>(
+      `${this.apiUrl}/products/admin/bundles/`,
+      toBundleFormData(data)
+    );
+  }
+
+  updateBundle(id: number, data: BundlePayload): Observable<Bundle> {
+    return this.http.patch<Bundle>(
+      `${this.apiUrl}/products/admin/bundles/${id}/`,
+      toBundleFormData(data)
+    );
+  }
+
+  replaceBundle(id: number, data: BundlePayload): Observable<Bundle> {
+    return this.http.put<Bundle>(
+      `${this.apiUrl}/products/admin/bundles/${id}/`,
+      toBundleFormData(data)
+    );
+  }
+
+  deleteBundle(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/products/admin/bundles/${id}/`);
+  }
+
   addProduct(data: FormData): Observable<any> {
 
     return this.http.post<ProductModel[]>(
