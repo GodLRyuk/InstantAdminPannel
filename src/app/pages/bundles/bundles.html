@@ -1,0 +1,146 @@
+<div class="page-container">
+  <div class="page-header">
+    <h2>Bundles</h2>
+    <button class="add-btn" type="button" (click)="openCreateForm()">Create bundle</button>
+  </div>
+
+  <p class="page-description">Group products together and set a bundle price for your store.</p>
+
+  <p class="bundle-error" role="alert" *ngIf="errorMessage">{{ errorMessage }}</p>
+  <p class="bundle-success" role="status" *ngIf="successMessage">{{ successMessage }}</p>
+
+  <section class="table-card bundle-form-card">
+    <h3>{{ editingId === null ? 'Create a bundle' : 'Edit bundle' }}</h3>
+    <p class="form-description">Choose the products and price, then save your bundle.</p>
+
+    <form (ngSubmit)="saveBundle()">
+      <div class="bundle-form-grid">
+        <div class="bundle-field">
+          <label for="bundle-name">Name</label>
+          <input id="bundle-name" name="name" type="text" [(ngModel)]="form.name" required />
+        </div>
+
+        <div class="bundle-field">
+          <label for="bundle-price">Bundle price</label>
+          <input
+            id="bundle-price"
+            name="bundle_price"
+            type="number"
+            [(ngModel)]="form.bundle_price"
+            min="0"
+            step="0.01"
+            required />
+        </div>
+
+        <div class="bundle-field bundle-description-field">
+          <label for="bundle-description">Description</label>
+          <textarea id="bundle-description" name="description" rows="3" [(ngModel)]="form.description"></textarea>
+        </div>
+
+        <div class="bundle-field">
+          <label for="bundle-image">Image <span class="optional-label">Optional</span></label>
+          <input
+            #bundleImageInput
+            id="bundle-image"
+            name="image"
+            type="file"
+            accept="image/*"
+            (change)="onImageChange($event)" />
+          <span class="field-hint" *ngIf="form.image">{{ form.image.name }}</span>
+          <span class="field-hint" *ngIf="!form.image && currentImage">Current image will be kept unless replaced.</span>
+          <img class="current-image" *ngIf="currentImage" [src]="currentImage" alt="Current bundle" />
+        </div>
+      </div>
+
+      <fieldset class="product-picker">
+        <legend>Products <span class="selection-count">{{ form.products.length }} selected</span></legend>
+        <div class="product-picker-toolbar">
+          <label for="bundle-product-search">Find a product</label>
+          <input
+            id="bundle-product-search"
+            name="product_search"
+            type="search"
+            [ngModel]="productSearch"
+            (ngModelChange)="onProductSearch($event)"
+            placeholder="Search by name or ID" />
+        </div>
+        <p class="picker-empty" *ngIf="products.length === 0">No products available.</p>
+        <p class="picker-empty" *ngIf="products.length > 0 && filteredProducts.length === 0">No products match your search.</p>
+        <div class="product-grid" *ngIf="filteredProducts.length > 0">
+          <label class="product-option" *ngFor="let product of filteredProducts">
+            <input
+              type="checkbox"
+              [checked]="isProductSelected(product.id)"
+              (change)="onProductChange($event, product.id)" />
+            <span class="product-name">{{ product.name }}</span>
+            <small>Product #{{ product.id }}</small>
+          </label>
+        </div>
+      </fieldset>
+
+      <label class="active-toggle">
+        <input type="checkbox" name="is_active" [(ngModel)]="form.is_active" />
+        Bundle is active
+      </label>
+
+      <div class="bundle-form-actions">
+        <button class="add-btn" type="submit" [disabled]="saving">
+          {{ saving ? 'Saving...' : editingId === null ? 'Create bundle' : 'Save changes' }}
+        </button>
+        <button class="cancel-btn" type="button" *ngIf="editingId !== null" (click)="cancelEdit()">Cancel</button>
+      </div>
+    </form>
+  </section>
+
+  <section class="table-card bundle-list-card">
+    <div class="list-heading">
+      <div>
+        <h3>Existing bundles</h3>
+        <p class="form-description">Review and manage the bundles available in your store.</p>
+      </div>
+      <span class="bundle-count">{{ bundles.length }} {{ bundles.length === 1 ? 'bundle' : 'bundles' }}</span>
+    </div>
+
+    <p class="list-loading" *ngIf="loading">Loading bundles...</p>
+    <div class="table-responsive" *ngIf="!loading">
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Products</th>
+            <th>Bundle price</th>
+            <th>Status</th>
+            <th>Created</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let bundle of bundles">
+            <td class="bundle-name">{{ bundle.name }}</td>
+            <td>{{ bundleProductNames(bundle) || '—' }}</td>
+            <td>{{ bundle.bundle_price }}</td>
+            <td>
+              <span class="status-badge" [class.status-active]="bundle.is_active" [class.status-inactive]="!bundle.is_active">
+                {{ bundle.is_active ? 'Active' : 'Inactive' }}
+              </span>
+            </td>
+            <td>{{ bundle.created_at | date:'mediumDate' }}</td>
+            <td class="bundle-actions">
+              <button class="edit" type="button" (click)="editBundle(bundle)" [disabled]="saving || deletingId !== null">Edit</button>
+              <button
+                class="delete"
+                type="button"
+                (click)="deleteBundle(bundle)"
+                [disabled]="saving || deletingId !== null">
+                {{ deletingId === bundle.id ? 'Deleting...' : 'Delete' }}
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="bundles.length === 0">
+            <td colspan="6" class="empty-state">No bundles found. Create your first bundle above.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
