@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { environment } from '../../../environments/environment';
 import { CouponValidationRequest, getPromotionApiError } from '../../models/promotion.model';
 import { MasterService } from '../../services/auth.service';
 
@@ -12,6 +13,7 @@ import { MasterService } from '../../services/auth.service';
   styleUrl: './coupon-validation.css',
 })
 export class CouponValidation {
+  readonly couponAdminUrl = `${environment.apiUrl.replace(/\/api\/?$/, '')}/admin/promotions/coupon/`;
   form: CouponValidationRequest = { code: '', order_total: 0 };
   result: unknown = null;
   errorMessage = '';

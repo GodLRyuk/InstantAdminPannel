@@ -3,11 +3,14 @@
     <h2>Flash Sales</h2>
   </div>
 
+  <p class="page-description">Schedule discounts for selected products and manage active sales.</p>
+
   <p class="promotion-error" role="alert" *ngIf="errorMessage">{{ errorMessage }}</p>
   <p class="promotion-success" role="status" *ngIf="successMessage">{{ successMessage }}</p>
 
   <section class="table-card sale-form-card">
     <h3>{{ editingId === null ? 'Create a flash sale' : 'Edit flash sale' }}</h3>
+    <p class="form-description">Choose a title, schedule, and one or more products.</p>
     <form (ngSubmit)="saveSale()">
       <div class="sale-form-grid">
         <div class="sale-field">
@@ -25,15 +28,28 @@
       </div>
 
       <fieldset class="product-picker">
-        <legend>Products</legend>
-        <p *ngIf="products.length === 0">No products available.</p>
-        <label class="product-option" *ngFor="let product of products">
+        <legend>Products <span class="selection-count">{{ form.products.length }} selected</span></legend>
+        <div class="product-picker-toolbar">
+          <label for="product-search">Find a product</label>
           <input
-            type="checkbox"
-            [checked]="isProductSelected(product.id)"
-            (change)="onProductChange($event, product.id)" />
-          <span>{{ product.name }} <small>#{{ product.id }}</small></span>
-        </label>
+            id="product-search"
+            name="product_search"
+            type="search"
+            [(ngModel)]="productSearch"
+            placeholder="Search by name or ID" />
+        </div>
+        <p class="picker-empty" *ngIf="products.length === 0">No products available.</p>
+        <p class="picker-empty" *ngIf="products.length > 0 && filteredProducts.length === 0">No products match your search.</p>
+        <div class="product-grid" *ngIf="filteredProducts.length > 0">
+          <label class="product-option" *ngFor="let product of filteredProducts">
+            <input
+              type="checkbox"
+              [checked]="isProductSelected(product.id)"
+              (change)="onProductChange($event, product.id)" />
+            <span class="product-name">{{ product.name }}</span>
+            <small>Product #{{ product.id }}</small>
+          </label>
+        </div>
       </fieldset>
 
       <label class="active-toggle">
@@ -51,10 +67,16 @@
   </section>
 
   <section class="table-card sale-list-card">
-    <h3>Existing flash sales</h3>
-    <p *ngIf="loading">Loading flash sales...</p>
+    <div class="list-heading">
+        <div>
+          <h3>Existing flash sales</h3>
+          <p class="form-description">Review and update your scheduled promotions.</p>
+        </div>
+        <span class="sale-count">{{ sales.length }} {{ sales.length === 1 ? 'sale' : 'sales' }}</span>
+    </div>
+    <p class="list-loading" *ngIf="loading">Loading flash sales...</p>
     <div class="table-responsive" *ngIf="!loading">
-      <table>
+        <table>
         <thead>
           <tr>
             <th>Title</th>
