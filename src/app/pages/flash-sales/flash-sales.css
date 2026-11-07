@@ -1,0 +1,107 @@
+.promotion-error,
+.promotion-success {
+  margin: 0 0 16px;
+}
+
+.promotion-error {
+  color: #b42318;
+}
+
+.promotion-success {
+  color: #2e7d32;
+}
+
+.sale-form-card,
+.sale-list-card {
+  margin-bottom: 20px;
+}
+
+.sale-form-card h3,
+.sale-list-card h3 {
+  margin: 0 0 16px;
+  font-size: 1.1rem;
+}
+
+.sale-form-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.sale-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sale-field label,
+.product-picker legend {
+  font-weight: 600;
+}
+
+.sale-field input {
+  min-height: 42px;
+  padding: 8px 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.product-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  margin: 18px 0 12px;
+  padding: 12px;
+  border: 1px solid #d0d5dd;
+  border-radius: 6px;
+}
+
+.product-picker legend {
+  float: none;
+  width: auto;
+  margin: 0;
+  padding: 0 4px;
+  font-size: 1rem;
+}
+
+.product-option,
+.active-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.product-option small {
+  color: #667085;
+}
+
+.product-picker p {
+  width: 100%;
+  margin: 0;
+  color: #667085;
+}
+
+.active-toggle {
+  margin-bottom: 16px;
+}
+
+.sale-form-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.sale-form-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.empty-state {
+  padding: 20px;
+  text-align: center;
+}
+
+@media (max-width: 800px) {
+  .sale-form-grid {
+    grid-template-columns: 1fr;
+  }
+}

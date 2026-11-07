@@ -1,0 +1,71 @@
+.promotion-card {
+  max-width: 760px;
+}
+
+.page-description {
+  margin: 0 0 20px;
+  color: #667085;
+}
+
+.promotion-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: end;
+  gap: 16px;
+}
+
+.promotion-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.promotion-field label {
+  font-weight: 600;
+}
+
+.promotion-field input {
+  min-height: 42px;
+  padding: 8px 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.promotion-form .add-btn {
+  justify-self: start;
+}
+
+.promotion-form .add-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.promotion-error {
+  margin: 16px 0 0;
+  color: #b42318;
+}
+
+.result-panel {
+  margin-top: 24px;
+  padding: 16px;
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+  background: #f9fafb;
+}
+
+.result-panel h3 {
+  margin: 0 0 10px;
+  font-size: 1rem;
+}
+
+.result-panel pre {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 600px) {
+  .promotion-form {
+    grid-template-columns: 1fr;
+  }
+}

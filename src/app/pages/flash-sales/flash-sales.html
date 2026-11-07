@@ -1,0 +1,87 @@
+<div class="page-container">
+  <div class="page-header">
+    <h2>Flash Sales</h2>
+  </div>
+
+  <p class="promotion-error" role="alert" *ngIf="errorMessage">{{ errorMessage }}</p>
+  <p class="promotion-success" role="status" *ngIf="successMessage">{{ successMessage }}</p>
+
+  <section class="table-card sale-form-card">
+    <h3>{{ editingId === null ? 'Create a flash sale' : 'Edit flash sale' }}</h3>
+    <form (ngSubmit)="saveSale()">
+      <div class="sale-form-grid">
+        <div class="sale-field">
+          <label for="sale-title">Title</label>
+          <input id="sale-title" name="title" type="text" [(ngModel)]="form.title" required />
+        </div>
+        <div class="sale-field">
+          <label for="sale-start">Start time</label>
+          <input id="sale-start" name="start_time" type="datetime-local" [(ngModel)]="form.start_time" required />
+        </div>
+        <div class="sale-field">
+          <label for="sale-end">End time</label>
+          <input id="sale-end" name="end_time" type="datetime-local" [(ngModel)]="form.end_time" required />
+        </div>
+      </div>
+
+      <fieldset class="product-picker">
+        <legend>Products</legend>
+        <p *ngIf="products.length === 0">No products available.</p>
+        <label class="product-option" *ngFor="let product of products">
+          <input
+            type="checkbox"
+            [checked]="isProductSelected(product.id)"
+            (change)="onProductChange($event, product.id)" />
+          <span>{{ product.name }} <small>#{{ product.id }}</small></span>
+        </label>
+      </fieldset>
+
+      <label class="active-toggle">
+        <input type="checkbox" name="is_active" [(ngModel)]="form.is_active" />
+        Sale is active
+      </label>
+
+      <div class="sale-form-actions">
+        <button class="add-btn" type="submit" [disabled]="saving">
+          {{ saving ? 'Saving...' : editingId === null ? 'Create Sale' : 'Save Changes' }}
+        </button>
+        <button class="cancel-btn" type="button" *ngIf="editingId !== null" (click)="cancelEdit()">Cancel</button>
+      </div>
+    </form>
+  </section>
+
+  <section class="table-card sale-list-card">
+    <h3>Existing flash sales</h3>
+    <p *ngIf="loading">Loading flash sales...</p>
+    <div class="table-responsive" *ngIf="!loading">
+      <table>
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Products</th>
+            <th>Start</th>
+            <th>End</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let sale of sales">
+            <td>{{ sale.title }}</td>
+            <td>{{ productNames(sale) }}</td>
+            <td>{{ sale.start_time | date:'medium' }}</td>
+            <td>{{ sale.end_time | date:'medium' }}</td>
+            <td><span [class.active]="sale.is_active">{{ sale.is_active ? 'Active' : 'Inactive' }}</span></td>
+            <td>
+              <button class="edit" type="button" (click)="editSale(sale)">Edit</button>
+              <button class="delete" type="button" (click)="deleteSale(sale)">Delete</button>
+            </td>
+          </tr>
+          <tr *ngIf="sales.length === 0">
+            <td colspan="6" class="empty-state">No flash sales found.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>

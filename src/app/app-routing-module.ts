@@ -39,6 +39,16 @@ const routes: Routes = [
       { path: 'orders', component: OrdersComponent },
       { path: 'users', component: Users },
       { path: 'products', component: Products },
+      {
+        path: 'promotions/coupons',
+        loadComponent: () =>
+          import('./pages/coupon-validation/coupon-validation').then(module => module.CouponValidation),
+      },
+      {
+        path: 'promotions/flash-sales',
+        loadComponent: () =>
+          import('./pages/flash-sales/flash-sales').then(module => module.FlashSales),
+      },
       { path: 'stock', component: Stock },
       { path: 'inventory', component: Inventory },
       { path: 'banner', component: BannerComponent },
