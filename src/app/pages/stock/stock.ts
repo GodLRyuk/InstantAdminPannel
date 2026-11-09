@@ -20,6 +20,7 @@ export class Stock implements OnInit {
   modalType: 'add' | 'edit' = 'add';
   selectedStock: StockModel | null = null;
   stockData: StockModel = this.getEmptyStock();
+  selectedBatchView: 'available' | 'history' = 'available';
 
   // Search
   searchTerm = '';
@@ -62,14 +63,28 @@ export class Stock implements OnInit {
   }
 
   loadstock() {
-    this.masterService.getAllstock().subscribe({
-      next: (data: any) => {
-        this.stocks = data;
+    this.masterService.getAllstock(this.selectedBatchView === 'history').subscribe({
+      next: (data: StockModel[]) => {
+        this.stocks = data.filter(stock =>
+          this.selectedBatchView === 'history'
+            ? Number(stock.quantity) <= 0
+            : Number(stock.quantity) > 0
+        );
         this.applyFilter();
         this.cdf.detectChanges();
       },
       error: err => console.error('Error loading stocks', err)
     });
+  }
+
+  selectBatchView(view: 'available' | 'history'): void {
+    if (this.selectedBatchView === view) {
+      return;
+    }
+
+    this.selectedBatchView = view;
+    this.currentPage = 1;
+    this.loadstock();
   }
 
   onSearch() {

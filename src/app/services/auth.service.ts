@@ -326,11 +326,12 @@ export class MasterService {
   }
 
 
-  getAllstock(): Observable<any> {
+  getAllstock(includeEmpty = false): Observable<StockModel[]> {
+    const params = includeEmpty
+      ? new HttpParams().set('include_empty', 'true')
+      : new HttpParams();
 
-    return this.http.get<StockModel[]>(
-      `${this.apiUrl}/stock/`,
-    );
+    return this.http.get<StockModel[]>(`${this.apiUrl}/stock/`, { params });
   }
 
   addStock(data: Partial<StockModel>): Observable<any> {
