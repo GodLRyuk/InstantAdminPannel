@@ -14,6 +14,7 @@ export interface Coupon {
   active: boolean;
   expires_at: string | null;
   one_time_per_user: boolean;
+  pass_members_only: boolean;
 }
 
 export interface CouponPayload {
@@ -24,6 +25,7 @@ export interface CouponPayload {
   active: boolean;
   expires_at: string | null;
   one_time_per_user: boolean;
+  pass_members_only: boolean;
 }
 
 export interface FlashSaleProduct {
