@@ -5,24 +5,26 @@
   <div *ngIf="errorMsg" class="error">{{ errorMsg }}</div>
   <div *ngIf="successMsg" class="success">{{ successMsg }}</div>
 
-  <table *ngIf="!loading && drivers.length > 0" class="table-card">
-    <thead>
-      <tr>
-        <th>Driver</th>
-        <th>Orders pending</th>
-        <th>Total due</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let driver of drivers">
-        <td>{{ driver.deliveryassignment__driver__username }}</td>
-        <td>{{ driver.order_count }}</td>
-        <td>₹{{ driver.total_due }}</td>
-        <td><button (click)="openDriver(driver)" style="background: green;border-radius: 10px;color:white">Settle</button></td>
-      </tr>
-    </tbody>
-  </table>
+  <div class="table-responsive" *ngIf="!loading && drivers.length > 0">
+    <table class="table-card">
+      <thead>
+        <tr>
+          <th>Driver</th>
+          <th>Orders pending</th>
+          <th>Total due</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let driver of drivers">
+          <td>{{ driver.deliveryassignment__driver__username }}</td>
+          <td>{{ driver.order_count }}</td>
+          <td>₹{{ driver.total_due }}</td>
+          <td><button (click)="openDriver(driver)" style="background: green;border-radius: 10px;color:white">Settle</button></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 
   <p *ngIf="!loading && drivers.length === 0">No pending COD settlements. All clear.</p>
 
@@ -30,28 +32,30 @@
   <div *ngIf="selectedDriverId" class="drilldown-panel">
     <h3>Settling for {{ selectedDriverName }}</h3>
 
-    <table class="order-table">
-      <thead>
-        <tr>
-          <th></th>
-          <th>Order</th>
-          <th>Customer</th>
-          <th>Amount</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let order of driverOrders">
-          <td>
-            <input type="checkbox"
-                   [checked]="selectedOrderIds.has(order.order_id)"
-                   (change)="toggleOrder(order.order_id)">
-          </td>
-          <td>#{{ order.order_id }}</td>
-          <td>{{ order.customer_name }}</td>
-          <td>₹{{ order.total_amount }}</td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="table-responsive">
+      <table class="order-table">
+        <thead>
+          <tr>
+            <th></th>
+            <th>Order</th>
+            <th>Customer</th>
+            <th>Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let order of driverOrders">
+            <td>
+              <input type="checkbox"
+                     [checked]="selectedOrderIds.has(order.order_id)"
+                     (change)="toggleOrder(order.order_id)">
+            </td>
+            <td>#{{ order.order_id }}</td>
+            <td>{{ order.customer_name }}</td>
+            <td>₹{{ order.total_amount }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
     <p>Selected total: ₹{{ selectedTotal }}</p>
 
