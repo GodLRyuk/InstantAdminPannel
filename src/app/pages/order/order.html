@@ -58,7 +58,7 @@
     Confirm
   </button>
 
-  <button class="btn btn-pack" disabled
+  <button class="btn btn-pack"
     *ngIf="order.order_status === 'CONFIRMED'"
     (click)="updateStatus(order, 'PACKED')">
     Pack
@@ -70,9 +70,14 @@
     Ship
   </button>
 
-  <button class="btn" disabled
-    *ngIf="order.order_status === 'SHIPPED' || order.order_status === 'DELIVERED'">
-    {{ order.order_status | titlecase }}
+  <button class="btn btn-confirm"
+    *ngIf="order.order_status === 'SHIPPED'"
+    (click)="updateStatus(order, 'DELIVERED')">
+    Delivered
+  </button>
+
+  <button class="btn" disabled *ngIf="order.order_status === 'DELIVERED'">
+    Delivered
   </button>
 </td>
 
