@@ -8,6 +8,67 @@
   color: #fff;
 }
 
+.order-items-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1300;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(15, 23, 42, 0.55);
+}
+
+.order-items-dialog {
+  width: min(100%, 560px);
+  max-height: min(80vh, 640px);
+  overflow: auto;
+  padding: 1.25rem;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.24);
+}
+
+.order-items-header,
+.order-item-heading,
+.order-item-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.order-items-header {
+  margin-bottom: 1rem;
+}
+
+.order-items-header h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.order-items-close {
+  border: 0;
+  background: transparent;
+  color: #475569;
+  font-size: 1.75rem;
+  line-height: 1;
+}
+
+.order-item-detail {
+  padding: 0.9rem 0;
+  border-top: 1px solid #e2e8f0;
+}
+
+.order-item-meta {
+  margin-top: 0.4rem;
+  color: #64748b;
+  font-size: 0.875rem;
+}
+
+.order-item-meta strong {
+  color: #0f172a;
+}
+
 .subcategory-pill {
   padding: 2px 9px;
   border-radius: 20px;

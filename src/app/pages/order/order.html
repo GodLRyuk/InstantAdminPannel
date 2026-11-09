@@ -49,6 +49,9 @@
           </td>
 
           <td>
+  <button class="btn" type="button" (click)="viewOrderItems(order)">
+    View items
+  </button>
   <button class="btn" type="button" (click)="printReceipt(order)" [attr.aria-label]="'Print bill for order ' + order.id">
     Print bill
   </button>
@@ -102,4 +105,35 @@
     </button>
     <button (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages">Next</button>
   </div>
+</div>
+
+<div class="order-items-overlay" *ngIf="selectedOrder as order" (click)="closeOrderItems()">
+  <section
+    class="order-items-dialog"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-label]="'Items for order ' + order.id"
+    (click)="$event.stopPropagation()">
+    <header class="order-items-header">
+      <h2>Items in Order #{{ order.id }}</h2>
+      <button class="order-items-close" type="button" aria-label="Close" (click)="closeOrderItems()">×</button>
+    </header>
+
+    <div class="order-items-list" *ngIf="order.items.length; else noOrderItems">
+      <article class="order-item-detail" *ngFor="let item of order.items">
+        <div class="order-item-heading">
+          <strong>{{ item.product_name }}</strong>
+          <span>{{ item.quantity }} × ₹{{ item.price }}</span>
+        </div>
+        <div class="order-item-meta">
+          <span *ngIf="item.subcategory_name">{{ item.subcategory_name }}</span>
+          <span>Batch: {{ item.batch_no || 'No batch' }}</span>
+          <strong>₹{{ item.total_price }}</strong>
+        </div>
+      </article>
+    </div>
+    <ng-template #noOrderItems>
+      <p class="empty">No items found for this order.</p>
+    </ng-template>
+  </section>
 </div>

@@ -26,6 +26,7 @@ export class OrdersComponent implements OnInit, OnDestroy {
 
   loading: boolean = false;
   showModal = false;
+  selectedOrder: OrderModel | null = null;
 
   notificationMessage = '';
   notificationVisible = false;
@@ -149,6 +150,14 @@ export class OrdersComponent implements OnInit, OnDestroy {
 
   get pages(): number[] {
     return getVisiblePageNumbers(this.currentPage, this.totalPages);
+  }
+
+  viewOrderItems(order: OrderModel): void {
+    this.selectedOrder = order;
+  }
+
+  closeOrderItems(): void {
+    this.selectedOrder = null;
   }
 
   printReceipt(order: OrderModel): void {
