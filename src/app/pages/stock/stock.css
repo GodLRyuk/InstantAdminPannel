@@ -1,0 +1,21 @@
+.stock-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.stock-tabs button {
+  padding: 8px 14px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+}
+
+.stock-tabs button.active {
+  border-bottom-color: #2563eb;
+  color: #1d4ed8;
+  font-weight: 600;
+}

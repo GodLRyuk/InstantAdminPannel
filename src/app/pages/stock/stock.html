@@ -15,6 +15,25 @@
       (ngModelChange)="onSearch()" />
   </div>
 
+  <div class="stock-tabs" role="tablist" aria-label="Batch status">
+    <button
+      type="button"
+      role="tab"
+      [attr.aria-selected]="selectedBatchView === 'available'"
+      [class.active]="selectedBatchView === 'available'"
+      (click)="selectBatchView('available')">
+      Available batches
+    </button>
+    <button
+      type="button"
+      role="tab"
+      [attr.aria-selected]="selectedBatchView === 'history'"
+      [class.active]="selectedBatchView === 'history'"
+      (click)="selectBatchView('history')">
+      History (empty batches)
+    </button>
+  </div>
+
   <!-- TABLE -->
   <div class="table-card">
     <table>
