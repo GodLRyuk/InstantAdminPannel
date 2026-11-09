@@ -78,6 +78,10 @@
           <input type="checkbox" name="one_time_per_user" [(ngModel)]="form.one_time_per_user" />
           Limit to one use per customer
         </label>
+        <label class="coupon-toggle">
+          <input type="checkbox" name="pass_members_only" [(ngModel)]="form.pass_members_only" />
+          Pass members only
+        </label>
       </div>
 
       <div class="coupon-form-actions">
@@ -112,6 +116,7 @@
             <th>Expires</th>
             <th>Status</th>
             <th>Per customer</th>
+            <th>Pass members</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -128,6 +133,7 @@
               </span>
             </td>
             <td>{{ coupon.one_time_per_user ? 'One use' : 'Multiple uses' }}</td>
+            <td>{{ coupon.pass_members_only ? 'Yes' : 'No' }}</td>
             <td class="coupon-actions">
               <button class="edit" type="button" (click)="editCoupon(coupon)" [disabled]="saving || deletingId !== null">
                 Edit
@@ -142,7 +148,7 @@
             </td>
           </tr>
           <tr *ngIf="coupons.length === 0">
-            <td colspan="8" class="empty-state">No coupons found. Create your first coupon above.</td>
+            <td colspan="9" class="empty-state">No coupons found. Create your first coupon above.</td>
           </tr>
         </tbody>
       </table>

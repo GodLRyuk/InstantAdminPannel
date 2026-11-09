@@ -63,6 +63,7 @@ export class CouponManagement implements OnInit {
       active: coupon.active,
       expires_at: this.toLocalDateTime(coupon.expires_at),
       one_time_per_user: coupon.one_time_per_user,
+      pass_members_only: coupon.pass_members_only ?? false,
     };
   }
 
@@ -153,6 +154,7 @@ export class CouponManagement implements OnInit {
       active: this.form.active,
       expires_at: expiresAt?.toISOString() ?? null,
       one_time_per_user: this.form.one_time_per_user,
+      pass_members_only: this.form.pass_members_only,
     };
   }
 
@@ -178,6 +180,7 @@ export class CouponManagement implements OnInit {
     active: boolean;
     expires_at: string;
     one_time_per_user: boolean;
+    pass_members_only: boolean;
   } {
     return {
       code: '',
@@ -187,6 +190,7 @@ export class CouponManagement implements OnInit {
       active: true,
       expires_at: '',
       one_time_per_user: false,
+      pass_members_only: false,
     };
   }
 }
