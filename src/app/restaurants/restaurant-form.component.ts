@@ -5,6 +5,8 @@ import { RestaurantAdminService } from './restaurant-admin.service';
 import { AuthService } from '../services/auth.service';
 import { AdminRestaurant, Cuisine } from './restaurant.models';
 import { ADMIN_CSS, errorText } from './restaurants-shared';
+import { AdminUser } from '../models/user.model';
+import { MasterService } from '../services/auth.service';
 
 @Component({
   selector: 'app-restaurant-form',
@@ -36,8 +38,20 @@ import { ADMIN_CSS, errorText } from './restaurants-shared';
         <h2>Basic details</h2>
         <div class="grid">
           @if (!isRestaurantOwner) {
-            <label class="f">Owner user ID *
-              <input type="number" formControlName="owner" />
+            <label class="f">Restaurant owner *
+              <select formControlName="owner">
+                <option [ngValue]="null">Select a restaurant owner</option>
+                @for (user of restaurantOwners(); track user.id) {
+                  <option [ngValue]="user.id">{{ ownerLabel(user) }}</option>
+                }
+              </select>
+              @if (loadingOwners()) {
+                <span class="muted">Loading restaurant owners...</span>
+              } @else if (ownerLoadError()) {
+                <span class="err">{{ ownerLoadError() }}</span>
+              } @else if (!restaurantOwners().length) {
+                <span class="muted">No restaurant users found. Create a user with the Restaurants role first.</span>
+              }
             </label>
           }
           <label class="f">Restaurant name *
@@ -191,6 +205,7 @@ import { ADMIN_CSS, errorText } from './restaurants-shared';
 })
 export class RestaurantFormComponent implements OnInit {
   private api = inject(RestaurantAdminService);
+  private usersApi = inject(MasterService);
   private fb = inject(FormBuilder);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
@@ -198,6 +213,9 @@ export class RestaurantFormComponent implements OnInit {
 
   id: number | null = null;
   cuisines = signal<Cuisine[]>([]);
+  restaurantOwners = signal<AdminUser[]>([]);
+  loadingOwners = signal(false);
+  ownerLoadError = signal('');
   current = signal<AdminRestaurant | null>(null);
   ownerName = signal('');
   saving = signal(false);
@@ -261,6 +279,7 @@ export class RestaurantFormComponent implements OnInit {
       });
       return;
     }
+    this.loadRestaurantOwners();
     this.api.cuisines().subscribe((c) => this.cuisines.set(c));
     if (param) {
       this.id = Number(param);
@@ -269,6 +288,26 @@ export class RestaurantFormComponent implements OnInit {
         error: (e) => this.error.set(errorText(e)),
       });
     }
+  }
+
+  private loadRestaurantOwners() {
+    this.loadingOwners.set(true);
+    this.ownerLoadError.set('');
+    this.usersApi.getUsers('RESTAURANT').subscribe({
+      next: (response) => {
+        this.restaurantOwners.set(Array.isArray(response) ? response : response.results);
+        this.loadingOwners.set(false);
+      },
+      error: () => {
+        this.ownerLoadError.set('Unable to load restaurant users.');
+        this.loadingOwners.set(false);
+      },
+    });
+  }
+
+  ownerLabel(user: AdminUser): string {
+    const name = `${user.first_name ?? ''} ${user.last_name ?? ''}`.trim();
+    return `${name || user.username} — ${user.email || user.username} (ID: ${user.id})`;
   }
 
   private fill(r: AdminRestaurant) {
