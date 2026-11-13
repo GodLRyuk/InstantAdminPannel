@@ -22,11 +22,14 @@ import { StockAdjustmentComponent } from './pages/stock-adjustment-component/sto
 import { Users } from './pages/users/users';
 import { authGuard } from './guards/auth.guard';
 import { roleAccessGuard } from './guards/role-access.guard';
-import { PrivacyPolicyComponent } from './components/privacy-policy/privacy-policy';
 
 const routes: Routes = [
   {path: '', component: LoginComponent},
-  { path: 'privacy-policy', component: PrivacyPolicyComponent },
+  {
+    path: 'privacy-policy',
+    loadComponent: () =>
+      import('./components/privacy-policy/privacy-policy').then(module => module.PrivacyPolicyComponent),
+  },
   {
     path: '',
     component: AdminLayoutComponent,
