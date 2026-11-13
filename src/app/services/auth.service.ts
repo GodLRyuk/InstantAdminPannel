@@ -148,6 +148,10 @@ export class MasterService {
     );
   }
 
+  deleteUser(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/accounts/users/${id}/`);
+  }
+
   createUser(data: CreateUserPayload): Observable<AdminUser> {
     return this.http.post<AdminUser>(`${this.apiUrl}/accounts/register/`, data);
   }

@@ -91,6 +91,24 @@ select {
   opacity: 0.65;
 }
 
+.delete-button {
+  padding: 0.45rem 0.7rem;
+  border: 1px solid #fecaca;
+  border-radius: 0.4rem;
+  background: #fff;
+  color: #b91c1c;
+  cursor: pointer;
+}
+
+.delete-button:hover:not(:disabled) {
+  background: #fef2f2;
+}
+
+.delete-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
 .table-wrap {
   overflow-x: auto;
   background: #fff;
