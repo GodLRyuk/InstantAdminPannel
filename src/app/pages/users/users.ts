@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@ang
 import { HttpErrorResponse } from '@angular/common/http';
 import { FormBuilder, Validators } from '@angular/forms';
 import { AdminUser, CreateUserPayload, UserRole } from '../../models/user.model';
-import { MasterService } from '../../services/auth.service';
+import { AuthService, MasterService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-users',
@@ -13,7 +13,9 @@ import { MasterService } from '../../services/auth.service';
 })
 export class Users implements OnInit {
   private readonly masterService = inject(MasterService);
+  private readonly authService = inject(AuthService);
   private readonly formBuilder = inject(FormBuilder);
+  readonly canDeleteUsers = this.authService.isStaff();
 
   readonly roles: { value: UserRole | ''; label: string }[] = [
     { value: '', label: 'All roles' },
@@ -42,6 +44,8 @@ export class Users implements OnInit {
   readonly createSuccess = signal('');
   readonly creating = signal(false);
   readonly addFormOpen = signal(false);
+  readonly deleteError = signal('');
+  readonly deletingUserId = signal<number | null>(null);
 
   ngOnInit(): void {
     this.loadUsers();
@@ -125,6 +129,31 @@ export class Users implements OnInit {
   setRole(role: UserRole | ''): void {
     this.selectedRole.set(role);
     this.loadUsers();
+  }
+
+  deleteUser(user: AdminUser): void {
+    if (!this.canDeleteUsers || this.deletingUserId() !== null) return;
+
+    const name = this.displayName(user);
+    if (!window.confirm(`Delete ${name}? This action cannot be undone.`)) return;
+
+    this.deletingUserId.set(user.id);
+    this.deleteError.set('');
+    this.masterService.deleteUser(user.id).subscribe({
+      next: () => {
+        this.users.update((users) => users.filter((item) => item.id !== user.id));
+        this.deletingUserId.set(null);
+      },
+      error: (error: unknown) => {
+        console.error('Failed to delete user', error);
+        this.deleteError.set(
+          error instanceof HttpErrorResponse && error.status === 403
+            ? 'You are not authorized to delete users.'
+            : 'Unable to delete this user. Please try again.',
+        );
+        this.deletingUserId.set(null);
+      },
+    });
   }
 
   onRoleChange(event: Event): void {
