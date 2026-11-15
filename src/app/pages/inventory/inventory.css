@@ -1,0 +1,65 @@
+.barcode-modal {
+  width: 560px;
+}
+
+.barcode-modal .modal-header h3 {
+  margin: 0;
+}
+
+.barcode-modal .close-btn {
+  border: 0;
+  background: transparent;
+  line-height: 1;
+}
+
+.barcode-scan-row {
+  display: flex;
+  gap: 8px;
+}
+
+.barcode-scan-row input {
+  flex: 1;
+  min-width: 0;
+}
+
+.scan-btn,
+.retry-products-btn {
+  border: 1px solid #2563eb;
+  border-radius: 6px;
+  background: #fff;
+  color: #1d4ed8;
+  padding: 8px 12px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.barcode-message {
+  min-height: 20px;
+  margin: 10px 0;
+}
+
+.barcode-message.success {
+  color: #166534;
+}
+
+.barcode-message.error {
+  color: #b91c1c;
+}
+
+.scanned-stock-form {
+  display: grid;
+  gap: 8px;
+}
+
+.scanned-stock-form input {
+  margin-bottom: 8px;
+}
+
+.scanned-product {
+  margin: 4px 0;
+}
+
+.barcode-modal button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
