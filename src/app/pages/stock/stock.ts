@@ -1,11 +1,14 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { StockModel } from '../../models/stock.model';
 import { MasterService } from '../../services/auth.service';
 import { getVisiblePageNumbers } from '../../shared/pagination';
 
 @Component({
   selector: 'app-stock',
-  standalone: false,
+  standalone: true,
+  imports: [CommonModule, FormsModule],
   templateUrl: './stock.html',
   styleUrls: ['./stock.css']
 })

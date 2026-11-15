@@ -21,8 +21,6 @@ import { AuthInterceptor } from './interceptors/auth-interceptor';
 import { Subcategory } from './pages/subcategory/subcategory';
 import { OrdersComponent } from './pages/order/order';
 import { Products } from './pages/products/products';
-import { Stock } from './pages/stock/stock';
-import { Inventory } from './pages/inventory/inventory';
 import { OrderModel } from './models/order.model';
 import { CommonModule } from '@angular/common';
 import { BannerComponent } from './pages/banner/banner';
@@ -47,8 +45,6 @@ import { Users } from './pages/users/users';
     Category,
     Subcategory,
     Products,
-    Stock,
-    Inventory,
     OrdersComponent,
     BannerComponent,
     Advbanner,
