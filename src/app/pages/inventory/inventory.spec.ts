@@ -1,6 +1,4 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { of } from 'rxjs';
 import { vi } from 'vitest';
 import { ProductModel } from '../../models/products.model';
@@ -36,8 +34,7 @@ describe('Inventory', () => {
   beforeEach(async () => {
     vi.clearAllMocks();
     await TestBed.configureTestingModule({
-      declarations: [Inventory],
-      imports: [CommonModule, FormsModule],
+      imports: [Inventory],
       providers: [{ provide: MasterService, useValue: masterService }],
     }).compileComponents();
 

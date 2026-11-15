@@ -1,4 +1,6 @@
 import { ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { MasterService } from '../../services/auth.service';
 import { InventoryModel } from '../../models/inventory.model';
 import { ProductModel } from '../../models/products.model';
@@ -7,7 +9,8 @@ import { getVisiblePageNumbers } from '../../shared/pagination';
 
 @Component({
   selector: 'app-inventory',
-  standalone: false,
+  standalone: true,
+  imports: [CommonModule, FormsModule],
   templateUrl: './inventory.html',
   styleUrl: './inventory.css',
 })
@@ -142,7 +145,7 @@ export class Inventory implements OnInit {
       this.setBarcodeMessage('Unable to load products. Try again.', 'error');
     } else {
       this.setBarcodeMessage(
-        this.productsLoaded ? 'Scan a product barcode, then press Enter.' : 'Loading products...',
+        this.productsLoaded ? 'Scan a barcode, then press Enter.' : 'Loading products...',
         'info'
       );
     }
@@ -164,7 +167,7 @@ export class Inventory implements OnInit {
     }
 
     if (!this.productsLoaded) {
-      this.setBarcodeMessage('Products are still loading. Please scan again in a moment.', 'info');
+      this.setBarcodeMessage('Products are loading. Try again shortly.', 'info');
       return;
     }
 
@@ -181,7 +184,7 @@ export class Inventory implements OnInit {
     this.purchasePrice = 0;
     const productPrice = Number(product.price);
     this.sellingPrice = Number.isFinite(productPrice) ? productPrice : 0;
-    this.setBarcodeMessage('Product found. Enter the stock batch and quantity to continue.', 'success');
+    this.setBarcodeMessage('Product found. Enter batch and stock details.', 'success');
   }
 
   onBarcodeInputChange(): void {
@@ -233,7 +236,7 @@ export class Inventory implements OnInit {
         this.purchasePrice = 0;
         this.sellingPrice = 0;
         this.loadInventoryItem();
-        this.setBarcodeMessage(`${product.name} stock added. Scan another barcode to continue.`, 'success');
+        this.setBarcodeMessage(`${product.name} stock added. Scan another barcode.`, 'success');
         this.cdf.detectChanges();
         this.barcodeInput?.nativeElement.focus();
       },

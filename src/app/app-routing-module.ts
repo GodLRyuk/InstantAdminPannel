@@ -9,8 +9,6 @@ import { Category } from './pages/category/category';
 import { Subcategory } from './pages/subcategory/subcategory';
 import { OrdersComponent } from './pages/order/order';
 import { Products } from './pages/products/products';
-import { Stock } from './pages/stock/stock';
-import { Inventory } from './pages/inventory/inventory';
 import { BannerComponent } from './pages/banner/banner';
 import { Advbanner } from './pages/advbanner/advbanner';
 import { SalesReport } from './reports/sales-report/sales-report';
@@ -59,8 +57,14 @@ const routes: Routes = [
         loadComponent: () =>
           import('./pages/flash-sales/flash-sales').then(module => module.FlashSales),
       },
-      { path: 'stock', component: Stock },
-      { path: 'inventory', component: Inventory },
+      {
+        path: 'stock',
+        loadComponent: () => import('./pages/stock/stock').then(module => module.Stock),
+      },
+      {
+        path: 'inventory',
+        loadComponent: () => import('./pages/inventory/inventory').then(module => module.Inventory),
+      },
       { path: 'banner', component: BannerComponent },
       { path: 'advbanner', component: Advbanner },
       { path: 'reports/sales', component: SalesReport },
