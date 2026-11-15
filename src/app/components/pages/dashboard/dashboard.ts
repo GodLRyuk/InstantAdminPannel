@@ -27,4 +27,7 @@ goToAppInventory()
 goToSalesReport() {
   this.router.navigate(['/reports/sales']);
 }
+goToStoreSale() {
+  this.router.navigate(['/store-sale']);
+}
 }
