@@ -1,0 +1,134 @@
+<main class="store-sale-page">
+  <header class="sale-header">
+    <div>
+      <a class="back-link" routerLink="/dashboard"><i class="fa fa-arrow-left" aria-hidden="true"></i> Dashboard</a>
+      <h1>Store sale</h1>
+      <p>Create a bill for an in-store purchase.</p>
+    </div>
+    <div class="sale-reference">
+      <span class="reference-icon"><i class="fa fa-file-text-o" aria-hidden="true"></i></span>
+      <span><small>New bill</small><strong>In-store checkout</strong></span>
+    </div>
+  </header>
+
+  <p class="preview-notice" role="note">
+    <i class="fa fa-info-circle" aria-hidden="true"></i>
+    Preview catalog is shown for design purposes. Product and billing data will connect to your API.
+  </p>
+
+  <div class="sale-layout">
+    <section class="catalog-panel" aria-labelledby="catalog-title">
+      <div class="section-heading">
+        <div>
+          <h2 id="catalog-title">Products</h2>
+          <p>Find an item or scan its barcode below.</p>
+        </div>
+        <span class="product-count">{{ filteredProducts.length }} items</span>
+      </div>
+
+      <label class="product-search">
+        <i class="fa fa-search" aria-hidden="true"></i>
+        <span class="visually-hidden">Search products</span>
+        <input type="search" [(ngModel)]="searchTerm" placeholder="Search products..." />
+        <kbd>/</kbd>
+      </label>
+
+      <div class="product-list">
+        <article class="product-card" *ngFor="let product of filteredProducts">
+          <div class="product-icon"><i class="fa fa-cube" aria-hidden="true"></i></div>
+          <div class="product-info">
+            <strong>{{ product.name }}</strong>
+            <span>{{ product.category }} <span class="dot">·</span> {{ product.stock }} in stock</span>
+            <small>Barcode: {{ product.barcode }}</small>
+          </div>
+          <div class="product-action">
+            <strong>₹{{ product.price | number:'1.2-2' }}</strong>
+            <button type="button" class="add-product-button" (click)="addProduct(product)" [disabled]="isAtStockLimit(product)">
+              <i class="fa fa-plus" aria-hidden="true"></i> Add
+            </button>
+          </div>
+        </article>
+        <div class="catalog-empty" *ngIf="filteredProducts.length === 0">
+          <i class="fa fa-search" aria-hidden="true"></i>
+          <strong>No products found</strong>
+          <span>Try another product name or barcode.</span>
+        </div>
+      </div>
+    </section>
+
+    <aside class="bill-panel" aria-labelledby="bill-title">
+      <div class="bill-heading">
+        <div>
+          <h2 id="bill-title">Current bill</h2>
+          <p>{{ itemCount }} {{ itemCount === 1 ? 'item' : 'items' }}</p>
+        </div>
+        <button type="button" class="clear-button" (click)="clearBill()" [disabled]="billItems.length === 0">Clear bill</button>
+      </div>
+
+      <label class="customer-field">
+        <span>Customer <small>(optional)</small></span>
+        <div><i class="fa fa-user-o" aria-hidden="true"></i><input type="text" placeholder="Customer name or phone" /></div>
+      </label>
+
+      <div class="bill-items" *ngIf="billItems.length; else emptyBill">
+        <article class="bill-item" *ngFor="let item of billItems">
+          <div class="bill-item-details">
+            <strong>{{ item.name }}</strong>
+            <span>₹{{ item.price | number:'1.2-2' }} each</span>
+          </div>
+          <div class="bill-item-controls">
+            <div class="quantity-control" [attr.aria-label]="'Quantity for ' + item.name">
+              <button type="button" (click)="changeQuantity(item, -1)" [attr.aria-label]="'Decrease ' + item.name">−</button>
+              <span>{{ item.quantity }}</span>
+              <button type="button" (click)="changeQuantity(item, 1)" [disabled]="item.quantity >= item.stock" [attr.aria-label]="'Increase ' + item.name">+</button>
+            </div>
+            <strong>₹{{ item.price * item.quantity | number:'1.2-2' }}</strong>
+            <button type="button" class="remove-button" (click)="removeItem(item)" [attr.aria-label]="'Remove ' + item.name">
+              <i class="fa fa-trash-o" aria-hidden="true"></i>
+            </button>
+          </div>
+        </article>
+      </div>
+
+      <ng-template #emptyBill>
+        <div class="empty-bill">
+          <span class="empty-bill-icon"><i class="fa fa-shopping-basket" aria-hidden="true"></i></span>
+          <strong>Your bill is empty</strong>
+          <span>Add products from the catalog or scan a barcode to get started.</span>
+        </div>
+      </ng-template>
+
+      <div class="bill-totals">
+        <div><span>Subtotal</span><strong>₹{{ subtotal | number:'1.2-2' }}</strong></div>
+        <div class="total-row"><span>Total payable</span><strong>₹{{ subtotal | number:'1.2-2' }}</strong></div>
+      </div>
+      <button type="button" class="checkout-button" [disabled]="billItems.length === 0">
+        <i class="fa fa-lock" aria-hidden="true"></i> Complete sale
+      </button>
+      <p class="checkout-note">Checkout will be enabled when billing is connected.</p>
+    </aside>
+  </div>
+
+  <section class="scanner-dock" aria-label="Barcode scanner">
+    <div class="scanner-symbol"><i class="fa fa-barcode" aria-hidden="true"></i></div>
+    <div class="scanner-copy">
+      <strong>Scan a product barcode</strong>
+      <span>Use your barcode scanner or enter the code manually.</span>
+    </div>
+    <form class="scanner-form" (ngSubmit)="addByBarcode()">
+      <label class="visually-hidden" for="store-sale-barcode">Barcode</label>
+      <input
+        id="store-sale-barcode"
+        name="barcode"
+        type="text"
+        autocomplete="off"
+        [(ngModel)]="barcode"
+        placeholder="Enter or scan barcode..."
+        (input)="scanMessage = ''; scanMessageType = ''" />
+      <button type="submit"><i class="fa fa-plus" aria-hidden="true"></i> Add to bill</button>
+    </form>
+    <span class="scan-message" [class.success]="scanMessageType === 'success'" [class.error]="scanMessageType === 'error'" role="status" aria-live="polite">
+      {{ scanMessage }}
+    </span>
+  </section>
+</main>

@@ -65,6 +65,10 @@ const routes: Routes = [
         path: 'inventory',
         loadComponent: () => import('./pages/inventory/inventory').then(module => module.Inventory),
       },
+      {
+        path: 'store-sale',
+        loadComponent: () => import('./pages/store-sale/store-sale').then(module => module.StoreSale),
+      },
       { path: 'banner', component: BannerComponent },
       { path: 'advbanner', component: Advbanner },
       { path: 'reports/sales', component: SalesReport },
