@@ -30,6 +30,7 @@ type AnalyticsSection =
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './ai-analytics.html',
+  styleUrl: './ai-analytics.css',
 })
 export class AiAnalytics implements AfterViewInit, OnDestroy {
   @ViewChild('salesCanvas') salesCanvas!: ElementRef<HTMLCanvasElement>;
