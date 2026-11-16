@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Coupon, CouponPayload, CouponType, getPromotionApiError } from '../../models/promotion.model';
 import { MasterService } from '../../services/auth.service';
@@ -22,7 +22,7 @@ export class CouponManagement implements OnInit {
   errorMessage = '';
   successMessage = '';
 
-  constructor(private masterService: MasterService) {}
+  constructor(private masterService: MasterService, private cdf: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.loadCoupons();
@@ -35,11 +35,13 @@ export class CouponManagement implements OnInit {
       next: (response) => {
         this.coupons = Array.isArray(response) ? response : response.results;
         this.loading = false;
+        this.cdf.detectChanges();
       },
       error: (error: unknown) => {
         this.errorMessage = getPromotionApiError(error, 'Unable to load coupons.');
         console.error('Loading coupons failed.', error);
         this.loading = false;
+        this.cdf.detectChanges();
       },
     });
   }
@@ -94,12 +96,14 @@ export class CouponManagement implements OnInit {
         this.form = this.emptyForm();
         this.successMessage = editingId === null ? 'Coupon created.' : 'Coupon updated.';
         this.saving = false;
+        this.cdf.detectChanges();
         this.loadCoupons();
       },
       error: (error: unknown) => {
         this.errorMessage = getPromotionApiError(error, 'Unable to save this coupon.');
         console.error('Saving coupon failed.', error);
         this.saving = false;
+        this.cdf.detectChanges();
       },
     });
   }
@@ -116,6 +120,7 @@ export class CouponManagement implements OnInit {
       next: () => {
         this.successMessage = `Coupon ${coupon.code} deleted.`;
         this.deletingId = null;
+        this.cdf.detectChanges();
         if (this.editingId === coupon.id) {
           this.editingId = null;
           this.form = this.emptyForm();
@@ -126,6 +131,7 @@ export class CouponManagement implements OnInit {
         this.errorMessage = getPromotionApiError(error, 'Unable to delete this coupon.');
         console.error('Deleting coupon failed.', error);
         this.deletingId = null;
+        this.cdf.detectChanges();
       },
     });
   }

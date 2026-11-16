@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
@@ -39,7 +39,7 @@ export class StoreSale implements OnInit {
   requestMessage = '';
   requestMessageType: 'success' | 'error' | '' = '';
 
-  constructor(private masterService: MasterService) {}
+  constructor(private masterService: MasterService, private cdf: ChangeDetectorRef) {}
 
   ngOnInit(): void { this.loadProducts(); }
 
@@ -52,11 +52,13 @@ export class StoreSale implements OnInit {
         this.products = productList.map((product: ProductModel) => this.toStoreProduct(product, inventoryList));
         this.visibleProductCount = this.productPageSize;
         this.loadingProducts = false;
+        this.cdf.detectChanges();
       },
       error: () => {
         this.loadingProducts = false;
         this.requestMessage = 'Could not load products. Please refresh and try again.';
         this.requestMessageType = 'error';
+        this.cdf.detectChanges();
       },
     });
   }
@@ -166,12 +168,14 @@ export class StoreSale implements OnInit {
         this.requestMessage = 'Sale completed successfully.';
         this.requestMessageType = 'success';
         this.submitting = false;
+        this.cdf.detectChanges();
         this.loadProducts();
       },
       error: error => {
         this.requestMessage = error?.error?.detail || error?.error?.message || 'Sale could not be completed. Please check the bill and try again.';
         this.requestMessageType = 'error';
         this.submitting = false;
+        this.cdf.detectChanges();
       },
     });
   }

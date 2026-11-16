@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { interval, Subject, startWith, switchMap, takeUntil } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { AuthService, MasterService } from '../../services/auth.service';
@@ -24,7 +24,8 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
 
   constructor(
     private masterService: MasterService,
-    private authService: AuthService
+    private authService: AuthService,
+    private cdf: ChangeDetectorRef
   ) {}
 
   isRestaurant(): boolean {
@@ -78,6 +79,7 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
           }
 
           this.lastOrderIds = newOrderIds;
+          this.cdf.detectChanges();
         },
         error: err => console.error(err)
       });

@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { Chart, registerables } from 'chart.js';
 import { MasterService } from '../../services/auth.service';
 
@@ -18,7 +18,7 @@ export class SalesReport implements OnInit, AfterViewInit {
   startDate: string = '';
   endDate: string = '';
 
-  constructor(private masterService: MasterService) {}
+  constructor(private masterService: MasterService, private cdf: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     const today = new Date();
@@ -39,6 +39,7 @@ export class SalesReport implements OnInit, AfterViewInit {
         const labels = data.map((d: any) => d.period);
         const revenues = data.map((d: any) => d.revenue);
         this.renderChart(labels, revenues);
+        this.cdf.detectChanges();
       },
       error: (err) => console.error('Failed to load sales trend', err)
     });

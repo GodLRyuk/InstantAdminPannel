@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ProductModel } from '../../models/products.model';
 import {
@@ -28,7 +28,7 @@ export class FlashSales implements OnInit {
   errorMessage = '';
   successMessage = '';
 
-  constructor(private masterService: MasterService) {}
+  constructor(private masterService: MasterService, private cdf: ChangeDetectorRef) {}
 
   get filteredProducts(): ProductModel[] {
     const query = this.productSearch.trim().toLocaleLowerCase();
@@ -52,11 +52,13 @@ export class FlashSales implements OnInit {
       next: (response) => {
         this.sales = Array.isArray(response) ? response : response.results;
         this.loading = false;
+        this.cdf.detectChanges();
       },
       error: (error: unknown) => {
         this.errorMessage = getPromotionApiError(error, 'Unable to load flash sales.');
         console.error('Loading flash sales failed.', error);
         this.loading = false;
+        this.cdf.detectChanges();
       },
     });
   }
@@ -65,10 +67,12 @@ export class FlashSales implements OnInit {
     this.masterService.getAllProducts().subscribe({
       next: (products) => {
         this.products = products;
+        this.cdf.detectChanges();
       },
       error: (error: unknown) => {
         this.errorMessage = getPromotionApiError(error, 'Unable to load products.');
         console.error('Loading products for flash sales failed.', error);
+        this.cdf.detectChanges();
       },
     });
   }
@@ -137,11 +141,13 @@ export class FlashSales implements OnInit {
         this.openCreateForm();
         this.loadSales();
         this.saving = false;
+        this.cdf.detectChanges();
       },
       error: (error: unknown) => {
         this.errorMessage = getPromotionApiError(error, 'Unable to save this flash sale.');
         console.error('Saving flash sale failed.', error);
         this.saving = false;
+        this.cdf.detectChanges();
       },
     });
   }
@@ -157,10 +163,12 @@ export class FlashSales implements OnInit {
       next: () => {
         this.sales = this.sales.filter((item) => item.id !== sale.id);
         this.successMessage = 'Flash sale deleted.';
+        this.cdf.detectChanges();
       },
       error: (error: unknown) => {
         this.errorMessage = getPromotionApiError(error, 'Unable to delete this flash sale.');
         console.error('Deleting flash sale failed.', error);
+        this.cdf.detectChanges();
       },
     });
   }
