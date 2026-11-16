@@ -28,7 +28,15 @@
         <tr *ngFor="let prod of pagedProducts; let i=index">
           <td>{{ (currentPage - 1) * pageSize + i + 1 }}</td>
           <td>{{ prod.name }}</td>
-          <td>{{ prod.barcode || '-' }}</td>
+          <td>
+            <span>{{ prod.barcode || '-' }}</span>
+            <svg *ngIf="getBarcodeBars(prod.barcode).length" class="barcode-table-preview"
+              [attr.viewBox]="'0 0 ' + getBarcodeBars(prod.barcode).length + ' 30'"
+              role="img" [attr.aria-label]="'Barcode ' + prod.barcode">
+              <rect *ngFor="let isBar of getBarcodeBars(prod.barcode); let index = index"
+                [attr.x]="index" y="2" width="1" height="22" [attr.fill]="isBar ? '#111827' : 'transparent'"></rect>
+            </svg>
+          </td>
           <td>{{ prod.price }}</td>
           <td>
             <button class="edit" (click)="openEditModal(prod)">Edit</button>
@@ -78,6 +86,7 @@
             <label>Price</label>
             <input type="number" [(ngModel)]="product.price" />
           </div>
+
         </div>
 
         <!-- Row 2 -->
@@ -200,13 +209,22 @@
               type="button"
               class="barcode-generate-btn"
               (click)="generateBarcode()"
-              [disabled]="generatingBarcode || !!product.barcode?.trim()">
+              [disabled]="generatingBarcode || !!product.barcode?.trim() || modalType === 'add'">
               <span *ngIf="generatingBarcode" class="save-spinner" aria-hidden="true"></span>
-              {{ generatingBarcode ? 'Generating...' : product.barcode?.trim() ? 'Barcode already set' : 'Generate barcode' }}
+              {{ generatingBarcode ? 'Generating...' : product.barcode?.trim() ? 'Barcode already set' : modalType === 'add' ? 'Save product to generate' : 'Generate barcode' }}
             </button>
             <span *ngIf="barcodeGenerationError" class="barcode-generation-error" role="alert">
               {{ barcodeGenerationError }}
             </span>
+            <div class="barcode-preview" *ngIf="product.barcode && barcodeBars.length" aria-label="Barcode preview">
+              <svg [attr.viewBox]="'0 0 ' + barcodeBars.length + ' 72'" role="img" [attr.aria-label]="'Barcode ' + product.barcode">
+                <rect *ngFor="let isBar of barcodeBars; let index = index" [attr.x]="index" y="4" width="1" height="52" [attr.fill]="isBar ? '#111827' : 'transparent'"></rect>
+              </svg>
+              <strong>{{ product.barcode }}</strong>
+            </div>
+            <small class="barcode-preview-note" *ngIf="product.barcode && !barcodeBars.length">
+              Barcode value: {{ product.barcode }}
+            </small>
           </div>
 
           <div class="form-group">
