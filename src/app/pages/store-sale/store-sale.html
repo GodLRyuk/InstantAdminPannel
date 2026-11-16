@@ -20,19 +20,19 @@
           <h2 id="catalog-title">Products</h2>
           <p>Search the product catalog or scan a product barcode.</p>
         </div>
-        <span class="product-count">{{ filteredProducts.length }} items</span>
+        <span class="product-count">{{ visibleProducts.length }} / {{ filteredProducts.length }} items</span>
       </div>
 
       <label class="product-search">
         <i class="fa fa-search" aria-hidden="true"></i>
         <span class="visually-hidden">Search products</span>
-        <input type="search" [(ngModel)]="searchTerm" placeholder="Search products..." />
+        <input type="search" [(ngModel)]="searchTerm" (ngModelChange)="onSearchChange()" placeholder="Search products..." />
         <kbd>/</kbd>
       </label>
 
-      <div class="product-list">
+      <div class="product-list" (scroll)="onProductListScroll($event)" aria-label="Product list" tabindex="0">
         <div class="catalog-empty" *ngIf="loadingProducts">Loading products...</div>
-        <article class="product-card" *ngFor="let product of filteredProducts">
+        <article class="product-card" *ngFor="let product of visibleProducts">
           <div class="product-icon"><i class="fa fa-cube" aria-hidden="true"></i></div>
           <div class="product-info">
             <strong>{{ product.name }}</strong>
@@ -51,6 +51,7 @@
           <strong>No products found</strong>
           <span>Try another product name or barcode.</span>
         </div>
+        <div class="product-load-more" *ngIf="!loadingProducts && hasMoreProducts" role="status">Scroll to load more products…</div>
       </div>
     </section>
 
