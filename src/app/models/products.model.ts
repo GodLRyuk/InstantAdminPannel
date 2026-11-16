@@ -14,4 +14,9 @@ export interface ProductModel {
   unit: number;
   unit_size: null,
   barcode?: string | null;
+  stock?: number | string | null;
+  category_name?: string | null;
+  subcategory_name?: string | null;
+  brand_name?: string | null;
+  unit_name?: string | null;
 }
