@@ -140,6 +140,10 @@ export class MasterService {
 
   constructor(private http: HttpClient) { }
 
+  createStoreOrder(data: { items: Array<{ product: number; quantity: number }>; payment_method: 'CASH'; discount?: number }): Observable<unknown> {
+    return this.http.post<unknown>(`${this.apiUrl}/orders/store/create/`, data);
+  }
+
   getUsers(role?: UserRole): Observable<AdminUser[] | { results: AdminUser[] }> {
     const params = role ? new HttpParams().set('role', role) : new HttpParams();
     return this.http.get<AdminUser[] | { results: AdminUser[] }>(

@@ -11,17 +11,14 @@
     </div>
   </header>
 
-  <p class="preview-notice" role="note">
-    <i class="fa fa-info-circle" aria-hidden="true"></i>
-    Preview catalog is shown for design purposes. Product and billing data will connect to your API.
-  </p>
+  <p class="request-message" *ngIf="requestMessage" [class.success]="requestMessageType === 'success'" [class.error]="requestMessageType === 'error'" role="status">{{ requestMessage }}</p>
 
   <div class="sale-layout">
     <section class="catalog-panel" aria-labelledby="catalog-title">
       <div class="section-heading">
         <div>
           <h2 id="catalog-title">Products</h2>
-          <p>Find an item or scan its barcode below.</p>
+          <p>Search the product catalog or scan a product barcode.</p>
         </div>
         <span class="product-count">{{ filteredProducts.length }} items</span>
       </div>
@@ -34,12 +31,13 @@
       </label>
 
       <div class="product-list">
+        <div class="catalog-empty" *ngIf="loadingProducts">Loading products...</div>
         <article class="product-card" *ngFor="let product of filteredProducts">
           <div class="product-icon"><i class="fa fa-cube" aria-hidden="true"></i></div>
           <div class="product-info">
             <strong>{{ product.name }}</strong>
             <span>{{ product.category }} <span class="dot">·</span> {{ product.stock }} in stock</span>
-            <small>Barcode: {{ product.barcode }}</small>
+            <small>{{ product.barcode ? 'Barcode: ' + product.barcode : 'No barcode' }}</small>
           </div>
           <div class="product-action">
             <strong>₹{{ product.price | number:'1.2-2' }}</strong>
@@ -48,7 +46,7 @@
             </button>
           </div>
         </article>
-        <div class="catalog-empty" *ngIf="filteredProducts.length === 0">
+        <div class="catalog-empty" *ngIf="!loadingProducts && filteredProducts.length === 0">
           <i class="fa fa-search" aria-hidden="true"></i>
           <strong>No products found</strong>
           <span>Try another product name or barcode.</span>
@@ -100,12 +98,14 @@
 
       <div class="bill-totals">
         <div><span>Subtotal</span><strong>₹{{ subtotal | number:'1.2-2' }}</strong></div>
-        <div class="total-row"><span>Total payable</span><strong>₹{{ subtotal | number:'1.2-2' }}</strong></div>
+        <label class="discount-field"><span>Manual discount</span><span class="discount-input"><span>₹</span><input type="number" min="0" [max]="subtotal" step="0.01" [(ngModel)]="discount" aria-label="Manual discount amount" /></span></label>
+        <div><span>Discount applied</span><strong>−₹{{ appliedDiscount | number:'1.2-2' }}</strong></div>
+        <div class="total-row"><span>Total payable</span><strong>₹{{ total | number:'1.2-2' }}</strong></div>
       </div>
-      <button type="button" class="checkout-button" [disabled]="billItems.length === 0">
-        <i class="fa fa-lock" aria-hidden="true"></i> Complete sale
+      <button type="button" class="checkout-button" (click)="completeSale()" [disabled]="billItems.length === 0 || submitting">
+        <i class="fa" [class.fa-spinner]="submitting" [class.fa-spin]="submitting" [class.fa-money]="!submitting" aria-hidden="true"></i> {{ submitting ? 'Completing sale...' : 'Complete sale' }}
       </button>
-      <p class="checkout-note">Checkout will be enabled when billing is connected.</p>
+      <p class="checkout-note">Payment method: Cash</p>
     </aside>
   </div>
 
