@@ -313,19 +313,19 @@ export class MasterService {
     return this.http.delete<void>(`${this.apiUrl}/products/admin/bundles/${id}/`);
   }
 
-  addProduct(data: FormData): Observable<any> {
+  addProduct(data: FormData): Observable<ProductModel | ProductModel[]> {
 
-    return this.http.post<ProductModel[]>(
+    return this.http.post<ProductModel | ProductModel[]>(
       `${this.apiUrl}/products/`, data
     );
   }
-  generateBarcode(): Observable<{ barcode: string }> {
+  generateBarcode(productId: number): Observable<{ barcode: string }> {
     return this.http.post<{ barcode: string }>(
-      `${this.apiUrl}/products/generate-barcode/`, null
+      `${this.apiUrl}/products/generate-barcode/`, { product_id: productId }
     );
   }
-  updateProduct(id: number, data: FormData): Observable<any> {
-  return this.http.put<ProductModel[]>(
+  updateProduct(id: number, data: FormData): Observable<ProductModel | ProductModel[]> {
+  return this.http.put<ProductModel | ProductModel[]>(
     `${this.apiUrl}/products/${id}/`, data
   );
 }

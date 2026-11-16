@@ -35,6 +35,39 @@
   color: #b02a37;
 }
 
+.barcode-preview {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  margin-top: 12px;
+  padding: 10px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+}
+
+.barcode-preview svg {
+  display: block;
+  width: 100%;
+  max-width: 280px;
+  height: 68px;
+}
+
+.barcode-preview strong,
+.barcode-preview-note {
+  color: #374151;
+  font-family: monospace;
+  font-size: 12px;
+  letter-spacing: 1px;
+}
+
+.barcode-table-preview {
+  display: block;
+  width: 130px;
+  height: 30px;
+  margin-top: 5px;
+}
+
 .searchable-dropdown {
   position: relative;
 }

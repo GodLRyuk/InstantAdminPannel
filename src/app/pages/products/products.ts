@@ -10,6 +10,22 @@ import { getVisiblePageNumbers } from '../../shared/pagination';
   styleUrl: './products.css',
 })
 export class Products implements OnInit {
+  private readonly upcLeftPatterns = [
+    '0001101', '0011001', '0010011', '0111101', '0100011',
+    '0110001', '0101111', '0111011', '0110111', '0001011',
+  ];
+  private readonly upcRightPatterns = [
+    '1110010', '1100110', '1101100', '1000010', '1011100',
+    '1001110', '1010000', '1000100', '1001000', '1110100',
+  ];
+  private readonly eanParity = [
+    'LLLLLL', 'LLGLGG', 'LLGGLG', 'LLGGGL', 'LGLLGG',
+    'LGGLLG', 'LGGGLL', 'LGLGLG', 'LGLGGL', 'LGGLGL',
+  ];
+  private readonly eanLeftGPatterns = [
+    '0100111', '0110011', '0011011', '0100001', '0011101',
+    '0111001', '0000101', '0010001', '0001001', '0010111',
+  ];
   openDropdown: 'brand' | 'category' | 'subcategory' | 'unit' | null = null;
   products: ProductModel[] = [];
   filteredProducts: ProductModel[] = [];
@@ -298,7 +314,12 @@ export class Products implements OnInit {
     this.generatingBarcode = true;
     this.barcodeGenerationError = '';
 
-    this.masterService.generateBarcode().subscribe({
+    if (this.modalType === 'add' || !this.product.id) {
+      this.barcodeGenerationError = 'Save the product first before generating its barcode.';
+      return;
+    }
+
+    this.masterService.generateBarcode(this.product.id).subscribe({
       next: response => {
         if (this.barcodeGenerationRequest === requestId) {
           if (this.showModal && !this.product.barcode?.trim()) {
@@ -350,16 +371,70 @@ export class Products implements OnInit {
       : this.masterService.updateProduct(this.product.id, formData);
 
     request.subscribe({
-      next: () => {
+      next: (response: ProductModel | ProductModel[]) => {
+        const savedProduct = Array.isArray(response) ? response[0] : response;
+        const shouldGenerateBarcode = this.modalType === 'add'
+          && !this.product.barcode?.trim()
+          && Number(savedProduct?.id) > 0;
+
+        if (shouldGenerateBarcode) {
+          this.masterService.generateBarcode(Number(savedProduct.id)).subscribe({
+            next: generated => {
+              this.product.barcode = generated.barcode;
+              this.saving = false;
+              this.loadProducts();
+              this.showModal = false;
+              this.cdf.detectChanges();
+            },
+            error: () => {
+              this.saving = false;
+              this.barcodeGenerationError = 'Product saved, but its barcode could not be generated.';
+              this.loadProducts();
+              this.showModal = false;
+              this.cdf.detectChanges();
+            },
+          });
+          return;
+        }
+
         this.saving = false;
         this.loadProducts();
         this.showModal = false;
+        this.cdf.detectChanges();
       },
       error: err => {
         console.error(err);
         this.saving = false;
       }
     });
+  }
+
+  get barcodeBars(): boolean[] {
+    return this.getBarcodeBars(this.product.barcode);
+  }
+
+  getBarcodeBars(barcode: string | null | undefined): boolean[] {
+    const value = (barcode ?? '').trim();
+    if (/^\d{12}$/.test(value)) {
+      return this.toBars(`101${value.slice(0, 6).split('').map(d => this.upcLeftPatterns[Number(d)]).join('')}01010${value.slice(6).split('').map(d => this.upcRightPatterns[Number(d)]).join('')}101`);
+    }
+
+    if (/^\d{13}$/.test(value)) {
+      const firstDigit = Number(value[0]);
+      const parity = this.eanParity[firstDigit];
+      const left = value.slice(1, 7).split('').map((digit, index) => {
+        const numericDigit = Number(digit);
+        return parity[index] === 'G' ? this.eanLeftGPatterns[numericDigit] : this.upcLeftPatterns[numericDigit];
+      }).join('');
+      const right = value.slice(7).split('').map(digit => this.upcRightPatterns[Number(digit)]).join('');
+      return this.toBars(`101${left}01010${right}101`);
+    }
+
+    return [];
+  }
+
+  private toBars(pattern: string): boolean[] {
+    return pattern.split('').map(value => value === '1');
   }
 
   deleteProduct(id: number) {
