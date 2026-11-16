@@ -367,6 +367,12 @@ export class MasterService {
     );
   }
 
+  getStoreSales(): Observable<OrderModel[] | { results: OrderModel[] }> {
+    return this.http.get<OrderModel[] | { results: OrderModel[] }>(
+      `${this.apiUrl}/store/sales/`,
+    );
+  }
+
   updateOrderStatus(id: number, data: { status: string }): Observable<any> {
     return this.http.post(`${this.apiUrl}/orders/${id}/status/`, data);
   }
