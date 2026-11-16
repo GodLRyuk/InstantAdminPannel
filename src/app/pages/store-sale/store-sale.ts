@@ -63,8 +63,9 @@ export class StoreSale implements OnInit {
 
   private toStoreProduct(product: ProductModel, inventory: InventoryModel[]): StoreProduct {
     const inventoryItem = inventory.find(row => Number(row.product_id) === Number(product.id));
-    const quantity = Number(inventoryItem?.available_stock ?? 0);
-    const category = typeof product.category === 'object' ? (product.category as any).name : String(product.category ?? '');
+    const productStock = product.stock === null || product.stock === undefined ? NaN : Number(product.stock);
+    const quantity = Number.isFinite(productStock) ? productStock : Number(inventoryItem?.available_stock ?? 0);
+    const category = product.category_name || String(product.category ?? '');
     return {
       id: Number(product.id),
       name: product.name,
