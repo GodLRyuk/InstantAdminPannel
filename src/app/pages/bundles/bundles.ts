@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Bundle, BundlePayload } from '../../models/bundle.model';
 import { ProductModel } from '../../models/products.model';
@@ -28,7 +28,7 @@ export class Bundles implements OnInit {
   errorMessage = '';
   successMessage = '';
 
-  constructor(private masterService: MasterService) {}
+  constructor(private masterService: MasterService, private cdf: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.loadBundles();
@@ -42,11 +42,13 @@ export class Bundles implements OnInit {
       next: (response) => {
         this.bundles = Array.isArray(response) ? response : response.results;
         this.loading = false;
+        this.cdf.detectChanges();
       },
       error: (error: unknown) => {
         this.errorMessage = getPromotionApiError(error, 'Unable to load bundles.');
         console.error('Loading bundles failed.', error);
         this.loading = false;
+        this.cdf.detectChanges();
       },
     });
   }
@@ -56,10 +58,12 @@ export class Bundles implements OnInit {
       next: (response: ProductModel[] | { results: ProductModel[] }) => {
         this.products = Array.isArray(response) ? response : response.results;
         this.applyProductSearch();
+        this.cdf.detectChanges();
       },
       error: (error: unknown) => {
         this.errorMessage = getPromotionApiError(error, 'Unable to load products.');
         console.error('Loading products for bundles failed.', error);
+        this.cdf.detectChanges();
       },
     });
   }
@@ -149,12 +153,14 @@ export class Bundles implements OnInit {
         this.resetImageInput();
         this.successMessage = editingId === null ? 'Bundle created.' : 'Bundle updated.';
         this.saving = false;
+        this.cdf.detectChanges();
         this.loadBundles();
       },
       error: (error: unknown) => {
         this.errorMessage = getPromotionApiError(error, 'Unable to save this bundle.');
         console.error('Saving bundle failed.', error);
         this.saving = false;
+        this.cdf.detectChanges();
       },
     });
   }
@@ -176,12 +182,14 @@ export class Bundles implements OnInit {
         }
         this.deletingId = null;
         this.successMessage = `Bundle "${bundle.name}" deleted.`;
+        this.cdf.detectChanges();
         this.loadBundles();
       },
       error: (error: unknown) => {
         this.errorMessage = getPromotionApiError(error, 'Unable to delete this bundle.');
         console.error('Deleting bundle failed.', error);
         this.deletingId = null;
+        this.cdf.detectChanges();
       },
     });
   }

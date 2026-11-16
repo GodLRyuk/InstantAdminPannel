@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { MasterService } from '../../services/auth.service';
@@ -19,7 +19,7 @@ export class StoreOrders implements OnInit {
   loading = false;
   errorMessage = '';
 
-  constructor(private readonly masterService: MasterService) {}
+  constructor(private readonly masterService: MasterService, private readonly cdf: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.loadOrders();
@@ -32,11 +32,13 @@ export class StoreOrders implements OnInit {
       next: response => {
         this.orders = Array.isArray(response) ? response : response.results ?? [];
         this.loading = false;
+        this.cdf.detectChanges();
       },
       error: () => {
         this.orders = [];
         this.loading = false;
         this.errorMessage = 'Could not load store orders. Please try again.';
+        this.cdf.detectChanges();
       },
     });
   }

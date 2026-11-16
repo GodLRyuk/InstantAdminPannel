@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component } from '@angular/core';
 import { MasterService } from '../../services/auth.service';
 
 @Component({
@@ -11,7 +11,7 @@ export class BrandProductsReport {
   isLoading = false;
   downloadError = '';
 
-  constructor(private masterService: MasterService) {}
+  constructor(private masterService: MasterService, private cdf: ChangeDetectorRef) {}
 
   exportBrandProducts() {
     this.isLoading = true;
@@ -26,11 +26,13 @@ export class BrandProductsReport {
         link.click();
         window.URL.revokeObjectURL(url);
         this.isLoading = false;
+        this.cdf.detectChanges();
       },
       error: (err) => {
         console.error('Brand products export failed', err);
         this.downloadError = 'Unable to download the report. Please try again.';
         this.isLoading = false;
+        this.cdf.detectChanges();
       }
     });
   }

@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Chart, registerables } from 'chart.js';
@@ -80,7 +80,7 @@ export class AiAnalytics implements AfterViewInit, OnDestroy {
   private inventoryChart: Chart | null = null;
   private signalsChart: Chart | null = null;
 
-  constructor(private masterService: MasterService) {}
+  constructor(private masterService: MasterService, private cdf: ChangeDetectorRef) {}
 
   ngAfterViewInit(): void {
     const today = new Date();
@@ -169,11 +169,13 @@ export class AiAnalytics implements AfterViewInit, OnDestroy {
       next: response => {
         this.assistantResponse = response;
         this.assistantLoading = false;
+        this.cdf.detectChanges();
       },
       error: error => {
         console.error('Failed to ask the analytics assistant', error);
         this.assistantError = this.getAssistantErrorMessage(error.status);
         this.assistantLoading = false;
+        this.cdf.detectChanges();
       },
     });
   }
@@ -233,11 +235,13 @@ export class AiAnalytics implements AfterViewInit, OnDestroy {
       next: data => {
         onSuccess(data);
         this.loading[section] = false;
+        this.cdf.detectChanges();
       },
       error: error => {
         console.error(`Failed to load analytics ${section}`, error);
         this.errors[section] = 'Unable to load this report. Please try again.';
         this.loading[section] = false;
+        this.cdf.detectChanges();
       },
     });
   }
