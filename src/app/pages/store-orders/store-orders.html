@@ -1,0 +1,82 @@
+<main class="store-orders-page">
+  <header class="page-header">
+    <div>
+      <a class="back-link" routerLink="/store-sale"><i class="fa fa-arrow-left" aria-hidden="true"></i> Store sale</a>
+      <h1>Store orders</h1>
+      <p>Review sales completed at the store counter.</p>
+    </div>
+    <button type="button" class="refresh-button" (click)="loadOrders()" [disabled]="loading">
+      <i class="fa" [class.fa-refresh]="!loading" [class.fa-spinner]="loading" [class.fa-spin]="loading" aria-hidden="true"></i>
+      {{ loading ? 'Refreshing...' : 'Refresh' }}
+    </button>
+  </header>
+
+  <div class="summary-row">
+    <div class="summary-card"><span>Total orders</span><strong>{{ orders.length }}</strong></div>
+    <div class="summary-card"><span>Visible orders</span><strong>{{ filteredOrders.length }}</strong></div>
+  </div>
+
+  <section class="orders-card" aria-labelledby="store-orders-title">
+    <div class="card-heading">
+      <div>
+        <h2 id="store-orders-title">Order history</h2>
+        <p>Click an order to view its items.</p>
+      </div>
+      <label class="search-box">
+        <i class="fa fa-search" aria-hidden="true"></i>
+        <span class="visually-hidden">Search store orders</span>
+        <input type="search" [(ngModel)]="searchTerm" placeholder="Search orders..." />
+      </label>
+    </div>
+
+    <p class="message error" *ngIf="errorMessage" role="alert">{{ errorMessage }}</p>
+    <div class="loading-state" *ngIf="loading">Loading store orders...</div>
+
+    <div class="table-wrapper" *ngIf="!loading">
+      <table>
+        <thead>
+          <tr>
+            <th>Order</th>
+            <th>Date</th>
+            <th>Items</th>
+            <th>Payment</th>
+            <th class="amount-column">Amount</th>
+            <th>Status</th>
+            <th><span class="visually-hidden">Action</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let order of filteredOrders; trackBy: trackByOrderId">
+            <td><strong>#{{ order.id }}</strong><small>{{ order.customer_name || 'Walk-in customer' }}</small></td>
+            <td>{{ order.created_at | date:'dd MMM yyyy, h:mm a' }}</td>
+            <td>{{ totalItems(order) }} {{ totalItems(order) === 1 ? 'item' : 'items' }}</td>
+            <td><span class="payment-badge">{{ order.payment_status || 'Paid' | titlecase }}</span></td>
+            <td class="amount-column"><strong>₹{{ order.total_amount | number:'1.2-2' }}</strong></td>
+            <td><span class="status-badge">{{ order.order_status || 'Completed' | titlecase }}</span></td>
+            <td><button type="button" class="view-button" (click)="toggleOrder(order)">{{ selectedOrder?.id === order.id ? 'Hide' : 'View' }}</button></td>
+          </tr>
+          <tr *ngIf="filteredOrders.length === 0">
+            <td colspan="7" class="empty-state">{{ searchTerm ? 'No store orders match your search.' : 'No store orders found.' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<div class="order-overlay" *ngIf="selectedOrder as order" (click)="closeOrder()">
+  <section class="order-dialog" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+    <header>
+      <div><span>Store order</span><h2>Order #{{ order.id }}</h2></div>
+      <button type="button" class="close-button" aria-label="Close order details" (click)="closeOrder()">×</button>
+    </header>
+    <div class="order-meta"><span>{{ order.created_at | date:'dd MMM yyyy, h:mm a' }}</span><span>{{ order.payment_status || 'Paid' | titlecase }}</span></div>
+    <div class="item-list">
+      <div class="item-row" *ngFor="let item of order.items">
+        <div><strong>{{ item.product_name }}</strong><small>{{ item.quantity }} × ₹{{ item.price | number:'1.2-2' }}</small></div>
+        <strong>₹{{ item.total_price | number:'1.2-2' }}</strong>
+      </div>
+    </div>
+    <div class="dialog-total"><span>Total</span><strong>₹{{ order.total_amount | number:'1.2-2' }}</strong></div>
+  </section>
+</div>
