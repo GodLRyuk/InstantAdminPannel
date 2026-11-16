@@ -10,6 +10,7 @@ import {
 import { Observable, throwError, BehaviorSubject } from 'rxjs';
 import { catchError, switchMap, filter, take } from 'rxjs/operators';
 import { AuthService } from '../services/auth.service';
+import { ApiErrorService } from '../services/api-error.service';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
@@ -17,7 +18,10 @@ export class AuthInterceptor implements HttpInterceptor {
   private isRefreshing = false;
   private refreshTokenSubject = new BehaviorSubject<string | null>(null);
 
-  constructor(private authService: AuthService) { }
+  constructor(
+    private authService: AuthService,
+    private apiErrorService: ApiErrorService
+  ) { }
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
 
@@ -48,9 +52,15 @@ export class AuthInterceptor implements HttpInterceptor {
 
         // ❌ Do NOT refresh for login/refresh APIs
         if (error.status === 401 && !isPublic) {
-          return this.handle401Error(authReq, next);
+          return this.handle401Error(authReq, next).pipe(
+            catchError(refreshError => {
+              this.apiErrorService.show(refreshError);
+              return throwError(() => refreshError);
+            })
+          );
         }
 
+        this.apiErrorService.show(error);
         return throwError(() => error);
       })
     );

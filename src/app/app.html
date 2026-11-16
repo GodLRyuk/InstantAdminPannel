@@ -1,1 +1,9 @@
+@if (apiErrorService.alert(); as alert) {
+  <div class="global-api-alert" role="alert" aria-live="assertive">
+    <span class="global-api-alert-icon" aria-hidden="true">!</span>
+    <span class="global-api-alert-message">{{ alert.message }}</span>
+    <button type="button" aria-label="Dismiss error" (click)="apiErrorService.dismiss()">×</button>
+  </div>
+}
+
 <router-outlet></router-outlet>
