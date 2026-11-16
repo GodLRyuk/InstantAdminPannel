@@ -5,7 +5,7 @@ import { RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { MasterService } from '../../services/auth.service';
 import { ProductModel } from '../../models/products.model';
-import { StockModel } from '../../models/stock.model';
+import { InventoryModel } from '../../models/inventory.model';
 
 interface StoreProduct {
   id: number;
@@ -25,6 +25,8 @@ interface BillItem extends StoreProduct { quantity: number; }
   imports: [CommonModule, FormsModule, RouterLink],
 })
 export class StoreSale implements OnInit {
+  private readonly productPageSize = 20;
+  visibleProductCount = this.productPageSize;
   products: StoreProduct[] = [];
   billItems: BillItem[] = [];
   barcode = '';
@@ -43,11 +45,12 @@ export class StoreSale implements OnInit {
 
   loadProducts(): void {
     this.loadingProducts = true;
-    forkJoin({ products: this.masterService.getAllProducts(), stock: this.masterService.getAllstock(true) }).subscribe({
-      next: ({ products, stock }) => {
+    forkJoin({ products: this.masterService.getAllProducts(), inventory: this.masterService.getInventoryItem() }).subscribe({
+      next: ({ products, inventory }) => {
         const productList = Array.isArray(products) ? products : products?.results ?? [];
-        const stockList = Array.isArray(stock) ? stock : [];
-        this.products = productList.map((product: ProductModel) => this.toStoreProduct(product, stockList));
+        const inventoryList = Array.isArray(inventory) ? inventory : inventory?.results ?? [];
+        this.products = productList.map((product: ProductModel) => this.toStoreProduct(product, inventoryList));
+        this.visibleProductCount = this.productPageSize;
         this.loadingProducts = false;
       },
       error: () => {
@@ -58,9 +61,9 @@ export class StoreSale implements OnInit {
     });
   }
 
-  private toStoreProduct(product: ProductModel, stock: StockModel[]): StoreProduct {
-    const rows = stock.filter(row => Number(row.product) === Number(product.id));
-    const quantity = rows.reduce((total, row) => total + Number(row.quantity || 0), 0);
+  private toStoreProduct(product: ProductModel, inventory: InventoryModel[]): StoreProduct {
+    const inventoryItem = inventory.find(row => Number(row.product_id) === Number(product.id));
+    const quantity = Number(inventoryItem?.available_stock ?? 0);
     const category = typeof product.category === 'object' ? (product.category as any).name : String(product.category ?? '');
     return {
       id: Number(product.id),
@@ -75,6 +78,27 @@ export class StoreSale implements OnInit {
   get filteredProducts(): StoreProduct[] {
     const query = this.searchTerm.trim().toLowerCase();
     return query ? this.products.filter(product => `${product.name} ${product.category} ${product.barcode}`.toLowerCase().includes(query)) : this.products;
+  }
+
+  get visibleProducts(): StoreProduct[] {
+    return this.filteredProducts.slice(0, this.visibleProductCount);
+  }
+
+  get hasMoreProducts(): boolean {
+    return this.visibleProductCount < this.filteredProducts.length;
+  }
+
+  onSearchChange(): void {
+    this.visibleProductCount = this.productPageSize;
+  }
+
+  loadMoreProducts(): void {
+    if (this.hasMoreProducts) this.visibleProductCount += this.productPageSize;
+  }
+
+  onProductListScroll(event: Event): void {
+    const list = event.target as HTMLElement;
+    if (list.scrollTop + list.clientHeight >= list.scrollHeight - 80) this.loadMoreProducts();
   }
 
   get itemCount(): number { return this.billItems.reduce((count, item) => count + item.quantity, 0); }

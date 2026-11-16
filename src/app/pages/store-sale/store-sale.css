@@ -179,6 +179,25 @@
 
 .product-list {
   margin-top: 12px;
+  max-height: 520px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: #c5ccd7 #f3f5f8;
+  border-top: 1px solid #eef0f4;
+}
+
+.product-list::-webkit-scrollbar { width: 8px; }
+.product-list::-webkit-scrollbar-track { background: #f3f5f8; border-radius: 8px; }
+.product-list::-webkit-scrollbar-thumb { background: #c5ccd7; border: 2px solid #f3f5f8; border-radius: 8px; }
+.product-list::-webkit-scrollbar-thumb:hover { background: #9da8b7; }
+
+.product-load-more {
+  padding: 12px;
+  color: #8a94a3;
+  text-align: center;
+  font-size: 11px;
 }
 
 .product-card {
