@@ -1,6 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
-import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
+import { Component, DestroyRef, ElementRef, OnInit, ViewChild, inject, signal } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -34,18 +34,26 @@ const emptyDetails = () => ({ account_number: '', ifsc_code: '', account_holder_
       @if (loading()) { <p role="status">Loading vendors…</p> }
       @else if (!listError()) {
         <div class="wrap"><table>
-          <thead><tr><th scope="col">Restaurant</th><th scope="col">Cashfree vendor ID</th><th scope="col">Verification</th><th scope="col">Settlement</th><th scope="col">Bank account</th><th scope="col">IFSC</th><th scope="col">Updated</th></tr></thead>
+          <thead><tr><th scope="col">Restaurant</th><th scope="col">Cashfree vendor ID</th><th scope="col">Verification</th><th scope="col">Settlement</th><th scope="col">Bank account</th><th scope="col">IFSC</th><th scope="col">Updated</th><th scope="col">Actions</th></tr></thead>
           <tbody>
             @for (vendor of vendors(); track vendor.id) {
-              <tr><td>{{ vendor.restaurant_name }}</td><td>{{ vendor.cashfree_vendor_id || 'Not assigned' }}</td>
+              <tr><td>{{ vendor.restaurant_name }}</td><td>{{ vendor.cashfree_vendor_id || 'Not assigned' }}
+                  @if (!vendor.cashfree_vendor_id && vendor.verification_status === 'NOT_SUBMITTED') {
+                    <p class="muted">Details saved; Cashfree registration not completed.</p>
+                  }
+                </td>
                 <td>{{ vendor.verification_status }}</td><td>{{ vendor.settlement_status }}</td>
-                <td>{{ mask(vendor.bank_account_last4) }}</td><td>{{ vendor.ifsc_code }}</td><td>{{ vendor.updated_at | date:'medium' }}</td></tr>
-            } @empty { <tr><td colspan="7">No restaurant vendors found.</td></tr> }
+                <td>{{ mask(vendor.bank_account_last4) }}</td><td>{{ vendor.ifsc_code }}</td><td>{{ vendor.updated_at | date:'medium' }}</td>
+                <td><button type="button" class="btn ghost sm" [disabled]="saving() || restaurantsLoading()" (click)="prepareRetry(vendor)">Edit and resubmit</button></td></tr>
+            } @empty { <tr><td colspan="8">No restaurant vendors found.</td></tr> }
           </tbody>
         </table></div>
       }
-      <form #vendorForm="ngForm" class="card" autocomplete="off" (ngSubmit)="submit(vendorForm)">
-        <h2>Add or retry vendor registration</h2>
+      <form #editor #vendorForm="ngForm" class="card" autocomplete="off" (ngSubmit)="submit(vendorForm)">
+        <h2>{{ editingVendor() ? 'Edit and resubmit Cashfree registration' : 'Add vendor registration' }}</h2>
+        @if (editingVendor(); as vendor) {
+          <p>Editing {{ vendor.restaurant_name }}. Re-enter the full bank and KYC details to submit them again. Saved account numbers and KYC identifiers are never returned by the API.</p>
+        }
         @if (restaurantsError()) {
           <p class="err" role="alert">{{ restaurantsError() }}</p>
           <button type="button" class="btn ghost" (click)="loadRestaurants()" [disabled]="restaurantsLoading()">Reload restaurants</button>
@@ -73,7 +81,7 @@ const emptyDetails = () => ({ account_number: '', ifsc_code: '', account_holder_
           <p class="muted">Bank and KYC details are sent securely to the backend and are never shown in the vendor list. Enter a valid IFSC and PAN.</p>
           @if (vendorForm.submitted && vendorForm.invalid) { <p class="err" role="alert">Complete the required fields and check the account number, IFSC, PAN, and optional GSTIN formats.</p> }
           <div class="actions">
-            <button class="btn" type="submit" [disabled]="!canRegister()">{{ saving() ? 'Registering…' : 'Register vendor' }}</button>
+            <button class="btn" type="submit" [disabled]="!canRegister()">{{ saving() ? 'Submitting…' : editingVendor() ? 'Resubmit Cashfree registration' : 'Register vendor' }}</button>
             <button class="btn grey" type="button" (click)="clear(vendorForm)">Clear form</button>
           </div>
         </fieldset>
@@ -86,6 +94,8 @@ export class RestaurantVendorsComponent implements OnInit {
   private auth = inject(AuthService);
   private destroyRef = inject(DestroyRef);
   readonly authorized = this.auth.isAuthenticated() && this.auth.isStaff() && !this.auth.isRestaurant();
+  @ViewChild('editor') private editor?: ElementRef<HTMLFormElement>;
+  readonly editingVendor = signal<RestaurantVendor | null>(null);
   readonly vendors = signal<RestaurantVendor[]>([]);
   readonly restaurants = signal<AdminRestaurant[]>([]);
   readonly loading = signal(false);
@@ -141,12 +151,27 @@ export class RestaurantVendorsComponent implements OnInit {
   }
 
   selectionChanged(): void {
+    this.editingVendor.set(null);
     this.details = emptyDetails();
     this.error.set('');
     this.message.set('');
   }
 
+  prepareRetry(vendor: RestaurantVendor): void {
+    if (!this.authorized || this.saving()) return;
+    // The API never returns full bank/KYC values; do not treat masked digits as an account number.
+    if (this.restaurantId !== vendor.restaurant_id) this.details = emptyDetails();
+    this.editingVendor.set(vendor);
+    this.restaurantId = vendor.restaurant_id;
+    this.details.ifsc_code = vendor.ifsc_code;
+    this.error.set('');
+    this.message.set('Complete the bank and KYC fields below to retry registration for this restaurant. Full saved details cannot be retrieved by this panel.');
+    this.editor?.nativeElement.scrollIntoView?.({ behavior: 'smooth', block: 'start' });
+    this.editor?.nativeElement.querySelector<HTMLInputElement>('[name=account_number]')?.focus({ preventScroll: true });
+  }
+
   clear(form: NgForm): void {
+    this.editingVendor.set(null);
     this.details = emptyDetails();
     this.restaurantId = null;
     form.resetForm({ restaurant_id: null, ...this.details });
@@ -186,12 +211,13 @@ export class RestaurantVendorsComponent implements OnInit {
         // Never render server response bodies: validation errors may echo bank/KYC values.
         const status = err instanceof HttpErrorResponse ? err.status : undefined;
         this.error.set(status === 502
-          ? 'Cashfree registration failed. The backend retained the encrypted details for retry. Review the details and submit again when ready.'
+          ? 'Details saved securely, but Cashfree vendor registration failed. The backend retained the encrypted details for retry. No successful Cashfree registration is confirmed. Review the details and submit again when ready.'
           : status === 401 || status === 403
             ? 'Staff authorization is required. Sign in with an authorized staff account.'
             : status === 400
               ? 'Registration was rejected. Check the restaurant email and phone, bank details, and business KYC fields.'
               : 'Unable to confirm registration. Refresh vendor statuses before retrying.');
+        if (status === 502) this.loadVendors();
       },
     });
   }
