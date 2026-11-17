@@ -1,4 +1,5 @@
 import { ChangeDetectorRef, Component, OnInit, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { Chart, registerables } from 'chart.js';
 import { MasterService } from '../../services/auth.service';
 
@@ -6,7 +7,8 @@ Chart.register(...registerables);
 
 @Component({
   selector: 'app-sales-report',
-  standalone: false,
+  standalone: true,
+  imports: [FormsModule],
   templateUrl: './sales-report.html',
   styleUrls: ['./sales-report.css']
 })

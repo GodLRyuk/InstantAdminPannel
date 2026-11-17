@@ -11,7 +11,6 @@ import { OrdersComponent } from './pages/order/order';
 import { Products } from './pages/products/products';
 import { BannerComponent } from './pages/banner/banner';
 import { Advbanner } from './pages/advbanner/advbanner';
-import { SalesReport } from './reports/sales-report/sales-report';
 import { BrandProductsReport } from './reports/brand-products-report/brand-products-report';
 import { Settlements } from './pages/settlements/settlements';
 import { StoreTiming } from './pages/store-timing/store-timing';
@@ -75,7 +74,11 @@ const routes: Routes = [
       },
       { path: 'banner', component: BannerComponent },
       { path: 'advbanner', component: Advbanner },
-      { path: 'reports/sales', component: SalesReport },
+      {
+        path: 'reports/sales',
+        loadComponent: () =>
+          import('./reports/sales-report/sales-report').then(module => module.SalesReport),
+      },
       { path: 'reports/brand-products', component: BrandProductsReport },
       {
         path: 'reports/ai-analytics',
