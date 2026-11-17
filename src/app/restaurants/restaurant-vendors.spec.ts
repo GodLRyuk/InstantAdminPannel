@@ -97,7 +97,10 @@ describe('Staff vendor onboarding', () => {
     const component = ready();
     component.submit(fakeForm());
     http.expectOne(`${base}/vendors/`).flush({ detail: 'Sensitive: 123456789012 ABCDE1234F' }, { status: 502, statusText: 'Bad Gateway' });
+    expect(component.error()).toContain('Details saved securely');
     expect(component.error()).toContain('encrypted details');
+    http.expectOne(`${base}/vendors/`).flush([{ ...safeVendor, cashfree_vendor_id: '', verification_status: 'NOT_SUBMITTED' }]);
+    expect(component.vendors()[0].verification_status).toBe('NOT_SUBMITTED');
     expect(component.error()).not.toContain('123456789012');
     expect(component.error()).not.toContain('ABCDE1234F');
     expect(TestBed.inject(ApiErrorService).alert()).toBeNull();
@@ -132,6 +135,31 @@ describe('Staff vendor onboarding', () => {
       expect(errors).toBe(2);
     }
     http.expectNone(() => true);
+  });
+
+  it('prepares retry for the saved restaurant without using masked digits as bank details', () => {
+    const component = ready();
+    component.restaurantId = null;
+    component.prepareRetry({ ...safeVendor, cashfree_vendor_id: '', verification_status: 'NOT_SUBMITTED' });
+    expect(component.editingVendor()?.restaurant_id).toBe(42);
+    expect(component.restaurantId).toBe(42);
+    expect(component.details.account_number).toBe('');
+    expect(component.details.pan).toBe('');
+    expect(component.details.ifsc_code).toBe('ABCD0123456');
+    expect(component.message()).toContain('Complete the bank and KYC fields');
+    http.expectNone(request => request.method === 'POST');
+    component.details = {
+      account_number: '987654321098', ifsc_code: 'ABCD0123456', account_holder_name: 'Updated Owner',
+      pan: 'ABCDE1234F', business_type: 'individual', gstin: '',
+    };
+    component.submit(fakeForm());
+    const request = http.expectOne(`${base}/vendors/`);
+    expect(request.request.body.restaurant_id).toBe(42);
+    expect(request.request.body.account_number).toBe('987654321098');
+    request.flush(safeVendor);
+    http.expectOne(`${base}/vendors/`).flush([safeVendor]);
+    expect(component.editingVendor()).toBeNull();
+    expect(component.details.account_number).toBe('');
   });
 
   it('never displays more than the last four bank digits', () => {
