@@ -16,6 +16,13 @@
     <li routerLink="/dashboard">Dashboard</li>
     <li routerLink="/users">Users</li>
     <li routerLink="/restaurants">Restaurants</li>
+    @if (isPaymentStaff()) {
+      <li routerLink="/restaurants/vendor-onboarding">Vendor Onboarding</li>
+      <li routerLink="/restaurants/commissions">Vendor Commissions</li>
+      <li routerLink="/restaurants/payment-splits">Restaurant Payment Splits</li>
+      <li routerLink="/restaurants/refunds">Restaurant Refunds</li>
+      <li routerLink="/restaurants/payment-operations">Payment Operations</li>
+    }
     <li routerLink="/restaurants/menu-categories">Menu Categories &amp; Cuisines</li>
     <li routerLink="/bundles">Bundles</li>
     <li routerLink="/banner">Banner</li>

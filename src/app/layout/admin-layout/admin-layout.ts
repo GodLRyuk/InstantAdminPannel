@@ -28,6 +28,10 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
     private cdf: ChangeDetectorRef
   ) {}
 
+  isPaymentStaff(): boolean {
+    return this.authService.isStaff() && !this.authService.isRestaurant();
+  }
+
   isRestaurant(): boolean {
     return this.authService.isRestaurant();
   }
