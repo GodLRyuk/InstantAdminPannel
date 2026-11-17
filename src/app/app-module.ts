@@ -25,7 +25,6 @@ import { OrderModel } from './models/order.model';
 import { CommonModule } from '@angular/common';
 import { BannerComponent } from './pages/banner/banner';
 import { Advbanner } from './pages/advbanner/advbanner';
-import { SalesReport } from './reports/sales-report/sales-report';
 import { BrandProductsReport } from './reports/brand-products-report/brand-products-report';
 import { Settlements } from './pages/settlements/settlements';
 import { Expense } from './pages/expense/expense';
@@ -48,7 +47,6 @@ import { Users } from './pages/users/users';
     OrdersComponent,
     BannerComponent,
     Advbanner,
-    SalesReport,
     BrandProductsReport,
     Settlements,
     Expense,
