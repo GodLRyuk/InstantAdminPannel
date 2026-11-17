@@ -17,11 +17,20 @@
     <li routerLink="/users">Users</li>
     <li routerLink="/restaurants">Restaurants</li>
     @if (isPaymentStaff()) {
-      <li routerLink="/restaurants/vendor-onboarding">Vendor Onboarding</li>
-      <li routerLink="/restaurants/commissions">Vendor Commissions</li>
-      <li routerLink="/restaurants/payment-splits">Restaurant Payment Splits</li>
-      <li routerLink="/restaurants/refunds">Restaurant Refunds</li>
-      <li routerLink="/restaurants/payment-operations">Payment Operations</li>
+      <li class="payments-menu">
+        <button type="button" class="submenu-label payments-toggle" [class.open]="paymentsOpen"
+          [attr.aria-expanded]="paymentsOpen" aria-controls="restaurant-payments-menu" (click)="paymentsOpen = !paymentsOpen">
+          <span class="submenu-title">Restaurant Payments</span>
+          <span class="submenu-arrow" aria-hidden="true">{{ paymentsOpen ? '▾' : '▸' }}</span>
+        </button>
+        <ul class="submenu" id="restaurant-payments-menu" [hidden]="!paymentsOpen">
+          <li><a routerLink="/restaurants/vendor-onboarding" routerLinkActive="active" ariaCurrentWhenActive="page">Vendor Onboarding</a></li>
+          <li><a routerLink="/restaurants/commissions" routerLinkActive="active" ariaCurrentWhenActive="page">Vendor Commissions</a></li>
+          <li><a routerLink="/restaurants/payment-splits" routerLinkActive="active" ariaCurrentWhenActive="page">Payment Splits</a></li>
+          <li><a routerLink="/restaurants/refunds" routerLinkActive="active" ariaCurrentWhenActive="page">Refunds</a></li>
+          <li><a routerLink="/restaurants/payment-operations" routerLinkActive="active" ariaCurrentWhenActive="page">Operations</a></li>
+        </ul>
+      </li>
     }
     <li routerLink="/restaurants/menu-categories">Menu Categories &amp; Cuisines</li>
     <li routerLink="/bundles">Bundles</li>

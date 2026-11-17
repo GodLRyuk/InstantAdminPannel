@@ -1,4 +1,5 @@
-import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { interval, Subject, startWith, switchMap, takeUntil } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { AuthService, MasterService } from '../../services/auth.service';
@@ -10,6 +11,8 @@ import { AuthService, MasterService } from '../../services/auth.service';
   styleUrls: ['./admin-layout.css']
 })
 export class AdminLayoutComponent implements OnInit, OnDestroy {
+  private router = inject(Router);
+  paymentsOpen = ['/restaurants/vendor-onboarding', '/restaurants/commissions', '/restaurants/payment-splits', '/restaurants/refunds', '/restaurants/payment-operations'].includes(this.router.url.split('?')[0]);
   reportsOpen = false;
   notificationVisible = false;
   notificationMessage = '';

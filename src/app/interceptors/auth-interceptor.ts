@@ -10,6 +10,7 @@ import {
 import { Observable, throwError, BehaviorSubject } from 'rxjs';
 import { catchError, switchMap, filter, take } from 'rxjs/operators';
 import { AuthService } from '../services/auth.service';
+import { LOCAL_API_ERROR } from '../services/http-context';
 import { ApiErrorService } from '../services/api-error.service';
 
 @Injectable()
@@ -54,13 +55,13 @@ export class AuthInterceptor implements HttpInterceptor {
         if (error.status === 401 && !isPublic) {
           return this.handle401Error(authReq, next).pipe(
             catchError(refreshError => {
-              this.apiErrorService.show(refreshError);
+              if (!req.context.get(LOCAL_API_ERROR)) this.apiErrorService.show(refreshError);
               return throwError(() => refreshError);
             })
           );
         }
 
-        this.apiErrorService.show(error);
+        if (!req.context.get(LOCAL_API_ERROR)) this.apiErrorService.show(error);
         return throwError(() => error);
       })
     );

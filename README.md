@@ -65,20 +65,30 @@ payment splits, refunds, and payment operations. Restaurant and customer
 accounts cannot open these routes. Django must enforce staff permissions on
 all admin API endpoints; browser role checks only control navigation.
 
-Staff screens link directly to Django admin on the configured API host:
+Vendor onboarding is native to the Angular panel:
 
-- Vendors: `/admin/restaurants/restaurantvendor/`
-- Commissions: `/admin/restaurants/vendorcommission/`
+- `GET /api/restaurants/admin/vendors/` loads safe vendor status metadata.
+- `POST /api/restaurants/admin/vendors/` registers a vendor using `restaurant_id`,
+  `account_number`, `ifsc_code`, `account_holder_name`, `pan`, `business_type`,
+  and optional `gstin`.
+
+The form requires a restaurant email and phone, validates bank/KYC fields,
+and keeps sensitive inputs only in component memory. Inputs are cleared after
+success, when changing restaurants, when clearing the form, and on navigation.
+The vendor list shows only masked bank digits and the safe response fields.
+HTTP 502 explains that the backend retained encrypted details and allows an
+explicit retry. Vendor API errors are rendered locally without echoing raw
+response bodies in global alerts. Bank/KYC entry is not available in Django
+admin and the partner vendor API is not used for staff entry.
+
+Commission, split, and refund screens link to Django admin:
+
+- Commissions: `/admin/restaurants/vendorcommission/` (add: `add/`)
 - Payment splits: `/admin/restaurants/paymentsplit/`
 - Refunds: `/admin/restaurants/restaurantrefund/`
 
-Django requires its own staff session and model permissions. There are no REST
-list APIs for these records. The partner vendor API at
-`/api/restaurants/partner/vendor/` is scoped to the authenticated owner and is
-not used as a staff listing. Owners submit bank/PAN details there; its response
-contains only vendor status fields, `bank_account_last4`, and `ifsc_code`.
-The Django vendor view must keep raw bank/PAN details hidden; that backend
-configuration is outside this repository.
+Django requires its own staff session and model permissions. These records
+have no REST list APIs.
 
 Operations send an empty JSON object by POST to:
 

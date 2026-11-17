@@ -1,10 +1,13 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpContext, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, throwError } from 'rxjs';
+import { LOCAL_API_ERROR } from '../services/http-context';
 import { AuthService } from '../services/auth.service';
 import { environment } from '../../environments/environment';
 import {
   AdminRestaurant,
+  RestaurantVendor,
+  VendorOnboardingPayload,
   Cuisine,
   MenuCategory,
   MenuItemPayload,
@@ -27,6 +30,20 @@ export class RestaurantAdminService {
   private http = inject(HttpClient);
   private auth = inject(AuthService);
   private base = `${environment.apiUrl}/restaurants`;
+
+  vendors(): Observable<RestaurantVendor[]> {
+    if (!this.canManagePayments()) return throwError(() => new Error('Staff access is required.'));
+    return this.http.get<RestaurantVendor[]>(`${this.base}/admin/vendors/`, { context: new HttpContext().set(LOCAL_API_ERROR, true) });
+  }
+
+  onboardVendor(payload: VendorOnboardingPayload): Observable<RestaurantVendor> {
+    if (!this.canManagePayments()) return throwError(() => new Error('Staff access is required.'));
+    return this.http.post<RestaurantVendor>(`${this.base}/admin/vendors/`, payload, { context: new HttpContext().set(LOCAL_API_ERROR, true) });
+  }
+
+  private canManagePayments(): boolean {
+    return this.auth.isAuthenticated() && this.auth.isStaff() && !this.auth.isRestaurant();
+  }
 
   processPayments(action: 'splits' | 'sync' | 'refunds'): Observable<PaymentOperationResult> {
     if (!this.auth.isAuthenticated() || !this.auth.isStaff() || this.auth.isRestaurant()) {

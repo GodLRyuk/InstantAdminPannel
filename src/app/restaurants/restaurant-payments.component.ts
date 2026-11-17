@@ -1,3 +1,4 @@
+import { RestaurantVendorsComponent } from './restaurant-vendors.component';
 import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -11,7 +12,7 @@ type Action = 'splits' | 'sync' | 'refunds';
 @Component({
   selector: 'app-restaurant-payments',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, RestaurantVendorsComponent],
   styles: [ADMIN_CSS],
   template: `
     @if (authorized) {
@@ -25,19 +26,15 @@ type Action = 'splits' | 'sync' | 'refunds';
       @if (message()) { <div class="ok" role="status">{{ message() }}</div> }
 
       @if (page === 'vendor-onboarding') {
-        <div class="card">
-          <h2>Restaurant vendors</h2>
-          <p>View each restaurant’s Cashfree vendor ID, verification status, settlement status, and masked bank account in Django admin.</p>
-          <p>Owners submit bank and PAN details through their partner account.</p>
-          <a class="btn" [href]="adminLinks.vendors" target="_blank" rel="noopener noreferrer">Open restaurant vendors</a>
-        </div>
+        <app-restaurant-vendors />
       }
 
       @if (page === 'commissions') {
         <div class="card">
           <h2>Vendor commissions</h2>
           <p>Add or edit a restaurant’s commission percentage and effective date in Django admin under Vendor commissions.</p>
-          <a class="btn" [href]="adminLinks.commissions" target="_blank" rel="noopener noreferrer">Open vendor commissions</a>
+          <a class="btn" [href]="adminLinks.addCommission" target="_blank" rel="noopener noreferrer">Add commission in Django admin</a>
+          <a class="btn ghost" [href]="adminLinks.commissions" target="_blank" rel="noopener noreferrer">View or edit commissions in Django admin</a>
         </div>
       }
       @if (page === 'payment-splits') {
@@ -54,8 +51,8 @@ type Action = 'splits' | 'sync' | 'refunds';
           <a class="btn" [href]="adminLinks.refunds" target="_blank" rel="noopener noreferrer">Open restaurant refunds</a>
         </div>
       }
-      @if (page === 'vendor-onboarding' || page === 'commissions' || page === 'payment-splits' || page === 'refunds') {
-        <p class="muted">Django admin requires a staff session and the relevant model permissions.</p>
+      @if (page === 'commissions' || page === 'payment-splits' || page === 'refunds') {
+        <p class="muted">Django forms and records open in a new tab. Sign in with your Django staff account if prompted; the panel session does not sign you into Django.</p>
       }
       @if (page === 'payment-operations') {
         <p class="sub">Run payment operations across eligible records. Backend staff permissions apply to every request.</p>
@@ -89,7 +86,7 @@ export class RestaurantPaymentsComponent {
   readonly authorized = this.auth.isAuthenticated() && this.auth.isStaff() && !this.auth.isRestaurant();
   readonly page = inject(ActivatedRoute).snapshot.routeConfig?.path || '';
   readonly adminLinks = {
-    vendors: new URL('/admin/restaurants/restaurantvendor/', environment.apiUrl).href,
+    addCommission: new URL('/admin/restaurants/vendorcommission/add/', environment.apiUrl).href,
     commissions: new URL('/admin/restaurants/vendorcommission/', environment.apiUrl).href,
     splits: new URL('/admin/restaurants/paymentsplit/', environment.apiUrl).href,
     refunds: new URL('/admin/restaurants/restaurantrefund/', environment.apiUrl).href,
