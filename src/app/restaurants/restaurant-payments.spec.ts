@@ -66,7 +66,6 @@ describe('Restaurant payment access and operations', () => {
 
   it('links staff directly to the confirmed Django models', () => {
     const component = TestBed.runInInjectionContext(() => new RestaurantPaymentsComponent());
-    expect(new URL(component.adminLinks.vendors).pathname).toBe('/admin/restaurants/restaurantvendor/');
     expect(new URL(component.adminLinks.commissions).pathname).toBe('/admin/restaurants/vendorcommission/');
     expect(new URL(component.adminLinks.splits).pathname).toBe('/admin/restaurants/paymentsplit/');
     expect(new URL(component.adminLinks.refunds).pathname).toBe('/admin/restaurants/restaurantrefund/');

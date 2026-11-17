@@ -151,3 +151,25 @@ export const STATUS_BUTTON_LABEL: Record<string, string> = {
   delivered: 'Delivered',
   cancelled: 'Cancel order',
 };
+
+export interface RestaurantVendor {
+  id: number;
+  restaurant_id: number;
+  restaurant_name: string;
+  cashfree_vendor_id: string;
+  verification_status: string;
+  settlement_status: string;
+  bank_account_last4: string;
+  ifsc_code: string;
+  updated_at: string;
+}
+
+export interface VendorOnboardingPayload {
+  restaurant_id: number;
+  account_number: string;
+  ifsc_code: string;
+  account_holder_name: string;
+  pan: string;
+  business_type: string;
+  gstin?: string;
+}
