@@ -1,3 +1,4 @@
+import { RestaurantPaymentsComponent } from './restaurant-payments.component';
 import { Routes } from '@angular/router';
 import { RestaurantFormComponent } from './restaurant-form.component';
 import { RestaurantOrdersComponent } from './restaurant-orders.component';
@@ -12,5 +13,6 @@ export const RESTAURANT_ROUTES: Routes = [
   { path: 'orders', component: RestaurantOrdersComponent },
   { path: 'menu-items', component: RestaurantMenuItemsComponent },
   { path: 'menu-categories', component: RestaurantMenuComponent },
+  ...['vendor-onboarding', 'commissions', 'payment-splits', 'refunds', 'payment-operations'].map(path => ({ path, component: RestaurantPaymentsComponent })),
   { path: ':id', component: RestaurantFormComponent },
 ];

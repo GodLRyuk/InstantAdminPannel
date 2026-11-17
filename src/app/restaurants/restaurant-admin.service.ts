@@ -1,6 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
+import { AuthService } from '../services/auth.service';
 import { environment } from '../../environments/environment';
 import {
   AdminRestaurant,
@@ -11,6 +12,12 @@ import {
   RestaurantOrder,
 } from './restaurant.models';
 
+export interface PaymentOperationResult {
+  failed: number;
+  processed?: number;
+  synced?: number;
+}
+
 /**
  * Calls the Django restaurants API. The JWT header is added by your existing
  * HTTP interceptor, the same way as your other services.
@@ -18,7 +25,20 @@ import {
 @Injectable({ providedIn: 'root' })
 export class RestaurantAdminService {
   private http = inject(HttpClient);
+  private auth = inject(AuthService);
   private base = `${environment.apiUrl}/restaurants`;
+
+  processPayments(action: 'splits' | 'sync' | 'refunds'): Observable<PaymentOperationResult> {
+    if (!this.auth.isAuthenticated() || !this.auth.isStaff() || this.auth.isRestaurant()) {
+      return throwError(() => new Error('Staff access is required.'));
+    }
+    const paths = {
+      splits: 'payment-splits/process',
+      sync: 'payment-splits/sync',
+      refunds: 'refunds/process',
+    };
+    return this.http.post<PaymentOperationResult>(`${this.base}/admin/${paths[action]}/`, {});
+  }
 
   // ---------------- restaurants
   list(filters: { status?: string; q?: string } = {}): Observable<AdminRestaurant[]> {
