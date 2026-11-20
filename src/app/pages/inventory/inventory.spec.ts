@@ -47,6 +47,25 @@ describe('Inventory', () => {
     expect(component).toBeTruthy();
   });
 
+  it('shows reserved stock and uses available stock for badges and row styling', () => {
+    component.inventoryItems = [
+      { product: 7, product_name: 'Coffee', total_stock: 10, available_stock: 0, reserved_stock: 10, unit: null },
+      { product: 8, product_name: 'Tea', total_stock: 10, available_stock: 5, reserved_stock: 5, unit: null },
+      { product: 9, product_name: 'Milk', total_stock: 10, available_stock: 6, reserved_stock: 4, unit: null },
+    ];
+    component.applyFilter();
+    fixture.changeDetectorRef.markForCheck();
+    fixture.detectChanges();
+
+    const rows = fixture.nativeElement.querySelectorAll('tbody tr');
+    expect(Array.from(rows[0].cells, (cell: HTMLTableCellElement) => cell.textContent.trim()).slice(2))
+      .toEqual(['10', '0', '10', 'Out of Stock']);
+    expect(rows[0].classList.contains('out-stock-row')).toBe(true);
+    expect(rows[1].querySelector('.low-stock').textContent.trim()).toBe('Low Stock');
+    expect(rows[1].classList.contains('low-stock-row')).toBe(true);
+    expect(rows[2].querySelector('.in-stock').textContent.trim()).toBe('In Stock');
+  });
+
   it('finds a product by an exact scanned barcode', () => {
     component.products = [product];
     component.productsLoaded = true;

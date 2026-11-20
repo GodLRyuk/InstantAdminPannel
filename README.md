@@ -81,14 +81,21 @@ explicit retry. Vendor API errors are rendered locally without echoing raw
 response bodies in global alerts. Bank/KYC entry is not available in Django
 admin and the partner vendor API is not used for staff entry.
 
-Commission, split, and refund screens link to Django admin:
+Commission, split, and refund forms open in the Angular panel. The staff-only
+Django endpoints are:
 
-- Commissions: `/admin/restaurants/vendorcommission/` (add: `add/`)
-- Payment splits: `/admin/restaurants/paymentsplit/`
-- Refunds: `/admin/restaurants/restaurantrefund/`
+- `GET/POST /api/restaurants/admin/commissions/` lists commission rates and saves a
+  restaurant, percentage, and effective date. The backend uses the applicable
+  rate when calculating an order's split.
+- `GET/POST /api/restaurants/admin/payment-splits/` lists recent splits and
+  processes or syncs one paid Cashfree order by order number. A split can remain
+  pending during the provider's two-minute wait.
+- `GET/POST /api/restaurants/admin/refunds/` lists recent refunds and submits or
+  checks a full cancellation refund for one order number.
 
-Django requires its own staff session and model permissions. These records
-have no REST list APIs.
+The Django backend calculates amounts, makes Cashfree requests, and returns the
+record status. These forms require a backend deployment containing the staff
+endpoints above.
 
 Operations send an empty JSON object by POST to:
 
@@ -98,5 +105,4 @@ Operations send an empty JSON object by POST to:
 
 Requests require an explicit confirmation and are never retried automatically.
 Successful responses display processed/failed counts for splits, synced/failed
-counts for settlements, and processed/failed/synced counts for refunds. Check
-Django admin records for individual outcomes.
+counts for settlements, and processed/failed/synced counts for refunds. The Payment splits and Restaurant refunds pages show individual outcomes.

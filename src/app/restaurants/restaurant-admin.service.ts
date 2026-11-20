@@ -6,6 +6,10 @@ import { AuthService } from '../services/auth.service';
 import { environment } from '../../environments/environment';
 import {
   AdminRestaurant,
+  CommissionInput,
+  CommissionRecord,
+  PaymentSplitRecord,
+  RestaurantRefundRecord,
   RestaurantVendor,
   VendorOnboardingPayload,
   Cuisine,
@@ -41,12 +45,46 @@ export class RestaurantAdminService {
     return this.http.post<RestaurantVendor>(`${this.base}/admin/vendors/`, payload, { context: new HttpContext().set(LOCAL_API_ERROR, true) });
   }
 
+  commissions(): Observable<CommissionRecord[]> {
+    return this.paymentRecords<CommissionRecord[]>('commissions');
+  }
+
+  addCommission(payload: CommissionInput): Observable<CommissionRecord> {
+    return this.paymentRecords<CommissionRecord>('commissions', payload);
+  }
+
+  paymentSplits(): Observable<PaymentSplitRecord[]> {
+    return this.paymentRecords<PaymentSplitRecord[]>('payment-splits');
+  }
+
+  submitSplit(orderNumber: string): Observable<PaymentSplitRecord> {
+    return this.paymentRecords<PaymentSplitRecord>('payment-splits', { order_number: orderNumber });
+  }
+
+  refunds(): Observable<RestaurantRefundRecord[]> {
+    return this.paymentRecords<RestaurantRefundRecord[]>('refunds');
+  }
+
+  submitRefund(orderNumber: string): Observable<RestaurantRefundRecord> {
+    return this.paymentRecords<RestaurantRefundRecord>('refunds', { order_number: orderNumber });
+  }
+
+  private paymentRecords<T>(
+    path: 'commissions' | 'payment-splits' | 'refunds',
+    payload?: CommissionInput | { order_number: string },
+  ): Observable<T> {
+    if (!this.canManagePayments()) return throwError(() => new Error('Staff access is required.'));
+    const url = `${this.base}/admin/${path}/`;
+    const options = { context: new HttpContext().set(LOCAL_API_ERROR, true) };
+    return payload ? this.http.post<T>(url, payload, options) : this.http.get<T>(url, options);
+  }
+
   private canManagePayments(): boolean {
     return this.auth.isAuthenticated() && this.auth.isStaff() && !this.auth.isRestaurant();
   }
 
   processPayments(action: 'splits' | 'sync' | 'refunds'): Observable<PaymentOperationResult> {
-    if (!this.auth.isAuthenticated() || !this.auth.isStaff() || this.auth.isRestaurant()) {
+    if (!this.canManagePayments()) {
       return throwError(() => new Error('Staff access is required.'));
     }
     const paths = {
@@ -128,6 +166,14 @@ export class RestaurantAdminService {
 
   partnerCategories(): Observable<MenuCategory[] | { results: MenuCategory[] }> {
     return this.http.get<MenuCategory[] | { results: MenuCategory[] }>(`${this.base}/partner/categories/`);
+  }
+
+  bulkUploadMenu(resource: 'categories' | 'items', file: File): Observable<unknown> {
+    const data = new FormData();
+    data.append('file', file);
+    return this.http.post(`${this.base}/partner/${resource}/bulk/`, data, {
+      context: new HttpContext().set(LOCAL_API_ERROR, true),
+    });
   }
 
   createPartnerCategory(data: Pick<MenuCategory, 'name' | 'sort_order'>): Observable<MenuCategory> {

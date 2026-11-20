@@ -173,3 +173,35 @@ export interface VendorOnboardingPayload {
   business_type: string;
   gstin?: string;
 }
+
+export interface CommissionInput {
+  restaurant: number;
+  commission_percentage: number;
+  effective_from: string;
+}
+
+export interface CommissionRecord extends Omit<CommissionInput, 'commission_percentage'> {
+  id: number;
+  restaurant_name: string;
+  commission_percentage: string;
+}
+
+export interface CashfreeOrderRecord {
+  id: number;
+  order_number: string;
+  restaurant_name: string;
+  status: string;
+  provider_reference: string;
+  cashfree_error?: boolean;
+}
+
+export interface PaymentSplitRecord extends CashfreeOrderRecord {
+  gross_amount: string;
+  commission_percentage: string;
+  platform_commission: string;
+  vendor_amount: string;
+}
+
+export interface RestaurantRefundRecord extends CashfreeOrderRecord {
+  amount: string;
+}

@@ -36,7 +36,7 @@
           <div class="product-icon"><i class="fa fa-cube" aria-hidden="true"></i></div>
           <div class="product-info">
             <strong>{{ product.name }}</strong>
-            <span>{{ product.category }} <span class="dot">·</span> {{ product.stock }} in stock</span>
+            <span>{{ product.category }} <span class="dot">·</span> {{ product.availableStock }} available</span>
             <small>{{ product.barcode ? 'Barcode: ' + product.barcode : 'No barcode' }}</small>
           </div>
           <div class="product-action">
@@ -79,7 +79,7 @@
             <div class="quantity-control" [attr.aria-label]="'Quantity for ' + item.name">
               <button type="button" (click)="changeQuantity(item, -1)" [attr.aria-label]="'Decrease ' + item.name">−</button>
               <span>{{ item.quantity }}</span>
-              <button type="button" (click)="changeQuantity(item, 1)" [disabled]="item.quantity >= item.stock" [attr.aria-label]="'Increase ' + item.name">+</button>
+              <button type="button" (click)="changeQuantity(item, 1)" [disabled]="item.quantity >= item.availableStock" [attr.aria-label]="'Increase ' + item.name">+</button>
             </div>
             <strong>₹{{ item.price * item.quantity | number:'1.2-2' }}</strong>
             <button type="button" class="remove-button" (click)="removeItem(item)" [attr.aria-label]="'Remove ' + item.name">
