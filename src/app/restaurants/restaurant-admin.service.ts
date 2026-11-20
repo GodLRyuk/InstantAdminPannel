@@ -5,6 +5,10 @@ import { LOCAL_API_ERROR } from '../services/http-context';
 import { AuthService } from '../services/auth.service';
 import { environment } from '../../environments/environment';
 import {
+  AddonGroup,
+  AddonGroupPayload,
+  AddonOption,
+  AddonOptionPayload,
   AdminRestaurant,
   CommissionInput,
   CommissionRecord,
@@ -13,10 +17,15 @@ import {
   RestaurantVendor,
   VendorOnboardingPayload,
   Cuisine,
+  CustomerMenuItem,
   MenuCategory,
   MenuItemPayload,
   PartnerMenuItem,
   RestaurantOrder,
+  RestaurantPlacedOrder,
+  RestaurantPlaceOrderRequest,
+  RestaurantQuote,
+  RestaurantQuoteRequest,
 } from './restaurant.models';
 
 export interface PaymentOperationResult {
@@ -206,6 +215,66 @@ export class RestaurantAdminService {
 
   deleteMenuItem(id: number): Observable<void> {
     return this.http.delete<void>(`${this.base}/partner/items/${id}/`);
+  }
+
+  addonGroups(itemId: number): Observable<AddonGroup[] | { results: AddonGroup[] }> {
+    return this.http.get<AddonGroup[] | { results: AddonGroup[] }>(
+      this.addonGroupsUrl(itemId), this.localErrors(),
+    );
+  }
+
+  saveAddonGroup(itemId: number, payload: AddonGroupPayload, groupId: number | null): Observable<AddonGroup> {
+    const url = this.addonGroupsUrl(itemId);
+    return groupId === null
+      ? this.http.post<AddonGroup>(url, payload, this.localErrors())
+      : this.http.patch<AddonGroup>(`${url}${groupId}/`, payload, this.localErrors());
+  }
+
+  deleteAddonGroup(itemId: number, groupId: number): Observable<void> {
+    return this.http.delete<void>(`${this.addonGroupsUrl(itemId)}${groupId}/`, this.localErrors());
+  }
+
+  addonOptions(itemId: number, groupId: number): Observable<AddonOption[] | { results: AddonOption[] }> {
+    return this.http.get<AddonOption[] | { results: AddonOption[] }>(
+      this.addonOptionsUrl(itemId, groupId), this.localErrors(),
+    );
+  }
+
+  saveAddonOption(
+    itemId: number, groupId: number, payload: AddonOptionPayload, optionId: number | null,
+  ): Observable<AddonOption> {
+    const url = this.addonOptionsUrl(itemId, groupId);
+    return optionId === null
+      ? this.http.post<AddonOption>(url, payload, this.localErrors())
+      : this.http.patch<AddonOption>(`${url}${optionId}/`, payload, this.localErrors());
+  }
+
+  deleteAddonOption(itemId: number, groupId: number, optionId: number): Observable<void> {
+    return this.http.delete<void>(`${this.addonOptionsUrl(itemId, groupId)}${optionId}/`, this.localErrors());
+  }
+
+  private addonGroupsUrl(itemId: number): string {
+    return `${this.base}/partner/items/${itemId}/addon-groups/`;
+  }
+
+  private addonOptionsUrl(itemId: number, groupId: number): string {
+    return `${this.addonGroupsUrl(itemId)}${groupId}/options/`;
+  }
+
+  private localErrors(): { context: HttpContext } {
+    return { context: new HttpContext().set(LOCAL_API_ERROR, true) };
+  }
+
+  customerMenu(restaurantId: number): Observable<CustomerMenuItem[]> {
+    return this.http.get<CustomerMenuItem[]>(`${this.base}/${restaurantId}/menu/`);
+  }
+
+  quoteOrder(payload: RestaurantQuoteRequest): Observable<RestaurantQuote> {
+    return this.http.post<RestaurantQuote>(`${this.base}/orders/quote/`, payload);
+  }
+
+  placeOrder(payload: RestaurantPlaceOrderRequest): Observable<RestaurantPlacedOrder> {
+    return this.http.post<RestaurantPlacedOrder>(`${this.base}/orders/`, payload);
   }
 
   // ---------------- orders

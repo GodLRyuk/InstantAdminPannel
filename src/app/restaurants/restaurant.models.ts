@@ -41,6 +41,69 @@ export interface MenuItemPayload {
   sort_order: number;
 }
 
+export interface AddonGroupPayload {
+  name: string;
+  min_select: number;
+  max_select: number;
+}
+
+export interface AddonGroup extends AddonGroupPayload {
+  id: number;
+}
+
+export interface AddonOptionPayload {
+  name: string;
+  price: string;
+  is_available: boolean;
+}
+
+export interface AddonOption extends AddonOptionPayload {
+  id: number;
+}
+
+export interface CustomerMenuItem {
+  id: number;
+  restaurant: number;
+  name: string;
+  description: string;
+  category: string;
+  is_veg: boolean;
+  price: string;
+  mrp: string;
+  image: string | null;
+  is_available: boolean;
+  packaging_charge: string;
+  discount_percent: number;
+  addon_groups?: (AddonGroup & { options: AddonOption[] })[];
+}
+
+export interface RestaurantQuoteRequest {
+  restaurant_id: number;
+  address_id?: number;
+  items: { menu_item_id: number; quantity: number; addon_option_ids: number[] }[];
+}
+
+export interface RestaurantQuote {
+  restaurant_id: number;
+  item_total: string;
+  discount: string;
+  delivery_fee: string;
+  packaging_charge: string;
+  gst: string;
+  total_amount: string;
+  offer_code: string;
+}
+
+export interface RestaurantPlaceOrderRequest extends RestaurantQuoteRequest {
+  address_id: number;
+  payment_method: RestaurantOrder['payment_method'];
+  notes?: string;
+}
+
+export interface RestaurantPlacedOrder extends RestaurantOrder {
+  razorpay?: { key_id: string; order_id: string; amount: number; currency: string };
+}
+
 export interface AdminRestaurant {
   id: number;
   owner: number;
