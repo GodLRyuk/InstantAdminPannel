@@ -2,13 +2,14 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RestaurantAdminService } from './restaurant-admin.service';
+import { RestaurantMenuAddonsComponent } from './restaurant-menu-addons.component';
 import { RestaurantMenuBulkUploadComponent } from './restaurant-menu-bulk-upload.component';
 import { MenuCategory, MenuItemPayload, PartnerMenuItem } from './restaurant.models';
 import { ADMIN_CSS, errorText } from './restaurants-shared';
 
 @Component({
   selector: 'app-restaurant-menu-items',
-  imports: [ReactiveFormsModule, RestaurantMenuBulkUploadComponent],
+  imports: [ReactiveFormsModule, RestaurantMenuAddonsComponent, RestaurantMenuBulkUploadComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: [ADMIN_CSS, `
     .item-form { display: grid; gap: 14px; }
@@ -93,6 +94,9 @@ import { ADMIN_CSS, errorText } from './restaurants-shared';
           <button class="btn grey" type="button" (click)="cancelForm()" [disabled]="saving()">Cancel</button>
         </div>
       </form>
+      @if (editingId(); as itemId) {
+        <app-restaurant-menu-addons [itemId]="itemId" />
+      }
     }
 
     @if (loading()) {
