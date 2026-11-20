@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, Injector, OnInit, afterNextRender, inject, signal, viewChild } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RestaurantAdminService } from './restaurant-admin.service';
 import { RestaurantMenuAddonsComponent } from './restaurant-menu-addons.component';
@@ -12,7 +12,7 @@ import { ADMIN_CSS, errorText } from './restaurants-shared';
   imports: [ReactiveFormsModule, RestaurantMenuAddonsComponent, RestaurantMenuBulkUploadComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: [ADMIN_CSS, `
-    .item-form { display: grid; gap: 14px; }
+    .item-form { display: grid; gap: 14px; scroll-margin-top: 16px; }
     .check-row { display: flex; gap: 18px; flex-wrap: wrap; }
     .item-photo { max-width: 100px; max-height: 72px; object-fit: cover; border-radius: 6px; }
     .danger { color: #b71c1c; }
@@ -40,14 +40,14 @@ import { ADMIN_CSS, errorText } from './restaurants-shared';
     }
 
     @if (formOpen()) {
-      <form class="card item-form" [formGroup]="form" (ngSubmit)="save()">
+      <form #itemEditor class="card item-form" [formGroup]="form" (ngSubmit)="save()">
         <h2>{{ editingId() ? 'Edit menu item' : 'Add menu item' }}</h2>
         @if (formError()) {
           <div class="err" role="alert">{{ formError() }}</div>
         }
         <div class="grid">
           <label class="f">Name *
-            <input formControlName="name" required />
+            <input #itemName formControlName="name" required />
           </label>
           <label class="f">Category
             <select formControlName="category">
@@ -162,6 +162,9 @@ import { ADMIN_CSS, errorText } from './restaurants-shared';
 export class RestaurantMenuItemsComponent implements OnInit {
   private readonly api = inject(RestaurantAdminService);
   private readonly fb = inject(FormBuilder);
+  private readonly injector = inject(Injector);
+  private readonly itemEditor = viewChild<ElementRef<HTMLFormElement>>('itemEditor');
+  private readonly itemName = viewChild<ElementRef<HTMLInputElement>>('itemName');
 
   readonly form = this.fb.nonNullable.group({
     name: ['', Validators.required],
@@ -222,6 +225,11 @@ export class RestaurantMenuItemsComponent implements OnInit {
         this.currentPhotoUrl.set(detail.image ?? detail.photo ?? null);
         this.formOpen.set(true);
         this.saving.set(false);
+        afterNextRender(() => {
+          if (this.editingId() !== detail.id) return;
+          this.itemEditor()?.nativeElement.scrollIntoView({ block: 'start' });
+          this.itemName()?.nativeElement.focus({ preventScroll: true });
+        }, { injector: this.injector });
       },
       error: (err: unknown) => {
         this.error.set(errorText(err));
