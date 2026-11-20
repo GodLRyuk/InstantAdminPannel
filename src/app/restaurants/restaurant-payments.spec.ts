@@ -7,6 +7,8 @@ import { environment } from '../../environments/environment';
 import { AuthService } from '../services/auth.service';
 import { roleAccessGuard } from '../guards/role-access.guard';
 import { RestaurantAdminService } from './restaurant-admin.service';
+import { NgForm } from '@angular/forms';
+import { RestaurantPaymentRecordsComponent } from './restaurant-payment-records.component';
 import { RestaurantPaymentsComponent } from './restaurant-payments.component';
 
 describe('Restaurant payment access and operations', () => {
@@ -64,13 +66,57 @@ describe('Restaurant payment access and operations', () => {
     }
   });
 
-  it('links staff directly to the confirmed Django models', () => {
-    const component = TestBed.runInInjectionContext(() => new RestaurantPaymentsComponent());
-    expect(new URL(component.adminLinks.commissions).pathname).toBe('/admin/restaurants/vendorcommission/');
-    expect(new URL(component.adminLinks.splits).pathname).toBe('/admin/restaurants/paymentsplit/');
-    expect(new URL(component.adminLinks.refunds).pathname).toBe('/admin/restaurants/restaurantrefund/');
-    http.expectNone(request => request.url.includes('/partner/vendor/'));
-  });
+  for (const page of ['commissions', 'payment-splits', 'refunds'] as const) {
+    it(`opens the ${page} form inside Angular and submits once`, () => {
+      const fixture = TestBed.createComponent(RestaurantPaymentRecordsComponent);
+      fixture.componentRef.setInput('page', page);
+      fixture.detectChanges();
+
+      const url = `${environment.apiUrl}/restaurants/admin/${page}/`;
+      http.expectOne({ url, method: 'GET' }).flush([]);
+      fixture.detectChanges();
+      fixture.nativeElement.querySelector('button').click();
+      fixture.detectChanges();
+
+      const component = fixture.componentInstance;
+      expect(fixture.nativeElement.querySelector('form')).toBeTruthy();
+      expect(fixture.nativeElement.querySelector('a')).toBeNull();
+      let payload: object;
+      let record: object;
+      if (page === 'commissions') {
+        http.expectOne({ url: `${environment.apiUrl}/restaurants/admin/restaurants/`, method: 'GET' })
+          .flush([{ id: 1, name: 'Test restaurant' }]);
+        component.restaurant = 1;
+        component.percentage = 12.5;
+        component.effectiveFrom = '2026-11-18T09:00';
+        payload = {
+          restaurant: 1, commission_percentage: 12.5,
+          effective_from: new Date(component.effectiveFrom).toISOString(),
+        };
+        record = { ...payload, id: 1, restaurant_name: 'Test restaurant', commission_percentage: '12.50' };
+      } else {
+        component.orderNumber = ' RO000123 ';
+        payload = { order_number: 'RO000123' };
+        record = {
+          ...payload, id: 1, restaurant_name: 'Test restaurant', status: 'submitted', provider_reference: 'cf-123',
+          ...(page === 'payment-splits'
+            ? { gross_amount: '100.00', platform_commission: '12.50', vendor_amount: '87.50', commission_percentage: '12.50' }
+            : { amount: '100.00' }),
+        };
+      }
+
+      const validForm = { invalid: false } as NgForm;
+      component.submit(validForm);
+      component.submit(validForm);
+      const request = http.expectOne({ url, method: 'POST' });
+      expect(request.request.body).toEqual(payload);
+      request.flush(record);
+      fixture.detectChanges();
+      expect(fixture.nativeElement.querySelector('form')).toBeNull();
+      expect(fixture.nativeElement.querySelector('tbody')?.textContent).toContain('Test restaurant');
+      expect(component.message()).toContain(page === 'commissions' ? 'Commission saved' : 'Submitted to Cashfree');
+    });
+  }
 
   for (const [action, path, counts, expected] of [
     ['splits', 'payment-splits/process', { processed: 3, failed: 1 }, 'Processed: 3. Failed: 1.'],

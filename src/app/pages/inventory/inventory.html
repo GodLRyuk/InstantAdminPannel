@@ -21,6 +21,7 @@
           <th>Product Name</th>
           <th>Total Stock</th>
           <th>Available Stock</th>
+          <th>Reserved</th>
           <th>Status</th>
         </tr>
       </thead>
@@ -28,39 +29,34 @@
       <tbody>
         <tr *ngFor="let item of pagedItems; let i = index"
             [ngClass]="{
-              'out-stock-row': item.total_stock === 0,
-              'low-stock-row': item.total_stock > 0 && item.total_stock <= 5,
+              'out-stock-row': item.available_stock <= 0,
+              'low-stock-row': item.available_stock > 0 && item.available_stock <= 5,
             }">
 
           <td>{{ (currentPage - 1) * pageSize + i + 1 }}</td>
 
           <td>{{ item.product_name }}</td>
 
-          <!-- Stock Column -->
+          <td>{{ item.total_stock }}</td>
+          <td>{{ item.available_stock }}</td>
+          <td>{{ item.reserved_stock ?? (item.total_stock - item.available_stock) }}</td>
           <td>
-              {{ item.total_stock }}
-          </td>
-
-          <!-- Price -->
-          <td>{{ item.available_stock}}</td>
-          <!-- Status -->
-          <td>
-            <span *ngIf="item.total_stock > 5" class="in-stock">
+            <span *ngIf="item.available_stock > 5" class="in-stock">
               In Stock
             </span>
 
-            <span *ngIf="item.total_stock > 0 && item.total_stock <= 5" class="low-stock">
+            <span *ngIf="item.available_stock > 0 && item.available_stock <= 5" class="low-stock">
               Low Stock
             </span>
 
-            <span *ngIf="item.total_stock === 0" class="out-stock">
+            <span *ngIf="item.available_stock <= 0" class="out-stock">
               Out of Stock
             </span>
           </td>
 
         </tr>
         <tr *ngIf="pagedItems.length === 0">
-          <td colspan="5" style="text-align:center; padding: 20px;">No inventory items found</td>
+          <td colspan="6" style="text-align:center; padding: 20px;">No inventory items found</td>
         </tr>
       </tbody>
 

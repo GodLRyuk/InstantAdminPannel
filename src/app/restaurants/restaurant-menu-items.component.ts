@@ -2,12 +2,13 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RestaurantAdminService } from './restaurant-admin.service';
+import { RestaurantMenuBulkUploadComponent } from './restaurant-menu-bulk-upload.component';
 import { MenuCategory, MenuItemPayload, PartnerMenuItem } from './restaurant.models';
 import { ADMIN_CSS, errorText } from './restaurants-shared';
 
 @Component({
   selector: 'app-restaurant-menu-items',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, RestaurantMenuBulkUploadComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: [ADMIN_CSS, `
     .item-form { display: grid; gap: 14px; }
@@ -22,9 +23,12 @@ import { ADMIN_CSS, errorText } from './restaurants-shared';
         <h1>Menu items</h1>
         <p class="sub">Create and manage restaurant menu items.</p>
       </div>
-      <button class="btn" type="button" (click)="startCreate()">
-        {{ formOpen() && !editingId() ? 'Close form' : 'Add menu item' }}
-      </button>
+      <div class="actions">
+        <button class="btn" type="button" (click)="startCreate()">
+          {{ formOpen() && !editingId() ? 'Close form' : 'Add menu item' }}
+        </button>
+        <app-restaurant-menu-bulk-upload resource="items" (uploaded)="loadItems()" />
+      </div>
     </div>
 
     @if (success()) {
@@ -324,7 +328,7 @@ export class RestaurantMenuItemsComponent implements OnInit {
     return typeof category === 'number' ? category : category.id;
   }
 
-  private loadItems(): void {
+  protected loadItems(): void {
     this.loading.set(true);
     this.error.set('');
     this.api.menuItems().subscribe({

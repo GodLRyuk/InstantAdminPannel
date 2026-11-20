@@ -1,13 +1,14 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RestaurantAdminService } from './restaurant-admin.service';
+import { RestaurantMenuBulkUploadComponent } from './restaurant-menu-bulk-upload.component';
 import { AuthService } from '../services/auth.service';
 import { AdminRestaurant, Cuisine, MenuCategory } from './restaurant.models';
 import { ADMIN_CSS, errorText } from './restaurants-shared';
 
 @Component({
   selector: 'app-restaurant-menu',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, RestaurantMenuBulkUploadComponent],
   styles: [ADMIN_CSS],
   template: `
     <div class="bar" style="justify-content: space-between">
@@ -17,6 +18,9 @@ import { ADMIN_CSS, errorText } from './restaurants-shared';
           {{ isRestaurantOwner ? 'View the categories for your restaurant menu.' : 'Create cuisine options and restaurant-specific menu categories.' }}
         </p>
       </div>
+      @if (isRestaurantOwner) {
+        <app-restaurant-menu-bulk-upload resource="categories" (uploaded)="loadPartnerCategories()" />
+      }
     </div>
 
     @if (!isRestaurantOwner) {
@@ -366,7 +370,7 @@ export class RestaurantMenuComponent implements OnInit {
     });
   }
 
-  private loadPartnerCategories(): void {
+  protected loadPartnerCategories(): void {
     this.loadingCategories.set(true);
     this.categoryError.set('');
     this.api.partnerCategories().subscribe({

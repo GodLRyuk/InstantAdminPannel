@@ -13,7 +13,7 @@ interface StoreProduct {
   category: string;
   barcode: string;
   price: number;
-  stock: number;
+  availableStock: number;
 }
 
 interface BillItem extends StoreProduct { quantity: number; }
@@ -64,9 +64,8 @@ export class StoreSale implements OnInit {
   }
 
   private toStoreProduct(product: ProductModel, inventory: InventoryModel[]): StoreProduct {
-    const inventoryItem = inventory.find(row => Number(row.product_id) === Number(product.id));
-    const productStock = product.stock === null || product.stock === undefined ? NaN : Number(product.stock);
-    const quantity = Number.isFinite(productStock) ? productStock : Number(inventoryItem?.available_stock ?? 0);
+    const inventoryItem = inventory.find(row => Number(row.product ?? row.product_id) === Number(product.id));
+    const availableStock = Number(inventoryItem?.available_stock ?? 0);
     const category = product.category_name || String(product.category ?? '');
     return {
       id: Number(product.id),
@@ -74,7 +73,7 @@ export class StoreSale implements OnInit {
       category: category && category !== 'null' ? category : 'Product',
       barcode: String(product.barcode ?? ''),
       price: Number(product.price) || 0,
-      stock: quantity,
+      availableStock: Number.isFinite(availableStock) ? Math.max(0, availableStock) : 0,
     };
   }
 
@@ -120,10 +119,10 @@ export class StoreSale implements OnInit {
   }
 
   addProduct(product: StoreProduct): boolean {
-    if (product.stock < 1) return false;
+    if (product.availableStock < 1) return false;
     const billItem = this.billItems.find(item => item.id === product.id);
     if (billItem) {
-      if (billItem.quantity >= product.stock) return false;
+      if (billItem.quantity >= product.availableStock) return false;
       billItem.quantity += 1;
       return true;
     }
@@ -133,13 +132,13 @@ export class StoreSale implements OnInit {
 
   isAtStockLimit(product: StoreProduct): boolean {
     const billItem = this.billItems.find(item => item.id === product.id);
-    return product.stock < 1 || (billItem?.quantity ?? 0) >= product.stock;
+    return product.availableStock < 1 || (billItem?.quantity ?? 0) >= product.availableStock;
   }
 
   changeQuantity(item: BillItem, change: number): void {
     const nextQuantity = item.quantity + change;
     if (nextQuantity < 1) { this.removeItem(item); return; }
-    item.quantity = Math.min(nextQuantity, item.stock);
+    item.quantity = Math.min(nextQuantity, item.availableStock);
   }
 
   removeItem(item: BillItem): void { this.billItems = this.billItems.filter(billItem => billItem.id !== item.id); }
