@@ -19,3 +19,47 @@
   color: #1d4ed8;
   font-weight: 600;
 }
+
+.product-dropdown {
+  position: relative;
+}
+
+.product-dropdown-panel {
+  position: absolute;
+  inset: calc(100% + 2px) 0 auto;
+  z-index: 1;
+  padding: 8px;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-shadow: 0 4px 10px rgb(0 0 0 / 15%);
+}
+
+.product-options {
+  max-height: 160px;
+  overflow-y: auto;
+}
+
+.product-options button,
+.product-options span {
+  display: block;
+  width: 100%;
+  padding: 8px 10px;
+  text-align: left;
+}
+
+.product-options button {
+  border: 0;
+  border-radius: 4px;
+  background: #fff;
+}
+
+.product-options button:hover,
+.product-options button[aria-pressed='true'] {
+  background: #f0f4f8;
+}
+
+.save-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
