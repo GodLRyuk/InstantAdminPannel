@@ -1,4 +1,5 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ApiErrorService } from '../../services/api-error.service';
 import { ProductModel } from '../../models/products.model';
 import { MasterService } from '../../services/auth.service';
 import { getVisiblePageNumbers } from '../../shared/pagination';
@@ -48,6 +49,7 @@ export class Products implements OnInit {
   selectedFile: File | null = null;
   imagePreview: string | ArrayBuffer | null = null;
   saving = false;
+  saveError = '';
   generatingBarcode = false;
   barcodeGenerationError = '';
   private barcodeGenerationRequest = 0;
@@ -62,7 +64,8 @@ export class Products implements OnInit {
 
   constructor(
     private masterService: MasterService,
-    private cdf: ChangeDetectorRef
+    private cdf: ChangeDetectorRef,
+    private apiErrorService: ApiErrorService
   ) { }
 
   ngOnInit(): void {
@@ -256,6 +259,7 @@ export class Products implements OnInit {
     this.product = this.getEmptyProduct();
     this.generatingBarcode = false;
     this.barcodeGenerationError = '';
+    this.saveError = '';
     this.selectedFile = null;
     this.imagePreview = null;
     this.resetDropdownSearches();
@@ -297,6 +301,7 @@ export class Products implements OnInit {
     this.product = { ...product, barcode: product.barcode ?? '' };
     this.generatingBarcode = false;
     this.barcodeGenerationError = '';
+    this.saveError = '';
     this.product.subcategory = Number(product.subcategory_id ?? product.subcategory) || 0;
     this.selectedFile = null;
     this.imagePreview = product.image || null;
@@ -308,103 +313,114 @@ export class Products implements OnInit {
   }
 
   generateBarcode(): void {
-    if (this.generatingBarcode || this.product.barcode?.trim()) return;
+    if (this.saving || this.generatingBarcode || this.product.barcode?.trim()) return;
+
+    if (this.modalType === 'add') {
+      this.product.barcode = this.generateDraftBarcode();
+      this.barcodeGenerationError = '';
+      this.saveError = '';
+      return;
+    }
 
     const requestId = ++this.barcodeGenerationRequest;
     this.generatingBarcode = true;
     this.barcodeGenerationError = '';
 
-    if (this.modalType === 'add' || !this.product.id) {
-      this.barcodeGenerationError = 'Save the product first before generating its barcode.';
-      return;
-    }
-
     this.masterService.generateBarcode(this.product.id).subscribe({
       next: response => {
-        if (this.barcodeGenerationRequest === requestId) {
-          if (this.showModal && !this.product.barcode?.trim()) {
-            if (response?.barcode?.trim()) {
-              this.product.barcode = response.barcode;
-            } else {
-              this.barcodeGenerationError = 'The barcode service returned an empty barcode.';
-            }
-          }
-          this.generatingBarcode = false;
-          this.cdf.detectChanges();
+        if (this.barcodeGenerationRequest !== requestId) return;
+        this.generatingBarcode = false;
+        const barcode = response?.barcode?.trim();
+        if (barcode) {
+          if (!this.product.barcode?.trim()) this.product.barcode = barcode;
+          this.loadProducts();
+        } else {
+          this.barcodeGenerationError = 'The barcode service returned an empty barcode. Please try again.';
         }
+        this.cdf.detectChanges();
       },
       error: err => {
         console.error('Error generating barcode', err);
-        if (this.barcodeGenerationRequest === requestId) {
-          this.barcodeGenerationError = 'Unable to generate barcode. Please try again.';
-          this.generatingBarcode = false;
-          this.cdf.detectChanges();
-        }
+        if (this.barcodeGenerationRequest !== requestId) return;
+        this.generatingBarcode = false;
+        this.barcodeGenerationError = 'Unable to generate barcode. Please try again.';
+        this.cdf.detectChanges();
       }
     });
   }
 
-  save() {
-    if (this.saving) return;
+  private generateDraftBarcode(): string {
+    // Prefix 20 is reserved for barcodes used within a restricted distribution area.
+    const existingBarcodes = new Set(this.products.map(product => product.barcode?.trim()));
+    const randomDigits = new Uint8Array(10);
+    let barcode: string;
+    do {
+      crypto.getRandomValues(randomDigits);
+      const digits = [2, 0, ...randomDigits.map(value => value % 10)];
+      const sum = digits.reduce((total, digit, index) => total + digit * (index % 2 ? 3 : 1), 0);
+      barcode = digits.join('') + ((10 - sum % 10) % 10);
+    } while (existingBarcodes.has(barcode));
+    return barcode;
+  }
 
-    const formData = new FormData();
+  save(): void {
+    if (this.saving || this.generatingBarcode) return;
 
-    formData.append('name', String(this.product.name));
-    formData.append('price', String(this.product.price));
-    formData.append('discount_percent', String(this.product.discount_percent));
-    formData.append('description', String(this.product.description));
-    formData.append('category', String(this.product.category));
-    formData.append('subcategory', String(this.product.subcategory));
-    formData.append('unit', String(this.product.unit));
-    formData.append('unit_size', String(this.product.unit_size));
-    formData.append('brand', String(this.product.brand));
-    formData.append('is_active', String(this.product.is_active));
-    formData.append('barcode', (this.product.barcode ?? '').toString().trim());
-
-    if (this.selectedFile) {
-      formData.append('image', this.selectedFile);
+    this.saveError = '';
+    const name = this.product.name.trim();
+    if (!name) {
+      this.saveError = 'Enter a product name.';
+      return;
+    }
+    if (this.product.price == null || String(this.product.price).trim() === '') {
+      this.saveError = 'Enter a price.';
+      return;
     }
 
+    const isNew = this.modalType === 'add';
+    const barcode = this.product.barcode?.trim() ?? '';
+    if (isNew && !barcode) {
+      this.saveError = 'Scan, enter, or generate a barcode before saving.';
+      return;
+    }
+    const formData = new FormData();
+    formData.append('name', name);
+    formData.append('price', String(this.product.price));
+    formData.append('discount_percent', String(this.product.discount_percent ?? 0));
+    formData.append('description', this.product.description ?? '');
+    formData.append('category', String(this.product.category));
+    if (this.product.subcategory || !isNew) {
+      formData.append('subcategory', this.product.subcategory ? String(this.product.subcategory) : '');
+    }
+    if (this.product.unit || !isNew) {
+      formData.append('unit', this.product.unit ? String(this.product.unit) : '');
+    }
+    if (this.product.unit_size != null || !isNew) {
+      formData.append('unit_size', String(this.product.unit_size ?? ''));
+    }
+    if (this.product.brand != null || !isNew) {
+      formData.append('brand', String(this.product.brand ?? ''));
+    }
+    formData.append('is_active', String(this.product.is_active));
+    if (barcode || !isNew) formData.append('barcode', barcode);
+    if (this.selectedFile) formData.append('image', this.selectedFile);
+
     this.saving = true;
-    const request = this.modalType === 'add'
+    const request = isNew
       ? this.masterService.addProduct(formData)
       : this.masterService.updateProduct(this.product.id, formData);
 
     request.subscribe({
-      next: (response: ProductModel | ProductModel[]) => {
-        const savedProduct = Array.isArray(response) ? response[0] : response;
-        const shouldGenerateBarcode = this.modalType === 'add'
-          && !this.product.barcode?.trim()
-          && Number(savedProduct?.id) > 0;
-
-        if (shouldGenerateBarcode) {
-          this.masterService.generateBarcode(Number(savedProduct.id)).subscribe({
-            next: generated => {
-              this.product.barcode = generated.barcode;
-              this.saving = false;
-              this.loadProducts();
-              this.showModal = false;
-              this.cdf.detectChanges();
-            },
-            error: () => {
-              this.saving = false;
-              this.barcodeGenerationError = 'Product saved, but its barcode could not be generated.';
-              this.loadProducts();
-              this.showModal = false;
-              this.cdf.detectChanges();
-            },
-          });
-          return;
-        }
-
+      next: () => {
         this.saving = false;
-        this.loadProducts();
         this.showModal = false;
+        this.loadProducts();
         this.cdf.detectChanges();
       },
       error: err => {
-        console.error(err);
+        this.saveError = this.apiErrorService.getMessage(err);
         this.saving = false;
+        this.cdf.detectChanges();
       }
     });
   }

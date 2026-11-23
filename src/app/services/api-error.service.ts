@@ -43,7 +43,7 @@ export class ApiErrorService {
     }
   }
 
-  private getMessage(error: unknown): string {
+  getMessage(error: unknown): string {
     if (error instanceof HttpErrorResponse) {
       const apiMessage = this.readMessage(error.error);
       if (apiMessage) return apiMessage;
