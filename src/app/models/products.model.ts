@@ -12,7 +12,7 @@ export interface ProductModel {
   subcategory_id?: number;
   brand: number | null;
   unit: number;
-  unit_size: null,
+  unit_size: number | string | null;
   barcode?: string | null;
   stock?: number | string | null;
   category_name?: string | null;
