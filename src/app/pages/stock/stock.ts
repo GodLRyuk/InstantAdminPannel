@@ -19,6 +19,8 @@ export class Stock implements OnInit {
   pagedStocks: StockModel[] = [];
 
   products: { id: number; name: string }[] = [];
+  productSearchTerm = '';
+  productDropdownOpen = false;
   showModal = false;
   modalType: 'add' | 'edit' = 'add';
   selectedStock: StockModel | null = null;
@@ -130,7 +132,34 @@ export class Stock implements OnInit {
     this.modalType = 'add';
     this.selectedStock = null;
     this.stockData = this.getEmptyStock();
+    this.productSearchTerm = '';
+    this.productDropdownOpen = false;
     this.showModal = true;
+  }
+
+  get filteredProducts() {
+    const term = this.productSearchTerm.trim().toLowerCase();
+    return this.products.filter(product => product.name.toLowerCase().includes(term));
+  }
+
+  get selectedProductName(): string {
+    return this.products.find(product => product.id === this.stockData.product)?.name ?? 'Select a product';
+  }
+
+  toggleProductDropdown(): void {
+    this.productSearchTerm = '';
+    this.productDropdownOpen = !this.productDropdownOpen;
+  }
+
+  selectProduct(id: number): void {
+    this.stockData.product = id;
+    this.productDropdownOpen = false;
+  }
+
+  closeProductDropdownOnBlur(event: FocusEvent, dropdown: HTMLElement): void {
+    if (!dropdown.contains(event.relatedTarget as Node | null)) {
+      this.productDropdownOpen = false;
+    }
   }
 
   openEditModal(stock: StockModel) {
@@ -142,6 +171,7 @@ export class Stock implements OnInit {
 
   save() {
     if (this.modalType === 'add') {
+      if (!this.stockData.product) return;
       const { id, ...payload } = this.stockData;
       this.masterService.addStock(payload).subscribe({
         next: () => {

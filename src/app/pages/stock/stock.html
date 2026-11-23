@@ -97,18 +97,41 @@
       <!-- BODY -->
       <div class="modal-body">
 
-       <label>Product</label>
+        <label for="productSelect">Product</label>
         <div class="form-group">
-          <select
-            id="productSelect"
-            class="form-control"
-            [(ngModel)]="stockData.product"
-            name="product">
-            <option [ngValue]="0" disabled>Select a product</option>
-            <option *ngFor="let product of products" [ngValue]="product.id">
-              {{ product.name }}
-            </option>
-        </select>
+          @if (modalType === 'add') {
+            <div #productDropdown class="product-dropdown"
+              (focusout)="closeProductDropdownOnBlur($event, productDropdown)"
+              (keydown.escape)="productDropdownOpen = false; productTrigger.focus()">
+              <button #productTrigger id="productSelect" type="button" class="form-select"
+                [attr.aria-expanded]="productDropdownOpen" (click)="toggleProductDropdown()">
+                {{ selectedProductName }}
+              </button>
+              @if (productDropdownOpen) {
+                <div class="product-dropdown-panel">
+                  <input type="search" [(ngModel)]="productSearchTerm" name="productSearch"
+                    placeholder="Search products..." aria-label="Search products" />
+                  <div class="product-options" role="group" aria-label="Products">
+                    @for (product of filteredProducts; track product.id) {
+                      <button type="button" [attr.aria-pressed]="stockData.product === product.id"
+                        (click)="selectProduct(product.id); productTrigger.focus()">
+                        {{ product.name }}
+                      </button>
+                    } @empty {
+                      <span role="status">No products found</span>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          } @else {
+            <select id="productSelect" class="form-control" [(ngModel)]="stockData.product" name="product">
+              <option [ngValue]="0" disabled>Select a product</option>
+              <option *ngFor="let product of products" [ngValue]="product.id">
+                {{ product.name }}
+              </option>
+            </select>
+          }
         </div>
          <label>Batch No</label>
         <input type="text" [(ngModel)]="stockData.batch_no" name="batch_no" />
@@ -126,7 +149,7 @@
 
       <!-- ACTIONS -->
       <div class="modal-actions">
-        <button class="save-btn" (click)="save()">
+        <button class="save-btn" [disabled]="modalType === 'add' && !stockData.product" (click)="save()">
           {{ modalType === 'add' ? 'Add Stock' : 'Update Stock' }}
         </button>
 
