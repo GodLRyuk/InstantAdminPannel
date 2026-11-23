@@ -17,6 +17,7 @@ export const roleAccessGuard: CanActivateChildFn = (_route, state) => {
       || targetPath === '/restaurants/orders'
       || targetPath === '/restaurants/menu-items'
       || targetPath === '/restaurants/menu-categories'
+      || targetPath === '/restaurants/reports/sales'
       ? true
       : router.parseUrl('/restaurants/menu-items');
   }
@@ -25,7 +26,7 @@ export const roleAccessGuard: CanActivateChildFn = (_route, state) => {
     return router.parseUrl('/');
   }
 
-  return targetPath.startsWith('/restaurants/menu-items')
+  return targetPath.startsWith('/restaurants/menu-items') || targetPath === '/restaurants/reports/sales'
     ? router.parseUrl('/restaurants')
     : true;
 };

@@ -12,6 +12,16 @@
     <li routerLink="/restaurants/orders">Orders</li>
     <li routerLink="/restaurants/menu-items">Menu Items</li>
     <li routerLink="/restaurants/menu-categories">Menu Categories</li>
+    <li class="payments-menu">
+      <button type="button" class="submenu-label payments-toggle" [class.open]="reportsOpen"
+        [attr.aria-expanded]="reportsOpen" aria-controls="restaurant-reports-menu" (click)="toggleReports()">
+        <span class="submenu-title">Reports</span>
+        <span class="submenu-arrow" aria-hidden="true">{{ reportsOpen ? '▾' : '▸' }}</span>
+      </button>
+      <ul class="submenu" id="restaurant-reports-menu" [hidden]="!reportsOpen">
+        <li><a routerLink="/restaurants/reports/sales" routerLinkActive="active" ariaCurrentWhenActive="page">Sales Report</a></li>
+      </ul>
+    </li>
   } @else {
     <li routerLink="/dashboard">Dashboard</li>
     <li routerLink="/users">Users</li>

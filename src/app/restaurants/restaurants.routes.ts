@@ -13,6 +13,10 @@ export const RESTAURANT_ROUTES: Routes = [
   { path: 'orders', component: RestaurantOrdersComponent },
   { path: 'menu-items', component: RestaurantMenuItemsComponent },
   { path: 'menu-categories', component: RestaurantMenuComponent },
+  {
+    path: 'reports/sales',
+    loadComponent: () => import('./restaurant-sales-report.component').then(m => m.RestaurantSalesReportComponent),
+  },
   ...['vendor-onboarding', 'commissions', 'payment-splits', 'refunds', 'payment-operations'].map(path => ({ path, component: RestaurantPaymentsComponent })),
   { path: ':id', component: RestaurantFormComponent },
 ];

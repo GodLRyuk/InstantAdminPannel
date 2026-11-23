@@ -201,6 +201,17 @@ export class RestaurantAdminService {
     return this.http.get<PartnerMenuItem[] | { results: PartnerMenuItem[] }>(`${this.base}/partner/items/`);
   }
 
+  salesReport(filters: { start_date: string; end_date: string; product_id: string }): Observable<unknown> {
+    let params = new HttpParams();
+    for (const [key, value] of Object.entries(filters)) {
+      if (value) params = params.set(key, value);
+    }
+    return this.http.get<unknown>(`${this.base}/partner/reports/sales/`, {
+      params,
+      ...this.localErrors(),
+    });
+  }
+
   menuItem(id: number): Observable<PartnerMenuItem> {
     return this.http.get<PartnerMenuItem>(`${this.base}/partner/items/${id}/`);
   }
