@@ -1,0 +1,4 @@
+.daily-sales-chart {
+  position: relative;
+  height: clamp(16rem, 42vw, 24rem);
+}

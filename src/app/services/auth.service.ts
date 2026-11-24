@@ -454,7 +454,7 @@ export class MasterService {
   }
 
   getSalesTrend(startDate: string, endDate: string) {
-    return this.http.get(
+    return this.http.get<{ period: string; revenue: number | string }[]>(
       `${this.apiUrl}/reports/sales-trend/?start_date=${startDate}&end_date=${endDate}`
     );
   }

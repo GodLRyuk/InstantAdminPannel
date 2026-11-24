@@ -1,6 +1,7 @@
-import { ChangeDetectorRef, Component, OnInit, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, signal, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Chart, registerables } from 'chart.js';
+import { Subscription } from 'rxjs';
 import { MasterService } from '../../services/auth.service';
 
 Chart.register(...registerables);
@@ -12,66 +13,122 @@ Chart.register(...registerables);
   templateUrl: './sales-report.html',
   styleUrls: ['./sales-report.css']
 })
-export class SalesReport implements OnInit, AfterViewInit {
+export class SalesReport implements OnInit, OnDestroy {
 
-  @ViewChild('salesCanvas') salesCanvas!: ElementRef<HTMLCanvasElement>;
-  private chart: Chart | null = null;
+  @ViewChild('salesCanvas', { static: true }) salesCanvas!: ElementRef<HTMLCanvasElement>;
+  private chart?: Chart<'bar'>;
+  private trendRequest?: Subscription;
+  private readonly dayLabel = new Intl.DateTimeFormat('en-IN', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    timeZone: 'UTC',
+  });
+  private readonly currency = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' });
 
   startDate: string = '';
   endDate: string = '';
+  readonly loading = signal(false);
+  readonly errorMessage = signal('');
 
-  constructor(private masterService: MasterService, private cdf: ChangeDetectorRef) {}
+  constructor(private masterService: MasterService) {}
 
   ngOnInit(): void {
     const today = new Date();
     const past = new Date();
     past.setDate(today.getDate() - 30);
 
-    this.endDate = today.toISOString().split('T')[0];
-    this.startDate = past.toISOString().split('T')[0];
-  }
-
-  ngAfterViewInit(): void {
+    this.endDate = this.localDateInputValue(today);
+    this.startDate = this.localDateInputValue(past);
     this.loadSalesTrend();
   }
 
-  loadSalesTrend() {
-    this.masterService.getSalesTrend(this.startDate, this.endDate).subscribe({
-      next: (data: any) => {
-        const labels = data.map((d: any) => d.period);
-        const revenues = data.map((d: any) => d.revenue);
+  ngOnDestroy(): void {
+    this.trendRequest?.unsubscribe();
+    this.chart?.destroy();
+  }
+
+  loadSalesTrend(): void {
+    const { startDate, endDate } = this;
+    this.trendRequest?.unsubscribe();
+    this.chart?.destroy();
+    this.chart = undefined;
+    this.errorMessage.set('');
+
+    if (!startDate || !endDate || startDate > endDate) {
+      this.loading.set(false);
+      this.errorMessage.set('Select a valid date range.');
+      return;
+    }
+
+    this.loading.set(true);
+    this.trendRequest = this.masterService.getSalesTrend(startDate, endDate).subscribe({
+      next: data => {
+        const salesByDate = new Map<string, number>();
+        for (const { period, revenue } of data) {
+          const date = period.slice(0, 10);
+          const amount = Number(revenue);
+          if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !Number.isFinite(amount)) {
+            this.loading.set(false);
+            this.errorMessage.set('The report did not return valid daily sales figures.');
+            return;
+          }
+          salesByDate.set(date, (salesByDate.get(date) ?? 0) + amount);
+        }
+
+        const labels: string[] = [];
+        const revenues: number[] = [];
+        const end = new Date(endDate);
+        for (const day = new Date(startDate); day <= end; day.setUTCDate(day.getUTCDate() + 1)) {
+          labels.push(this.dayLabel.format(day));
+          revenues.push(salesByDate.get(day.toISOString().slice(0, 10)) ?? 0);
+        }
+
         this.renderChart(labels, revenues);
-        this.cdf.detectChanges();
+        this.loading.set(false);
       },
-      error: (err) => console.error('Failed to load sales trend', err)
+      error: () => {
+        this.loading.set(false);
+        this.errorMessage.set('Could not load daily sales. Please try again.');
+      },
     });
   }
 
-  renderChart(labels: string[], revenues: number[]) {
-    if (this.chart) {
-      this.chart.destroy(); // avoid stacking multiple chart instances on re-fetch
-    }
+  private localDateInputValue(date: Date): string {
+    const localTime = date.getTime() - date.getTimezoneOffset() * 60_000;
+    return new Date(localTime).toISOString().slice(0, 10);
+  }
 
+  private renderChart(labels: string[], revenues: number[]): void {
     this.chart = new Chart(this.salesCanvas.nativeElement, {
-      type: 'line',
+      type: 'bar',
       data: {
         labels: labels,
         datasets: [{
-          label: 'Revenue',
+          label: 'Daily sales',
           data: revenues,
-          borderColor: '#3CB549',
-          backgroundColor: 'rgba(60, 181, 73, 0.1)',
-          fill: true,
-          tension: 0.3,
+          backgroundColor: '#278534',
+          maxBarThickness: 36,
+          borderRadius: 3,
         }]
       },
       options: {
         responsive: true,
+        maintainAspectRatio: false,
         plugins: {
-          legend: { display: true }
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: context => this.currency.format(context.parsed.y ?? 0),
+            },
+          },
         },
         scales: {
-          y: { beginAtZero: true }
+          x: { ticks: { maxRotation: 0, autoSkip: true } },
+          y: {
+            beginAtZero: true,
+            ticks: { callback: value => this.currency.format(Number(value)) },
+          },
         }
       }
     });
