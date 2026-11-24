@@ -6,6 +6,19 @@ import { MasterService } from '../../services/auth.service';
 
 Chart.register(...registerables);
 
+interface DailySales {
+  online: number;
+  store: number;
+  total: number;
+  onlineCount?: number;
+  storeCount?: number;
+  totalCount?: number;
+}
+
+const emptyDay: DailySales = {
+  online: 0, store: 0, total: 0, onlineCount: 0, storeCount: 0, totalCount: 0,
+};
+
 @Component({
   selector: 'app-sales-report',
   standalone: true,
@@ -64,27 +77,37 @@ export class SalesReport implements OnInit, OnDestroy {
     this.loading.set(true);
     this.trendRequest = this.masterService.getSalesTrend(startDate, endDate).subscribe({
       next: data => {
-        const salesByDate = new Map<string, number>();
-        for (const { period, revenue } of data) {
-          const date = period.slice(0, 10);
-          const amount = Number(revenue);
-          if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !Number.isFinite(amount)) {
+        const salesByDate = new Map<string, DailySales>();
+        for (const row of data) {
+          const date = row.period.slice(0, 10);
+          const total = Number(row.revenue);
+          const store = Number(row.store_revenue ?? 0);
+          const online = Number(row.online_revenue ?? total - store);
+          if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || ![online, store, total].every(Number.isFinite)) {
             this.loading.set(false);
             this.errorMessage.set('The report did not return valid daily sales figures.');
             return;
           }
-          salesByDate.set(date, (salesByDate.get(date) ?? 0) + amount);
+          const previous = salesByDate.get(date);
+          salesByDate.set(date, {
+            online: (previous?.online ?? 0) + online,
+            store: (previous?.store ?? 0) + store,
+            total: (previous?.total ?? 0) + total,
+            onlineCount: this.addCount(previous?.onlineCount, row.online_count ?? row.online_order_count),
+            storeCount: this.addCount(previous?.storeCount, row.store_count ?? row.store_sale_count),
+            totalCount: this.addCount(previous?.totalCount, row.transaction_count ?? row.order_count),
+          });
         }
 
         const labels: string[] = [];
-        const revenues: number[] = [];
+        const dailySales: DailySales[] = [];
         const end = new Date(endDate);
         for (const day = new Date(startDate); day <= end; day.setUTCDate(day.getUTCDate() + 1)) {
           labels.push(this.dayLabel.format(day));
-          revenues.push(salesByDate.get(day.toISOString().slice(0, 10)) ?? 0);
+          dailySales.push(salesByDate.get(day.toISOString().slice(0, 10)) ?? emptyDay);
         }
 
-        this.renderChart(labels, revenues);
+        this.renderChart(labels, dailySales);
         this.loading.set(false);
       },
       error: () => {
@@ -99,15 +122,30 @@ export class SalesReport implements OnInit, OnDestroy {
     return new Date(localTime).toISOString().slice(0, 10);
   }
 
-  private renderChart(labels: string[], revenues: number[]): void {
+  private addCount(previous: number | undefined, count: number | undefined): number | undefined {
+    return count == null ? previous : (previous ?? 0) + Number(count);
+  }
+
+  private salesTooltip(label: string, revenue: number, count?: number): string {
+    const transactions = count == null ? '' : ` · ${count} ${count === 1 ? 'transaction' : 'transactions'}`;
+    return `${label}: ${this.currency.format(revenue)}${transactions}`;
+  }
+
+  private renderChart(labels: string[], dailySales: DailySales[]): void {
     this.chart = new Chart(this.salesCanvas.nativeElement, {
       type: 'bar',
       data: {
         labels: labels,
         datasets: [{
-          label: 'Daily sales',
-          data: revenues,
+          label: 'Online sales',
+          data: dailySales.map(day => day.online),
           backgroundColor: '#278534',
+          maxBarThickness: 36,
+          borderRadius: 3,
+        }, {
+          label: 'In-store sales',
+          data: dailySales.map(day => day.store),
+          backgroundColor: '#2563eb',
           maxBarThickness: 36,
           borderRadius: 3,
         }]
@@ -115,11 +153,20 @@ export class SalesReport implements OnInit, OnDestroy {
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
         plugins: {
-          legend: { display: false },
+          legend: { display: true },
           tooltip: {
             callbacks: {
-              label: context => this.currency.format(context.parsed.y ?? 0),
+              label: context => {
+                const day = dailySales[context.dataIndex];
+                const count = context.datasetIndex === 0 ? day.onlineCount : day.storeCount;
+                return this.salesTooltip(context.dataset.label ?? '', context.parsed.y ?? 0, count);
+              },
+              footer: ([context]) => {
+                const day = dailySales[context.dataIndex];
+                return this.salesTooltip('Combined', day.total, day.totalCount);
+              },
             },
           },
         },
