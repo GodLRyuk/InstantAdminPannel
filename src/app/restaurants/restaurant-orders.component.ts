@@ -333,7 +333,7 @@ export class RestaurantOrdersComponent implements OnInit {
         <div class="row"><span>GST</span><span>${formatReceiptCurrency(order.gst)}</span></div>
         <div class="row total"><span>Total</span><span>${formatReceiptCurrency(order.total_amount)}</span></div>
         <div class="divider"></div>
-        <p>Payment: ${escapeReceiptText(order.payment_method_label)} — ${escapeReceiptText(order.payment_status_label)}</p>
+        <p>Payment mode: ${escapeReceiptText(order.payment_method_label || (order.payment_method === 'cod' ? 'Cash on delivery' : 'Online'))}</p>
         <p>Status: ${escapeReceiptText(order.status_label)}</p>
         <p>Deliver to: ${escapeReceiptText(this.addressText(order))}</p>
         ${order.notes ? `<p>Note: ${escapeReceiptText(order.notes)}</p>` : ''}

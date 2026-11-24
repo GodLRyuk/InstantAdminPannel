@@ -211,7 +211,7 @@ export class OrdersComponent implements OnInit, OnDestroy {
       <div class="row total"><span>Total</span><span>${formatReceiptCurrency(order.total_amount)}</span></div>
       <div class="divider"></div>
       <p>Status: ${escapeReceiptText(order.order_status)}</p>
-      <p>Payment: ${escapeReceiptText(order.payment_status)}</p>
+      <p>Payment mode: ${escapeReceiptText(order.payment_method_label || order.payment_method || order.payment_mode || 'Not recorded')}</p>
       <p class="center">Thank you</p>
     `);
   }
