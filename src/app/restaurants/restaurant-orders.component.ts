@@ -2,6 +2,7 @@ import { DatePipe, DecimalPipe } from '@angular/common';
 import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 import { RestaurantAdminService } from './restaurant-admin.service';
 import {
@@ -304,32 +305,41 @@ export class RestaurantOrdersComponent implements OnInit {
       </div>
     `).join('');
 
-    printThermalReceipt(`Instant Delivery - Order ${order.order_number}`, `
-      <h1>Instant Delivery</h1>
-      <p class="center">${escapeReceiptText(order.restaurant.name)}</p>
-      <p class="center muted">${escapeReceiptText(order.restaurant.phone)}</p>
-      <div class="divider"></div>
-      <p>Order: ${escapeReceiptText(order.order_number)}</p>
-      <p>Date: ${formatReceiptDate(order.created_at)}</p>
-      <p>Customer: ${escapeReceiptText(order.customer_name)}</p>
-      <p>Phone: ${escapeReceiptText(order.customer_phone)}</p>
-      <div class="divider"></div>
-      <h2>Items</h2>
-      ${items}
-      <div class="divider"></div>
-      <div class="row"><span>Items</span><span>${formatReceiptCurrency(order.item_total)}</span></div>
-      <div class="row"><span>Discount${order.offer_code ? ` (${escapeReceiptText(order.offer_code)})` : ''}</span><span>−${formatReceiptCurrency(order.discount)}</span></div>
-      <div class="row"><span>Delivery</span><span>${formatReceiptCurrency(order.delivery_fee)}</span></div>
-      <div class="row"><span>Packaging</span><span>${formatReceiptCurrency(order.packaging_charge)}</span></div>
-      <div class="row"><span>GST</span><span>${formatReceiptCurrency(order.gst)}</span></div>
-      <div class="row total"><span>Total</span><span>${formatReceiptCurrency(order.total_amount)}</span></div>
-      <div class="divider"></div>
-      <p>Payment: ${escapeReceiptText(order.payment_method_label)} — ${escapeReceiptText(order.payment_status_label)}</p>
-      <p>Status: ${escapeReceiptText(order.status_label)}</p>
-      <p>Deliver to: ${escapeReceiptText(this.addressText(order))}</p>
-      ${order.notes ? `<p>Note: ${escapeReceiptText(order.notes)}</p>` : ''}
-      <p class="center">Thank you</p>
-    `);
+    const restaurant = order.restaurant;
+    printThermalReceipt(`${restaurant.name} - Order ${order.order_number}`, async () => {
+      const details = this.restaurants().find(entry => entry.id === restaurant.id)
+        ?? (restaurant.address_line ? restaurant : await firstValueFrom(
+          this.isOwner ? this.api.getOwnerRestaurant(restaurant.id) : this.api.get(restaurant.id)
+        ));
+      const address = [details.address_line, details.city, details.pincode].filter(Boolean).join(', ');
+
+      return `
+        <h1>${escapeReceiptText(restaurant.name)}</h1>
+        ${address ? `<p class="center">${escapeReceiptText(address)}</p>` : ''}
+        <p class="center muted">${escapeReceiptText(order.restaurant.phone)}</p>
+        <div class="divider"></div>
+        <p>Order: ${escapeReceiptText(order.order_number)}</p>
+        <p>Date: ${formatReceiptDate(order.created_at)}</p>
+        <p>Customer: ${escapeReceiptText(order.customer_name)}</p>
+        <p>Customer phone: ${escapeReceiptText(order.customer_phone)}</p>
+        <div class="divider"></div>
+        <h2>Items</h2>
+        ${items}
+        <div class="divider"></div>
+        <div class="row"><span>Items</span><span>${formatReceiptCurrency(order.item_total)}</span></div>
+        <div class="row"><span>Discount${order.offer_code ? ` (${escapeReceiptText(order.offer_code)})` : ''}</span><span>−${formatReceiptCurrency(order.discount)}</span></div>
+        <div class="row"><span>Delivery</span><span>${formatReceiptCurrency(order.delivery_fee)}</span></div>
+        <div class="row"><span>Packaging</span><span>${formatReceiptCurrency(order.packaging_charge)}</span></div>
+        <div class="row"><span>GST</span><span>${formatReceiptCurrency(order.gst)}</span></div>
+        <div class="row total"><span>Total</span><span>${formatReceiptCurrency(order.total_amount)}</span></div>
+        <div class="divider"></div>
+        <p>Payment: ${escapeReceiptText(order.payment_method_label)} — ${escapeReceiptText(order.payment_status_label)}</p>
+        <p>Status: ${escapeReceiptText(order.status_label)}</p>
+        <p>Deliver to: ${escapeReceiptText(this.addressText(order))}</p>
+        ${order.notes ? `<p>Note: ${escapeReceiptText(order.notes)}</p>` : ''}
+        <p class="center">Thank you</p>
+      `;
+    });
   }
 
   change(order: RestaurantOrder, status: string) {

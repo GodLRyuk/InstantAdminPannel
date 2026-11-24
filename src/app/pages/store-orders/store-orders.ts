@@ -84,8 +84,10 @@ export class StoreOrders implements OnInit {
       : ''
     ).join('');
 
-    printThermalReceipt(`Instant Delivery - Store Order ${order.id}`, `
-      <h1>Instant Delivery</h1>
+    printThermalReceipt(`Stope And Shop - Store Order ${order.id}`, `
+      <h1>Stope And Shop</h1>
+      <p class="center">Taherpur rail Quater more</p>
+      <p class="center">Phone: 9609937467</p>
       <p class="center">Store bill #${escapeReceiptText(order.id)}</p>
       <p class="center muted">${formatReceiptDate(order.created_at)}</p>
       <p>Customer: ${escapeReceiptText(order.customer_name || 'Walk-in customer')}</p>

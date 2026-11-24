@@ -28,12 +28,25 @@ export function formatReceiptDate(value: string): string {
       }));
 }
 
-export function printThermalReceipt(title: string, receiptContent: string): void {
+export async function printThermalReceipt(
+  title: string,
+  receiptContent: string | (() => Promise<string>),
+): Promise<void> {
   const printWindow = window.open('', '_blank', 'width=400,height=700');
   if (!printWindow) {
     window.alert('Allow pop-ups for this site to print the receipt.');
     return;
   }
+
+  let content: string;
+  try {
+    content = typeof receiptContent === 'string' ? receiptContent : await receiptContent();
+  } catch {
+    printWindow.close();
+    window.alert('Could not load the restaurant address. Please try printing again.');
+    return;
+  }
+  if (printWindow.closed) return;
 
   printWindow.document.open();
   printWindow.document.write(`<!doctype html>
@@ -66,7 +79,7 @@ export function printThermalReceipt(title: string, receiptContent: string): void
           }
         </style>
       </head>
-      <body>${receiptContent}</body>
+      <body>${content}</body>
     </html>`);
   printWindow.document.close();
   printWindow.focus();
