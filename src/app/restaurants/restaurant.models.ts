@@ -170,7 +170,15 @@ export interface RestaurantOrder {
   payment_method_label: string;
   payment_status: string;
   payment_status_label: string;
-  restaurant: { id: number; name: string; phone: string; image: string | null };
+  restaurant: {
+    id: number;
+    name: string;
+    phone: string;
+    image: string | null;
+    address_line?: string;
+    city?: string;
+    pincode?: string;
+  };
   items: RestaurantOrderItem[];
   item_total: string;
   discount: string;
