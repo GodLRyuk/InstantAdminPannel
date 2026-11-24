@@ -96,7 +96,7 @@ export class StoreOrders implements OnInit {
       <div class="divider"></div>
       ${adjustments}
       <div class="row total"><span>Total</span><span>${formatReceiptCurrency(order.total_amount)}</span></div>
-      <p>Payment: ${escapeReceiptText(order.payment_status || 'Paid')}</p>
+      <p>Payment mode: ${escapeReceiptText(order.payment_method_label || order.payment_method || order.payment_mode || 'Cash')}</p>
     `);
   }
 

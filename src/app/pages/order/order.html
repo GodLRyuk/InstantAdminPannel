@@ -19,7 +19,7 @@
           <th class="col-items">Items & Batch</th>
           <th class="col-status">Status</th>
           <th class="col-amount">Amount</th>
-          <th class="col-action">Status</th>
+          <th class="col-action">Payment status</th>
           <th class="col-action actions-column">Actions</th>
         </tr>
       </thead>
@@ -45,7 +45,7 @@
             <span class="amount">₹{{ order.total_amount }}</span>
           </td>
           <td>
-            <span class="status">{{ order.order_status}}</span>
+            <span class="status">{{ (order.payment_status | titlecase) || '—' }}</span>
           </td>
 
           <td class="order-actions-cell">

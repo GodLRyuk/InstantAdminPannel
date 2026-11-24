@@ -23,6 +23,9 @@ export interface OrderModel {
   customer_name?: string;
   customer_phone?: string;
   delivery_address?: string;
+  payment_method_label?: string;
+  payment_method?: string;
+  payment_mode?: string;
   payment_status: string;
   order_status: string;
   created_at: string;
