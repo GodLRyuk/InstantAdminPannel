@@ -4,6 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { MasterService } from '../../services/auth.service';
 import { OrderModel } from '../../models/order.model';
+import {
+  escapeReceiptText,
+  formatReceiptCurrency,
+  formatReceiptDate,
+  printThermalReceipt,
+} from '../../shared/thermal-receipt';
 
 @Component({
   selector: 'app-store-orders',
@@ -57,6 +63,39 @@ export class StoreOrders implements OnInit {
 
   totalItems(order: OrderModel): number {
     return (order.items ?? []).reduce((total, item) => total + Number(item.quantity || 0), 0);
+  }
+
+  printBill(order: OrderModel): void {
+    const items = (order.items ?? []).map(item => `
+      <div class="item">
+        <div>${escapeReceiptText(item.product_name)}</div>
+        <div class="row">
+          <span>${escapeReceiptText(item.quantity)} × ${formatReceiptCurrency(item.price)}</span>
+          <strong>${formatReceiptCurrency(item.total_price)}</strong>
+        </div>
+      </div>
+    `).join('');
+    const adjustments = [
+      { label: 'Discount', amount: order.discount_amount, prefix: '−' },
+      { label: 'Packaging', amount: order.packaging_charge, prefix: '' },
+      { label: 'GST', amount: order.gst, prefix: '' },
+    ].map(({ label, amount, prefix }) => amount && Number(amount) !== 0
+      ? `<div class="row"><span>${label}</span><span>${prefix}${formatReceiptCurrency(amount)}</span></div>`
+      : ''
+    ).join('');
+
+    printThermalReceipt(`Instant Delivery - Store Order ${order.id}`, `
+      <h1>Instant Delivery</h1>
+      <p class="center">Store bill #${escapeReceiptText(order.id)}</p>
+      <p class="center muted">${formatReceiptDate(order.created_at)}</p>
+      <p>Customer: ${escapeReceiptText(order.customer_name || 'Walk-in customer')}</p>
+      <div class="divider"></div>
+      ${items}
+      <div class="divider"></div>
+      ${adjustments}
+      <div class="row total"><span>Total</span><span>${formatReceiptCurrency(order.total_amount)}</span></div>
+      <p>Payment: ${escapeReceiptText(order.payment_status || 'Paid')}</p>
+    `);
   }
 
   toggleOrder(order: OrderModel): void {

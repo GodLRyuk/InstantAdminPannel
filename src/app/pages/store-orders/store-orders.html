@@ -42,7 +42,7 @@
             <th>Payment</th>
             <th class="amount-column">Amount</th>
             <th>Status</th>
-            <th><span class="visually-hidden">Action</span></th>
+            <th><span class="visually-hidden">Actions</span></th>
           </tr>
         </thead>
         <tbody>
@@ -53,7 +53,14 @@
             <td><span class="payment-badge">{{ order.payment_status || 'Paid' | titlecase }}</span></td>
             <td class="amount-column"><strong>₹{{ order.total_amount | number:'1.2-2' }}</strong></td>
             <td><span class="status-badge">{{ order.order_status || 'Completed' | titlecase }}</span></td>
-            <td><button type="button" class="view-button" (click)="toggleOrder(order)">{{ selectedOrder?.id === order.id ? 'Hide' : 'View' }}</button></td>
+            <td>
+              <div class="order-actions">
+                <button type="button" class="view-button" (click)="toggleOrder(order)">{{ selectedOrder?.id === order.id ? 'Hide' : 'View' }}</button>
+                <button type="button" class="print-button" [attr.aria-label]="'Print bill for order ' + order.id" (click)="printBill(order)">
+                  <i class="fa fa-print" aria-hidden="true"></i> Print bill
+                </button>
+              </div>
+            </td>
           </tr>
           <tr *ngIf="filteredOrders.length === 0">
             <td colspan="7" class="empty-state">{{ searchTerm ? 'No store orders match your search.' : 'No store orders found.' }}</td>
@@ -78,5 +85,10 @@
       </div>
     </div>
     <div class="dialog-total"><span>Total</span><strong>₹{{ order.total_amount | number:'1.2-2' }}</strong></div>
+    <div class="order-actions dialog-actions">
+      <button type="button" class="print-button" (click)="printBill(order)">
+        <i class="fa fa-print" aria-hidden="true"></i> Print bill
+      </button>
+    </div>
   </section>
 </div>

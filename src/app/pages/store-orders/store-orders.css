@@ -8,6 +8,10 @@ h1, h2, p { margin-top: 0; } h1 { margin-bottom: 5px; font-size: 26px; } h2 { ma
 button { cursor: pointer; } button:disabled { cursor: wait; opacity: .65; }
 .refresh-button, .view-button { border: 0; border-radius: 7px; color: #fff; background: #fe611d; font-weight: 600; }
 .refresh-button { padding: 10px 15px; } .view-button { padding: 7px 12px; font-size: 12px; }
+.order-actions { display: flex; gap: 8px; }
+.dialog-actions { justify-content: flex-end; margin-top: 16px; }
+.print-button { border: 1px solid #d8e0ea; border-radius: 7px; padding: 6px 11px; color: #172033; background: #fff; font-size: 12px; font-weight: 600; }
+.print-button:hover { background: #f5f7fb; }
 .summary-row { justify-content: flex-start; margin-bottom: 18px; }
 .summary-card { min-width: 150px; padding: 16px 18px; background: #fff; border: 1px solid #e9edf3; border-radius: 12px; }
 .summary-card span { display: block; color: #8490a2; font-size: 12px; } .summary-card strong { display: block; margin-top: 5px; font-size: 22px; }

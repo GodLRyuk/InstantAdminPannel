@@ -11,7 +11,16 @@
 
   </div>
 
-  <div class="chart-card">
-    <canvas #salesCanvas></canvas>
-  </div>
+  <section class="chart-card" aria-labelledby="daily-sales-title">
+    <h3 id="daily-sales-title">Daily sales</h3>
+    @if (loading()) {
+      <p role="status">Loading daily sales…</p>
+    }
+    @if (errorMessage()) {
+      <p role="alert">{{ errorMessage() }}</p>
+    }
+    <div class="daily-sales-chart">
+      <canvas #salesCanvas role="img" aria-label="Bar chart of daily sales in Indian rupees"></canvas>
+    </div>
+  </section>
 </div>
