@@ -27,9 +27,21 @@
       <tbody>
         <tr *ngFor="let prod of pagedProducts; let i=index">
           <td>{{ (currentPage - 1) * pageSize + i + 1 }}</td>
-          <td>{{ prod.name }}</td>
+          <td>
+            <div class="product-list-name">
+              <div class="product-thumbnail">
+                <img *ngIf="prod.image as image" #thumbnail [src]="image" alt="" loading="lazy"
+                  (load)="thumbnail.hidden = false" (error)="thumbnail.hidden = true" />
+                <span class="product-thumbnail-placeholder" role="img" aria-label="No product image">
+                  <i class="fa fa-picture-o" aria-hidden="true"></i>
+                </span>
+              </div>
+              <span>{{ prod.name }}</span>
+            </div>
+          </td>
           <td>
             <span>{{ prod.barcode || '-' }}</span>
+            <span *ngIf="isSystemGeneratedBarcode(prod)" class="barcode-source-tag">System generated</span>
             <svg *ngIf="getBarcodeBars(prod.barcode).length" class="barcode-table-preview"
               [attr.viewBox]="'0 0 ' + getBarcodeBars(prod.barcode).length + ' 30'"
               role="img" [attr.aria-label]="'Barcode ' + prod.barcode">
