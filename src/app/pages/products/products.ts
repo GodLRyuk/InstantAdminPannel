@@ -53,6 +53,8 @@ export class Products implements OnInit {
   generatingBarcode = false;
   barcodeGenerationError = '';
   private barcodeGenerationRequest = 0;
+  private generatedDraftBarcode = '';
+  private readonly generatedBarcodes = new Map<number, string>();
 
   // Search
   searchTerm = '';
@@ -80,6 +82,15 @@ export class Products implements OnInit {
     this.masterService.getAllProducts().subscribe({
       next: (data: any) => {
         this.products = data;
+        for (const product of this.products) {
+          if (this.generatedBarcodes.has(product.id)) continue;
+          try {
+            const value = localStorage.getItem(this.generatedBarcodeKey(product.id));
+            if (value) this.generatedBarcodes.set(product.id, value);
+          } catch {
+            break;
+          }
+        }
         this.applyFilter();
         this.cdf.detectChanges();
       },
@@ -257,6 +268,7 @@ export class Products implements OnInit {
     this.modalType = 'add';
     this.barcodeGenerationRequest++;
     this.product = this.getEmptyProduct();
+    this.generatedDraftBarcode = '';
     this.generatingBarcode = false;
     this.barcodeGenerationError = '';
     this.saveError = '';
@@ -316,7 +328,8 @@ export class Products implements OnInit {
     if (this.saving || this.generatingBarcode || this.product.barcode?.trim()) return;
 
     if (this.modalType === 'add') {
-      this.product.barcode = this.generateDraftBarcode();
+      this.generatedDraftBarcode = this.generateDraftBarcode();
+      this.product.barcode = this.generatedDraftBarcode;
       this.barcodeGenerationError = '';
       this.saveError = '';
       return;
@@ -333,6 +346,7 @@ export class Products implements OnInit {
         const barcode = response?.barcode?.trim();
         if (barcode) {
           if (!this.product.barcode?.trim()) this.product.barcode = barcode;
+          this.storeGeneratedBarcode(this.product.id, barcode);
           this.loadProducts();
         } else {
           this.barcodeGenerationError = 'The barcode service returned an empty barcode. Please try again.';
@@ -347,6 +361,28 @@ export class Products implements OnInit {
         this.cdf.detectChanges();
       }
     });
+  }
+
+  isSystemGeneratedBarcode(product: ProductModel): boolean {
+    const barcode = product.barcode?.trim();
+    return !!barcode && this.generatedBarcodes.get(product.id) === barcode;
+  }
+
+  private generatedBarcodeKey(id: number): string {
+    return `instant-admin:generated-barcode:${id}`;
+  }
+
+  private storeGeneratedBarcode(id: number, barcode: string): void {
+    if (barcode) this.generatedBarcodes.set(id, barcode);
+    else this.generatedBarcodes.delete(id);
+
+    try {
+      const key = this.generatedBarcodeKey(id);
+      if (barcode) localStorage.setItem(key, barcode);
+      else localStorage.removeItem(key);
+    } catch {
+      // Keep the tag available on this page when browser storage is unavailable.
+    }
   }
 
   private generateDraftBarcode(): string {
@@ -411,7 +447,17 @@ export class Products implements OnInit {
       : this.masterService.updateProduct(this.product.id, formData);
 
     request.subscribe({
-      next: () => {
+      next: response => {
+        if (isNew && barcode === this.generatedDraftBarcode) {
+          const saved = Array.isArray(response)
+            ? response.find(product => product.barcode?.trim() === barcode)
+            : response;
+          if (saved?.id && saved.barcode?.trim() === barcode) {
+            this.storeGeneratedBarcode(saved.id, barcode);
+          }
+        } else if (!isNew && this.generatedBarcodes.get(this.product.id) !== barcode) {
+          this.storeGeneratedBarcode(this.product.id, '');
+        }
         this.saving = false;
         this.showModal = false;
         this.loadProducts();
@@ -455,7 +501,10 @@ export class Products implements OnInit {
 
   deleteProduct(id: number) {
     if (confirm('Are you sure you want to delete this product?')) {
-      this.masterService.deleteproduct(id).subscribe(() => this.loadProducts());
+      this.masterService.deleteproduct(id).subscribe(() => {
+        this.storeGeneratedBarcode(id, '');
+        this.loadProducts();
+      });
     }
   }
 
