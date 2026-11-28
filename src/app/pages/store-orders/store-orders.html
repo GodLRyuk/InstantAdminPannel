@@ -80,7 +80,14 @@
     <div class="order-meta"><span>{{ order.created_at | date:'dd MMM yyyy, h:mm a' }}</span><span>{{ order.payment_status || 'Paid' | titlecase }}</span></div>
     <div class="item-list">
       <div class="item-row" *ngFor="let item of order.items">
-        <div><strong>{{ item.product_name }}</strong><small>{{ item.quantity }} × ₹{{ item.price | number:'1.2-2' }}</small></div>
+        <div class="item-product">
+          <span class="item-thumbnail" aria-hidden="true">
+            <img *ngIf="productImages.get(+item.product) as image" #thumbnail [src]="image" alt="" loading="lazy"
+              (error)="thumbnail.hidden = true" (load)="thumbnail.hidden = false" />
+            <i class="fa fa-cube"></i>
+          </span>
+          <div><strong>{{ item.product_name }}</strong><small>{{ item.quantity }} × ₹{{ item.price | number:'1.2-2' }}</small></div>
+        </div>
         <strong>₹{{ item.total_price | number:'1.2-2' }}</strong>
       </div>
     </div>
