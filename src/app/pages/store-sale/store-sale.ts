@@ -10,6 +10,7 @@ import { InventoryModel } from '../../models/inventory.model';
 interface StoreProduct {
   id: number;
   name: string;
+  image: string | null;
   category: string;
   barcode: string;
   price: number;
@@ -70,6 +71,7 @@ export class StoreSale implements OnInit {
     return {
       id: Number(product.id),
       name: product.name,
+      image: product.image || null,
       category: category && category !== 'null' ? category : 'Product',
       barcode: String(product.barcode ?? ''),
       price: Number(product.price) || 0,

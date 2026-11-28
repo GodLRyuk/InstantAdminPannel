@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { MasterService } from '../../services/auth.service';
 import { OrderModel } from '../../models/order.model';
+import { ProductModel } from '../../models/products.model';
 import {
   escapeReceiptText,
   formatReceiptCurrency,
@@ -21,6 +22,7 @@ import {
 export class StoreOrders implements OnInit {
   orders: OrderModel[] = [];
   selectedOrder: OrderModel | null = null;
+  readonly productImages = new Map<number, string>();
   searchTerm = '';
   loading = false;
   errorMessage = '';
@@ -29,6 +31,16 @@ export class StoreOrders implements OnInit {
 
   ngOnInit(): void {
     this.loadOrders();
+    this.masterService.getAllProducts().subscribe({
+      next: response => {
+        const products: ProductModel[] = Array.isArray(response) ? response : response?.results ?? [];
+        for (const product of products) {
+          if (product.image) this.productImages.set(Number(product.id), product.image);
+        }
+        this.cdf.markForCheck();
+      },
+      error: () => this.productImages.clear(),
+    });
   }
 
   loadOrders(): void {

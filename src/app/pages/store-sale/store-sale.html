@@ -33,7 +33,11 @@
       <div class="product-list" (scroll)="onProductListScroll($event)" aria-label="Product list" tabindex="0">
         <div class="catalog-empty" *ngIf="loadingProducts">Loading products...</div>
         <article class="product-card" *ngFor="let product of visibleProducts">
-          <div class="product-icon"><i class="fa fa-cube" aria-hidden="true"></i></div>
+          <div class="product-icon" aria-hidden="true">
+            <img *ngIf="product.image as image" #thumbnail [src]="image" alt="" loading="lazy"
+              (load)="thumbnail.hidden = false" (error)="thumbnail.hidden = true" />
+            <i class="fa fa-cube"></i>
+          </div>
           <div class="product-info">
             <strong>{{ product.name }}</strong>
             <span>{{ product.category }} <span class="dot">·</span> {{ product.availableStock }} available</span>
