@@ -263,7 +263,7 @@
           <p *ngIf="comboErrors.is_combo" id="combo-enabled-error" class="barcode-generation-error" role="alert">{{ comboErrors.is_combo }}</p>
 
           <ng-container *ngIf="product.is_combo">
-            <div class="row">
+            <div class="combo-fields">
               <div class="form-group">
                 <label for="combo-buy-qty">Units customer selects</label>
                 <input id="combo-buy-qty" type="number" min="1" step="1" required
@@ -280,8 +280,6 @@
                   [attr.aria-describedby]="comboErrors.combo_free_qty ? 'combo-free-qty-error' : null" />
                 <p *ngIf="comboErrors.combo_free_qty" id="combo-free-qty-error" class="barcode-generation-error" role="alert">{{ comboErrors.combo_free_qty }}</p>
               </div>
-            </div>
-            <div class="row">
               <div class="form-group">
                 <label for="combo-price">Price for one combo (₹)</label>
                 <input id="combo-price" type="text" inputmode="decimal" required
@@ -290,14 +288,16 @@
                   [attr.aria-describedby]="comboErrors.combo_price ? 'combo-price-error' : null" />
                 <p *ngIf="comboErrors.combo_price" id="combo-price-error" class="barcode-generation-error" role="alert">{{ comboErrors.combo_price }}</p>
               </div>
+              <div class="combo-repeat">
+                <label class="combo-checkbox">
+                  <input type="checkbox" [(ngModel)]="product.combo_repeat" (ngModelChange)="comboErrors.combo_repeat = undefined"
+                    [attr.aria-invalid]="comboErrors.combo_repeat ? true : null"
+                    [attr.aria-describedby]="comboErrors.combo_repeat ? 'combo-repeat-error' : null" />
+                  Repeat for each qualifying group
+                </label>
+                <p *ngIf="comboErrors.combo_repeat" id="combo-repeat-error" class="barcode-generation-error" role="alert">{{ comboErrors.combo_repeat }}</p>
+              </div>
             </div>
-            <label class="combo-checkbox">
-              <input type="checkbox" [(ngModel)]="product.combo_repeat" (ngModelChange)="comboErrors.combo_repeat = undefined"
-                [attr.aria-invalid]="comboErrors.combo_repeat ? true : null"
-                [attr.aria-describedby]="comboErrors.combo_repeat ? 'combo-repeat-error' : null" />
-              Repeat for each qualifying group
-            </label>
-            <p *ngIf="comboErrors.combo_repeat" id="combo-repeat-error" class="barcode-generation-error" role="alert">{{ comboErrors.combo_repeat }}</p>
             <p *ngIf="comboPreview as preview" class="combo-preview">{{ preview }}</p>
           </ng-container>
         </section>
