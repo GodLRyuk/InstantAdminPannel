@@ -85,7 +85,9 @@
         <span class="close-btn" (click)="!saving && !generatingBarcode && (showModal = false)">×</span>
       </div>
 
-      <fieldset class="modal-body" [disabled]="saving || generatingBarcode">
+      <p *ngIf="loadingProduct" class="save-status" role="status">Loading product…</p>
+      <p *ngIf="productLoadError" class="barcode-generation-error" role="alert">{{ productLoadError }}</p>
+      <fieldset *ngIf="!loadingProduct && !productLoadError" class="modal-body" [disabled]="saving || generatingBarcode">
 
         <!-- Row 1 -->
         <div class="row">
@@ -250,6 +252,56 @@
           </div>
         </div>
 
+        <section class="combo-pricing" aria-labelledby="combo-pricing-heading">
+          <h4 id="combo-pricing-heading">Combo pricing</h4>
+          <label class="combo-checkbox">
+            <input type="checkbox" [(ngModel)]="product.is_combo" (ngModelChange)="comboErrors = {}"
+              [attr.aria-invalid]="comboErrors.is_combo ? true : null"
+              [attr.aria-describedby]="comboErrors.is_combo ? 'combo-enabled-error' : null" />
+            Enable combo pricing
+          </label>
+          <p *ngIf="comboErrors.is_combo" id="combo-enabled-error" class="barcode-generation-error" role="alert">{{ comboErrors.is_combo }}</p>
+
+          <ng-container *ngIf="product.is_combo">
+            <div class="row">
+              <div class="form-group">
+                <label for="combo-buy-qty">Units customer selects</label>
+                <input id="combo-buy-qty" type="number" min="1" step="1" required
+                  [(ngModel)]="product.combo_buy_qty" (ngModelChange)="comboErrors.combo_buy_qty = undefined"
+                  [attr.aria-invalid]="comboErrors.combo_buy_qty ? true : null"
+                  [attr.aria-describedby]="comboErrors.combo_buy_qty ? 'combo-buy-qty-error' : null" />
+                <p *ngIf="comboErrors.combo_buy_qty" id="combo-buy-qty-error" class="barcode-generation-error" role="alert">{{ comboErrors.combo_buy_qty }}</p>
+              </div>
+              <div class="form-group">
+                <label for="combo-free-qty">Extra pieces included</label>
+                <input id="combo-free-qty" type="number" min="0" step="1" required
+                  [(ngModel)]="product.combo_free_qty" (ngModelChange)="comboErrors.combo_free_qty = undefined"
+                  [attr.aria-invalid]="comboErrors.combo_free_qty ? true : null"
+                  [attr.aria-describedby]="comboErrors.combo_free_qty ? 'combo-free-qty-error' : null" />
+                <p *ngIf="comboErrors.combo_free_qty" id="combo-free-qty-error" class="barcode-generation-error" role="alert">{{ comboErrors.combo_free_qty }}</p>
+              </div>
+            </div>
+            <div class="row">
+              <div class="form-group">
+                <label for="combo-price">Price for one combo (₹)</label>
+                <input id="combo-price" type="text" inputmode="decimal" required
+                  [(ngModel)]="product.combo_price" (ngModelChange)="comboErrors.combo_price = undefined"
+                  [attr.aria-invalid]="comboErrors.combo_price ? true : null"
+                  [attr.aria-describedby]="comboErrors.combo_price ? 'combo-price-error' : null" />
+                <p *ngIf="comboErrors.combo_price" id="combo-price-error" class="barcode-generation-error" role="alert">{{ comboErrors.combo_price }}</p>
+              </div>
+            </div>
+            <label class="combo-checkbox">
+              <input type="checkbox" [(ngModel)]="product.combo_repeat" (ngModelChange)="comboErrors.combo_repeat = undefined"
+                [attr.aria-invalid]="comboErrors.combo_repeat ? true : null"
+                [attr.aria-describedby]="comboErrors.combo_repeat ? 'combo-repeat-error' : null" />
+              Repeat for each qualifying group
+            </label>
+            <p *ngIf="comboErrors.combo_repeat" id="combo-repeat-error" class="barcode-generation-error" role="alert">{{ comboErrors.combo_repeat }}</p>
+            <p *ngIf="comboPreview as preview" class="combo-preview">{{ preview }}</p>
+          </ng-container>
+        </section>
+
         <!-- Full Width -->
         <div class="form-group full">
           <label>Description</label>
@@ -269,7 +321,7 @@
 
       <p *ngIf="saveError" class="barcode-generation-error" role="alert">{{ saveError }}</p>
       <div class="modal-actions">
-        <button class="save-btn" (click)="save()" [disabled]="saving || generatingBarcode" [attr.aria-busy]="saving">
+        <button class="save-btn" (click)="save()" [disabled]="saving || generatingBarcode || loadingProduct || !!productLoadError" [attr.aria-busy]="saving">
           <span *ngIf="saving" class="save-spinner" aria-hidden="true"></span>
           {{ saving ? 'Saving...' : 'Save' }}
         </button>
