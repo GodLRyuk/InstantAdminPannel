@@ -324,11 +324,15 @@ export class MasterService {
       `${this.apiUrl}/products/generate-barcode/`, { product_id: productId }
     );
   }
+  getProduct(id: number): Observable<ProductModel> {
+    return this.http.get<ProductModel>(`${this.apiUrl}/products/${id}/`);
+  }
+
   updateProduct(id: number, data: FormData): Observable<ProductModel | ProductModel[]> {
-  return this.http.put<ProductModel | ProductModel[]>(
-    `${this.apiUrl}/products/${id}/`, data
-  );
-}
+    return this.http.patch<ProductModel | ProductModel[]>(
+      `${this.apiUrl}/products/${id}/`, data
+    );
+  }
   deleteproduct(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/products/${id}/`);
   }

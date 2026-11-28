@@ -1,8 +1,13 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { ApiErrorService } from '../../services/api-error.service';
 import { ProductModel } from '../../models/products.model';
 import { MasterService } from '../../services/auth.service';
 import { getVisiblePageNumbers } from '../../shared/pagination';
+
+const comboFields = ['is_combo', 'combo_buy_qty', 'combo_free_qty', 'combo_price', 'combo_repeat'] as const;
+type ComboField = (typeof comboFields)[number];
+type ComboErrors = Partial<Record<ComboField, string>>;
 
 @Component({
   selector: 'app-products',
@@ -34,7 +39,6 @@ export class Products implements OnInit {
 
   showModal = false;
   modalType: 'add' | 'edit' = 'add';
-  selectedProduct: ProductModel | null = null;
   productName = '';
   product: ProductModel = this.getEmptyProduct();
   categories: any[] = [];
@@ -50,6 +54,15 @@ export class Products implements OnInit {
   imagePreview: string | ArrayBuffer | null = null;
   saving = false;
   saveError = '';
+  loadingProduct = false;
+  productLoadError = '';
+  comboErrors: ComboErrors = {};
+  private readonly comboPriceFormat = new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: 'INR',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  });
   generatingBarcode = false;
   barcodeGenerationError = '';
   private barcodeGenerationRequest = 0;
@@ -272,6 +285,9 @@ export class Products implements OnInit {
     this.generatingBarcode = false;
     this.barcodeGenerationError = '';
     this.saveError = '';
+    this.loadingProduct = false;
+    this.productLoadError = '';
+    this.comboErrors = {};
     this.selectedFile = null;
     this.imagePreview = null;
     this.resetDropdownSearches();
@@ -293,6 +309,11 @@ export class Products implements OnInit {
       name: '',
       price: '0',
       discount_percent: '0',
+      is_combo: false,
+      combo_buy_qty: null,
+      combo_free_qty: null,
+      combo_price: null,
+      combo_repeat: true,
       description: '',
       image: null,
       is_active: true,
@@ -309,19 +330,59 @@ export class Products implements OnInit {
   openEditModal(product: ProductModel) {
     this.modalType = 'edit';
     this.barcodeGenerationRequest++;
-    this.selectedProduct = product;
-    this.product = { ...product, barcode: product.barcode ?? '' };
+    const draft = this.getEmptyProduct();
+    this.product = draft;
     this.generatingBarcode = false;
     this.barcodeGenerationError = '';
     this.saveError = '';
-    this.product.subcategory = Number(product.subcategory_id ?? product.subcategory) || 0;
+    this.comboErrors = {};
+    this.loadingProduct = true;
+    this.productLoadError = '';
     this.selectedFile = null;
-    this.imagePreview = product.image || null;
+    this.imagePreview = null;
     this.resetDropdownSearches();
-
-    this.syncEditSubcategory();
-
     this.showModal = true;
+
+    this.masterService.getProduct(product.id).subscribe({
+      next: detail => {
+        if (!this.showModal || this.product !== draft) return;
+        this.product = { ...draft, ...detail, barcode: detail.barcode ?? '' };
+        this.product.subcategory = Number(detail.subcategory_id ?? detail.subcategory) || 0;
+        this.imagePreview = detail.image || null;
+        this.syncEditSubcategory();
+        this.loadingProduct = false;
+        this.cdf.detectChanges();
+      },
+      error: err => {
+        if (!this.showModal || this.product !== draft) return;
+        this.loadingProduct = false;
+        this.productLoadError = this.apiErrorService.getMessage(err);
+        this.cdf.detectChanges();
+      }
+    });
+  }
+
+  private validateCombo(): ComboErrors {
+    const errors: ComboErrors = {};
+    const { combo_buy_qty, combo_free_qty, combo_price } = this.product;
+    if (combo_buy_qty == null || !Number.isSafeInteger(combo_buy_qty) || combo_buy_qty < 1) {
+      errors.combo_buy_qty = 'Enter a whole number of at least 1.';
+    }
+    if (combo_free_qty == null || !Number.isSafeInteger(combo_free_qty) || combo_free_qty < 0) {
+      errors.combo_free_qty = 'Enter a whole number of at least 0.';
+    }
+    const price = combo_price?.trim() ?? '';
+    if (!/^(?:\d+(?:\.\d{1,2})?|\.\d{1,2})$/.test(price) || !Number.isFinite(Number(price)) || Number(price) <= 0) {
+      errors.combo_price = 'Enter a positive rupee amount with up to two decimal places.';
+    }
+    return errors;
+  }
+
+  get comboPreview(): string {
+    if (!this.product.is_combo || Object.keys(this.validateCombo()).length) return '';
+    const { combo_buy_qty, combo_free_qty, combo_price } = this.product;
+    const pieces = Number(combo_buy_qty) + Number(combo_free_qty);
+    return `Customer selects ${combo_buy_qty} · receives ${pieces} ${pieces === 1 ? 'piece' : 'pieces'} · pays ${this.comboPriceFormat.format(Number(combo_price))}`;
   }
 
   generateBarcode(): void {
@@ -400,9 +461,11 @@ export class Products implements OnInit {
   }
 
   save(): void {
-    if (this.saving || this.generatingBarcode) return;
+    if (this.saving || this.generatingBarcode || this.loadingProduct || this.productLoadError) return;
 
     this.saveError = '';
+    this.comboErrors = this.product.is_combo ? this.validateCombo() : {};
+    if (Object.keys(this.comboErrors).length) return;
     const name = this.product.name.trim();
     if (!name) {
       this.saveError = 'Enter a product name.';
@@ -438,6 +501,16 @@ export class Products implements OnInit {
       formData.append('brand', String(this.product.brand ?? ''));
     }
     formData.append('is_active', String(this.product.is_active));
+    formData.append('is_combo', String(this.product.is_combo ?? false));
+    if (this.product.is_combo) {
+      formData.append('combo_buy_qty', String(this.product.combo_buy_qty));
+      formData.append('combo_free_qty', String(this.product.combo_free_qty));
+      const [rupees, paise = ''] = this.product.combo_price!.trim().split('.');
+      formData.append('combo_price', `${rupees || '0'}.${paise.padEnd(2, '0')}`);
+    }
+    if (isNew || this.product.is_combo) {
+      formData.append('combo_repeat', String(this.product.combo_repeat ?? true));
+    }
     if (barcode || !isNew) formData.append('barcode', barcode);
     if (this.selectedFile) formData.append('image', this.selectedFile);
 
@@ -464,7 +537,19 @@ export class Products implements OnInit {
         this.cdf.detectChanges();
       },
       error: err => {
-        this.saveError = this.apiErrorService.getMessage(err);
+        if (err instanceof HttpErrorResponse && err.status === 400 && err.error && typeof err.error === 'object') {
+          const remainingErrors = { ...err.error };
+          for (const field of comboFields) {
+            if (remainingErrors[field] == null) continue;
+            this.comboErrors[field] = this.apiErrorService.getMessage(remainingErrors[field]);
+            delete remainingErrors[field];
+          }
+          if (Object.keys(remainingErrors).length || !Object.keys(this.comboErrors).length) {
+            this.saveError = this.apiErrorService.getMessage(remainingErrors);
+          }
+        } else {
+          this.saveError = this.apiErrorService.getMessage(err);
+        }
         this.saving = false;
         this.cdf.detectChanges();
       }

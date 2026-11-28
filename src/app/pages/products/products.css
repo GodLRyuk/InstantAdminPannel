@@ -194,3 +194,26 @@
     transform: rotate(360deg);
   }
 }
+.combo-pricing {
+  margin: 16px 0;
+  padding: 16px;
+  border: 1px solid #dbe1e8;
+  border-radius: 8px;
+}
+
+.combo-pricing h4 {
+  margin: 0 0 12px;
+  font-weight: 600;
+}
+
+.combo-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.combo-preview {
+  margin: 0;
+  font-weight: 600;
+}
