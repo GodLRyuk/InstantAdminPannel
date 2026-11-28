@@ -194,26 +194,86 @@
     transform: rotate(360deg);
   }
 }
+
 .combo-pricing {
-  margin: 16px 0;
+  margin: 12px 0 18px;
   padding: 16px;
   border: 1px solid #dbe1e8;
   border-radius: 8px;
+  background: #f8fafc;
 }
 
 .combo-pricing h4 {
-  margin: 0 0 12px;
+  margin: 0 0 8px;
+  font-size: 1rem;
   font-weight: 600;
 }
 
-.combo-checkbox {
+.combo-pricing .combo-checkbox {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 12px;
+  width: fit-content;
+  min-height: 32px;
+  margin: 0;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.combo-checkbox input[type='checkbox'] {
+  flex: 0 0 16px;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  padding: 0;
+  accent-color: #0d6efd;
+}
+
+.combo-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 16px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #dbe1e8;
+}
+
+.combo-fields .form-group {
+  margin: 0;
+}
+
+.combo-fields .form-group input {
+  min-height: 40px;
+  padding: 6px 10px;
+  background: #fff;
+}
+
+.combo-repeat {
+  align-self: start;
+  padding-top: 26px;
+}
+
+.combo-pricing .barcode-generation-error {
+  margin-bottom: 0;
+  font-size: 0.875rem;
 }
 
 .combo-preview {
-  margin: 0;
+  margin: 12px 0 0;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: #eaf2ff;
+  color: #184276;
+  font-size: 0.875rem;
   font-weight: 600;
+}
+
+@media (max-width: 540px) {
+  .combo-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .combo-repeat {
+    padding-top: 0;
+  }
 }
